@@ -1,9 +1,13 @@
 **User** (entity)
- ├── **Profile** (entity)          — 1:1
- ├── **Post** (entity)             — 1:N
-  │     ├── **Comment** (entity)    — 1:N
-  │     └── **Like** (entity)       — N:M (**User** ↔ **Post**)
- ├── **Friendship** (entity)       — N:M (**User** ↔ **User**)
+```text
+User ── Profile (1:1)
+  │
+  ├── Post (1:N)
+  │     └── Comment (1:N)
+  │
+  ├── Like (N:M) ── Post
+  │
+  └── Friendship (N:M) ── User
 ***
 
 **Relationship types:**
