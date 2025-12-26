@@ -7,8 +7,8 @@ User ── Profile (1:1)
   │
   ├── Like (N:M) ── Post
   │
-  └── Friendship (N:M) ── User ```
-***
+  └── Friendship (N:M) ── User
+```
 
 **Relationship types:**
 - **1 : 1 (One-to-One)**
