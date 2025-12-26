@@ -13,33 +13,55 @@ In a very simplified way:
 
 ⸻
 
-2️⃣ Minimal Project Structure (Realistic)
-
-/Backend
- ├── Api
- │    ├── Controllers
- │    ├── Middlewares
+2️⃣ Back end Project Structure
+```text
+src/
+ ├── Api/
+ │    ├── Controllers/        (или Endpoints/ если Minimal API)
+ │    ├── Middleware/
+ │    │     ├── ErrorHandlingMiddleware.cs
+ │    │     ├── LocalizationMiddleware.cs
  │    ├── Program.cs
  │
- ├── Application
- │    ├── Services
- │    ├── DTOs
- │    ├── Interfaces
+ ├── Application/
+ │    ├── Posts/
+ │    │     ├── CreatePost/
+ │    │     │     ├── CreatePostCommand.cs
+ │    │     │     ├── CreatePostHandler.cs
+ │    │     │     └── CreatePostDto.cs
+ │    │
+ │    ├── Moderation/
+ │    │     ├── Interfaces/
+ │    │     │     └── IModerationService.cs
+ │    │     ├── ModerationDecision.cs
+ │    │     └── ModerationResult.cs
  │
- ├── Domain
- │    ├── Entities
- │    ├── Enums
+ ├── Infrastructure/
+ │    ├── AI/
+ │    │     ├── OpenAIModerationService.cs (или другой провайдер)
+ │    │
+ │    ├── BackgroundJobs/
+ │    │     └── ModeratePostWorker.cs
+ │    │
+ │    ├── Persistence/
+ │    │     ├── AppDbContext.cs
+ │    │     ├── Entities/
+ │    │     │     ├── Post.cs
+ │    │     │     └── ModerationLog.cs
  │
- ├── Infrastructure
- │    ├── Data
- │    ├── Repositories
- │    ├── External
+ ├── Domain/
+ │    ├── Entities/
+ │    │     ├── Post.cs
+ │    │     └── User.cs
+ │    ├── Enums/
+ │    │     └── PostStatus.cs
  │
- └── Shared
-      ├── Config
-      ├── Utils
-
-
+ └── Shared/
+      ├── Localization/
+      │     └── ErrorMessages.de.json
+      ├── Settings/
+      │     └── ModerationSettings.cs
+```
 🔹 API
 
 **Backend entry point**
