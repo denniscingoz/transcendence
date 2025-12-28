@@ -60,3 +60,40 @@ Frontend can mock API responses using:
 Frontend may mock API responses during development.
 Mocks must strictly follow DTOs defined in Swagger.
 This allows frontend development without waiting for backend implementation.
+
+**DTO (Data Transfer Objects)**
+
+DTOs describe the exact shape of request and response data exchanged between frontend and backend.
+They define fields, types, required/optional properties and enums.
+DTOs are part of the API contract and must stay stable.
+
+📌 DTO = what data looks like
+
+**Endpoints**
+
+Endpoints define available backend operations and how to call them via HTTP.
+Each endpoint represents a specific user action or system operation.
+
+📌 Endpoint = what actions are possible
+
+**Status codes**
+
+HTTP status codes describe the result of a request in a standardized way.
+Frontend relies on status codes, not on error text, to handle different outcomes.
+
+📌 Status = what happened
+
+**Errors**
+
+Errors are returned in a structured format with machine-readable error codes.
+Frontend must not parse error messages and should react only to error codes.
+
+📌 Error = why it failed (in a predictable form)
+
+**Swagger (OpenAPI)**
+
+Swagger is the single source of truth for the backend API.
+It documents endpoints, DTOs, enums, errors and authentication rules.
+Frontend uses Swagger to generate types and mock API responses.
+
+📌 Swagger = the contract
