@@ -37,3 +37,10 @@ If translation missing in UI:
 2. Accept-Language HTTP header
 3. Default language (en)
 
+if (user is authenticated AND user.preferredLanguage is set)
+    use user.preferredLanguage
+else if (Accept-Language header exists)
+    use Accept-Language
+else
+    use default language (en)
+
