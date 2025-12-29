@@ -49,7 +49,7 @@ User
     ├── Privacy settings
     └── Account delete
  
-
+```
 ## **1️⃣ Registration & Login**
 
 ### **🧾 Registration**
