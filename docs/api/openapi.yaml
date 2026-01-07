@@ -7,10 +7,16 @@ info:
 tags:
   - name: Auth
   - name: Feed
+  - name: Profile
   - name: Search
   - name: Notifications
 
 paths:
+
+  # =====================
+  # AUTH
+  # =====================
+
   /auth/login:
     post:
       tags: [Auth]
@@ -65,6 +71,11 @@ paths:
               schema:
                 $ref: ./auth/auth.envelopes.yaml#/AuthResponseEnvelope
 
+
+  # =====================
+  # FEED
+  # =====================
+
   /feed:
     get:
       tags: [Feed]
@@ -118,16 +129,6 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: pageSize
-          in: query
-          schema:
-            type: integer
-            default: 10
       responses:
         "200":
           description: Comments loaded
@@ -190,16 +191,6 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: pageSize
-          in: query
-          schema:
-            type: integer
-            default: 20
       responses:
         "200":
           description: Likes loaded
@@ -208,10 +199,79 @@ paths:
               schema:
                 $ref: ./feed/feed.envelopes.yaml#/PostLikesEnvelope
 
+
+  # =====================
+  # PROFILE
+  # =====================
+
+  /profile/me:
+    get:
+      tags: [Profile]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: Profile loaded
+          content:
+            application/json:
+              schema:
+                $ref: ./profile/profile.envelopes.yaml#/MyProfileEnvelope
+
+    patch:
+      tags: [Profile]
+      summary: Update profile info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./profile/profile.schemas.yaml#/UpdateProfileRequest
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: ./profile/profile.envelopes.yaml#/ProfileUpdatedEnvelope
+
+
+  /profile/me/posts:
+    get:
+      tags: [Profile]
+      summary: Get current user posts
+      responses:
+        "200":
+          description: Posts loaded
+          content:
+            application/json:
+              schema:
+                $ref: ./profile/profile.envelopes.yaml#/MyPostsGridEnvelope
+
+    post:
+      tags: [Profile]
+      summary: Create new post
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: ./profile/profile.schemas.yaml#/CreatePostRequest
+      responses:
+        "201":
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: ./profile/profile.envelopes.yaml#/PostCreatedEnvelope
+
+
+  # =====================
+  # SEARCH
+  # =====================
+
   /search/users:
     get:
       tags: [Search]
-      summary: Search users by username or full name
+      summary: Search users
       parameters:
         - name: q
           in: query
@@ -219,17 +279,6 @@ paths:
           schema:
             type: string
             minLength: 2
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: pageSize
-          in: query
-          schema:
-            type: integer
-            default: 20
-            maximum: 50
       responses:
         "200":
           description: Users found
@@ -238,22 +287,15 @@ paths:
               schema:
                 $ref: ./search/search.envelopes.yaml#/SearchUsersEnvelope
 
+
+  # =====================
+  # NOTIFICATIONS
+  # =====================
+
   /notifications:
     get:
       tags: [Notifications]
-      summary: Get notifications for current user
-      parameters:
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: pageSize
-          in: query
-          schema:
-            type: integer
-            default: 20
-            maximum: 50
+      summary: Get notifications
       responses:
         "200":
           description: Notifications list
@@ -293,6 +335,7 @@ paths:
               schema:
                 $ref: ./common/ApiResponse.yaml#/ApiResponseBase
 
+
 components:
   schemas:
     ApiMetadata:
@@ -303,21 +346,3 @@ components:
 
     UserShortDto:
       $ref: ./common/user.schemas.yaml#/UserShortDto
-
-    SearchUsersResponseDto:
-      $ref: ./search/search.schemas.yaml#/SearchUsersResponseDto
-
-    SearchUserItemDto:
-      $ref: ./search/search.schemas.yaml#/SearchUserItemDto
-
-    SearchUsersEnvelope:
-      $ref: ./search/search.envelopes.yaml#/SearchUsersEnvelope
-
-    NotificationDto:
-      $ref: ./notifications/notifications.schemas.yaml#/NotificationDto
-
-    NotificationsListResponseDto:
-      $ref: ./notifications/notifications.schemas.yaml#/NotificationsListResponseDto
-
-    NotificationsListEnvelope:
-      $ref: ./notifications/notifications.envelopes.yaml#/NotificationsListEnvelope

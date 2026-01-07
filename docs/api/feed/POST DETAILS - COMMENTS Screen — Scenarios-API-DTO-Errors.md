@@ -136,7 +136,7 @@ pageSize    (number, optional, default = 10)
  #### **Success Response (200 OK)**
 ```json
 {
-  "data": null,
+  
   "isSuccess": true,
   "errors": []
 }
@@ -151,7 +151,7 @@ pageSize    (number, optional, default = 10)
  #### **Success Response (200 OK)**
 ```json
 {
-  "data": null,
+  
   "isSuccess": true,
   "errors": []
 }
@@ -189,7 +189,7 @@ All error responses follow the standard API envelope.
 #### **401 Unauthorized**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Unauthorized"]
 }
@@ -197,7 +197,7 @@ All error responses follow the standard API envelope.
 #### **403 Bad Request**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Access denied"]
 }
@@ -205,7 +205,7 @@ All error responses follow the standard API envelope.
 #### **404 Not found**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Post not found"]
 }
@@ -213,7 +213,7 @@ All error responses follow the standard API envelope.
 ####  **422 Unprocessable Entity**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Comment text must not be empty"]
 }

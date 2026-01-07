@@ -1,0 +1,63 @@
+MyProfileEnvelope:
+  allOf:
+    - $ref: ../common/ApiResponse.yaml#/ApiResponseBase
+    - type: object
+      properties:
+        data:
+          $ref: ./profile.schemas.yaml#/MyProfileDto
+
+
+MyPostsGridEnvelope:
+  allOf:
+    - $ref: ../common/ApiResponse.yaml#/ApiResponseBase
+    - type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: ./profile.schemas.yaml#/ProfilePostThumbDto
+
+
+PostCreatedEnvelope:
+  allOf:
+    - $ref: ../common/ApiResponse.yaml#/ApiResponseBase
+    - type: object
+      properties:
+        data:
+          $ref: ./profile.schemas.yaml#/PostCreatedDto
+
+
+FollowersListEnvelope:
+  allOf:
+    - $ref: ../common/ApiResponse.yaml#/ApiResponseBase
+    - type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: ../common/user.schemas.yaml#/UserShortDto
+
+
+FollowingListEnvelope:
+  allOf:
+    - $ref: ../common/ApiResponse.yaml#/ApiResponseBase
+    - type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: ../common/user.schemas.yaml#/UserShortDto
+
+
+ProfileUpdatedEnvelope:
+  allOf:
+    - $ref: ../common/ApiResponse.yaml#/ApiResponseBase

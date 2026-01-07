@@ -1,7 +1,7 @@
+
 /feed:
   get:
-    tags:
-      - Feed
+    tags: [Feed]
     summary: Load feed posts
     parameters:
       - name: page
@@ -20,12 +20,11 @@
         content:
           application/json:
             schema:
-              $ref: "./feed.envelopes.yaml#/FeedResponseEnvelope"
+              $ref: ./feed.envelopes.yaml#/FeedResponseEnvelope
 
 /posts/{postId}:
   get:
-    tags:
-      - Feed
+    tags: [Feed]
     summary: Get post details
     parameters:
       - name: postId
@@ -40,12 +39,11 @@
         content:
           application/json:
             schema:
-              $ref: "./feed.envelopes.yaml#/PostDetailsEnvelope"
+              $ref: ./feed.envelopes.yaml#/PostDetailsEnvelope
 
 /posts/{postId}/comments:
   get:
-    tags:
-      - Feed
+    tags: [Feed]
     summary: Load post comments
     parameters:
       - name: postId
@@ -70,11 +68,10 @@
         content:
           application/json:
             schema:
-              $ref: "./feed.envelopes.yaml#/CommentsEnvelope"
+              $ref: ./feed.envelopes.yaml#/CommentsEnvelope
 
   post:
-    tags:
-      - Feed
+    tags: [Feed]
     summary: Add comment to post
     parameters:
       - name: postId
@@ -88,19 +85,18 @@
       content:
         application/json:
           schema:
-            $ref: "./feed.schemas.yaml#/CreateCommentRequest"
+            $ref: ./feed.schemas.yaml#/CreateCommentRequest
     responses:
       "201":
         description: Comment created
         content:
           application/json:
             schema:
-              $ref: "./feed.envelopes.yaml#/CommentEnvelope"
+              $ref: ./feed.envelopes.yaml#/CommentEnvelope
 
 /posts/{postId}/like:
   post:
-    tags:
-      - Feed
+    tags: [Feed]
     summary: Like or unlike post
     parameters:
       - name: postId
@@ -115,12 +111,11 @@
         content:
           application/json:
             schema:
-              $ref: "./feed.envelopes.yaml#/LikeEnvelope"
+              $ref: ./feed.envelopes.yaml#/LikeEnvelope
 
 /posts/{postId}/likes:
   get:
-    tags:
-      - Feed
+    tags: [Feed]
     summary: Get users who liked post
     parameters:
       - name: postId
@@ -145,4 +140,4 @@
         content:
           application/json:
             schema:
-              $ref: "./feed.envelopes.yaml#/PostLikesEnvelope"
+              $ref: ./feed.envelopes.yaml#/PostLikesEnvelope

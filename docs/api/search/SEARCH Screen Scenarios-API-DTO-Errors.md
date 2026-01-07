@@ -98,7 +98,7 @@ public class SearchUserItemDto
 
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Search query is required"]
 }
@@ -108,7 +108,7 @@ public class SearchUserItemDto
 
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Search query must be at least 2 characters"]
 }

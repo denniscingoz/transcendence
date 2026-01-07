@@ -1,57 +1,52 @@
 /auth/login:
-  post:
-    tags: [Auth]
-    summary: Login with email or username
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: './auth.schemas.yaml#/LoginRequest'
-    responses:
-      '200':
-        description: Login successful
+    post:
+      tags: [Auth]
+      summary: Login with email or username
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: './auth.envelopes.yaml#/AuthResponseEnvelope'
-      '401':
-        description: Invalid credentials
-
+              $ref: ./auth.schemas.yaml#/LoginRequest
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: ./auth.envelopes.yaml#/AuthResponseEnvelope
 /auth/signup:
-  post:
-    tags: [Auth]
-    summary: Register a new user
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: './auth.schemas.yaml#/SignupRequest'
-    responses:
-      '201':
-        description: Signup successful
+    post:
+      tags: [Auth]
+      summary: Register new user
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: './auth.envelopes.yaml#/AuthResponseEnvelope'
-      '409':
-        description: Email already exists
+              $ref: ./auth.schemas.yaml#/SignupRequest
+      responses:
+        "201":
+          description: Signup successful
+          content:
+            application/json:
+              schema:
+                $ref: ./auth.envelopes.yaml#/AuthResponseEnvelope
 
 /auth/google:
   post:
     tags: [Auth]
-    summary: Login or signup with Google OAuth
+    summary: Login or signup via Google OAuth
     requestBody:
       required: true
       content:
         application/json:
           schema:
-            $ref: './auth.schemas.yaml#/GoogleAuthRequest'
+            $ref: ./auth.schemas.yaml#/GoogleAuthRequest
     responses:
-      '200':
-        description: Login successful
+      "200":
+        description: Auth successful
         content:
           application/json:
             schema:
-              $ref: './auth.envelopes.yaml#/AuthResponseEnvelope'
+              $ref: ./auth.envelopes.yaml#/AuthResponseEnvelope

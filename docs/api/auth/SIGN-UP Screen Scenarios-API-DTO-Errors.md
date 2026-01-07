@@ -115,7 +115,7 @@ All error responses follow the standard API envelope.
 #### **400 Bad Request**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Invalid request payload"]
 }
@@ -123,7 +123,7 @@ All error responses follow the standard API envelope.
 #### **409 Conflict**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Email allready exists"]
 }
@@ -131,7 +131,7 @@ All error responses follow the standard API envelope.
 ### **422 Unprocessable Entity**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": [
     "Email is required",

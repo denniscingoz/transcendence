@@ -122,7 +122,7 @@ public class PostLikeUserDto
 
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Unauthorized"]
 }
@@ -132,7 +132,7 @@ public class PostLikeUserDto
 
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Post not found"]
 }
@@ -142,7 +142,7 @@ public class PostLikeUserDto
 
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Invalid pagination parameters"]
 }

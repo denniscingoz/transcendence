@@ -1,0 +1,32 @@
+# AUTH
+/auth/login:
+  $ref: ./auth/auth.paths.yaml#/auth/login
+
+/auth/signup:
+  $ref: ./auth/auth.paths.yaml#/auth/signup
+
+
+# FEED
+/feed:
+  $ref: ./feed/feed.paths.yaml#/feed
+
+/posts/{postId}:
+  $ref: ./feed/feed.paths.yaml#/posts/{postId}
+
+
+# PROFILE
+/profile/me:
+  $ref: ./profile/profile.paths.yaml#/profile/me
+
+/profile/me/posts:
+  $ref: ./profile/profile.paths.yaml#/profile/me/posts
+
+
+# SEARCH
+/search/users:
+  $ref: ./search/search.paths.yaml#/search/users
+
+
+# NOTIFICATIONS
+/notifications:
+  $ref: ./notifications/notifications.paths.yaml#/notifications

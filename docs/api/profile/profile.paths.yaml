@@ -1,0 +1,134 @@
+/profile/me:
+  get:
+    tags: [Profile]
+    summary: Get current user profile
+    responses:
+      "200":
+        description: Profile loaded
+        content:
+          application/json:
+            schema:
+              $ref: ./profile.envelopes.yaml#/MyProfileEnvelope
+      "401":
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: ../common/ApiResponse.yaml#/ApiResponseBase
+
+  patch:
+    tags: [Profile]
+    summary: Update profile info
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ./profile.schemas.yaml#/UpdateProfileRequest
+    responses:
+      "200":
+        description: Profile updated
+        content:
+          application/json:
+            schema:
+              $ref: ./profile.envelopes.yaml#/ProfileUpdatedEnvelope
+
+
+/profile/me/posts:
+  get:
+    tags: [Profile]
+    summary: Get current user posts
+    parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          default: 20
+          maximum: 50
+    responses:
+      "200":
+        description: Posts loaded
+        content:
+          application/json:
+            schema:
+              $ref: ./profile.envelopes.yaml#/MyPostsGridEnvelope
+
+  post:
+    tags: [Profile]
+    summary: Create new post
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: ./profile.schemas.yaml#/CreatePostRequest
+    responses:
+      "201":
+        description: Post created
+        content:
+          application/json:
+            schema:
+              $ref: ./profile.envelopes.yaml#/PostCreatedEnvelope
+
+
+/profile/me/followers:
+  get:
+    tags: [Profile]
+    summary: Get followers list
+    parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          default: 20
+          maximum: 50
+      - name: q
+        in: query
+        schema:
+          type: string
+    responses:
+      "200":
+        description: Followers loaded
+        content:
+          application/json:
+            schema:
+              $ref: ./profile.envelopes.yaml#/FollowersListEnvelope
+
+
+/profile/me/following:
+  get:
+    tags: [Profile]
+    summary: Get following list
+    parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          default: 20
+          maximum: 50
+      - name: q
+        in: query
+        schema:
+          type: string
+    responses:
+      "200":
+        description: Following loaded
+        content:
+          application/json:
+            schema:
+              $ref: ./profile.envelopes.yaml#/FollowingListEnvelope

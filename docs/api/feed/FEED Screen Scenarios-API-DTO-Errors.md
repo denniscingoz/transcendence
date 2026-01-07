@@ -108,7 +108,7 @@ All error responses follow the standard API envelope.
 #### **401 Unauthorized**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Unauthorized"]
 }
@@ -116,7 +116,7 @@ All error responses follow the standard API envelope.
 #### **400 Bad Request**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Invalid pagination parameters"]
 }
@@ -124,7 +124,7 @@ All error responses follow the standard API envelope.
 ### **500 Internal Sever Error**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Unexpected server error"]
 }

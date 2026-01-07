@@ -98,7 +98,7 @@ All error responses follow the standard API envelope.
 #### **400 Bad Request**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Invalid request payload"]
 }
@@ -106,7 +106,7 @@ All error responses follow the standard API envelope.
 #### **401 Bad Unauthorized**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": ["Unauthorized"]
 }
@@ -114,7 +114,7 @@ All error responses follow the standard API envelope.
 ### **422 Unprocessable Entity**
 ```json
 {
-  "data": null,
+  
   "isSuccess": false,
   "errors": [
     "Identifier is required",
