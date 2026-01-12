@@ -7,3 +7,12 @@ public interface IUserRepository
     Task AddAsync(User user);
     Task SaveChangesAsync();
 }
+/*
+    Repository
+	•	знает как читать / писать данные
+	•	переводит Domain ↔ БД
+	•	НЕ знает:
+	•	бизнес-сценарии
+	•	HTTP
+	•	кто кого вызывает 
+*/

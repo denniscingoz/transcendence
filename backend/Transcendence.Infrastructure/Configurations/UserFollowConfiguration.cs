@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Transcendence.Domain;
+using Transcendence.Domain.UserFollows;
 
 public sealed class UserFollowConfiguration : IEntityTypeConfiguration<UserFollow>
 {

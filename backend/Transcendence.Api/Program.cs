@@ -1,6 +1,10 @@
 using Transcendence.Application;
 using Transcendence.Infrastructure;
 using Transcendence.Api.Chat;
+using Microsoft.EntityFrameworkCore;
+using Transcendence.Application.Users.Interfaces;
+using Transcendence.Application.UserFollows.Interfaces;
+using Transcendence.Application.Users.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer(); // scan endpoints for  OpenAPI
@@ -13,9 +17,28 @@ builder.Services.AddSignalR();
 
 builder.Services.AddApplication(); //my extention method
 
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<TranscendenceDbContext>(options =>
+    options.UseNpgsql(connectionString));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserFollowRepository, UserFollowRepository>();
+
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddScoped<FollowService>();
+builder.Services.AddScoped<ProfileService>();
+/*
+	If a class:
+	• has dependencies
+	• must live within a request
+	• is used through a constructor
+
+	it is registered in DI
+*/
 
 var app = builder.Build();
+
  
 // app.UseMiddleware<ErrorHandlingMiddleware>();
 // app.UseMiddleware<LocalizationMiddleware>();
@@ -32,7 +55,7 @@ app.Run();
 1. builder = WebApplication.CreateBuilder()
 2. builder.Services.AddXxx()        ← DependencyInjection
 3. app = builder.Build()
-4. app.UseXxx()                     ← Middleware
+4. app.UseXxx()                     ← Middleware 
 5. app.MapXxx()                     ← Endpoints (routing)
 6. app.Run()
 

@@ -26,15 +26,31 @@ public sealed class User
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateProfile(string? bio, string? avatarUrl)
+    public void UpdateProfile(string? bio, string? avatarUrl) // recieves privimitives , not DTO
     {
-        Bio = bio;
-        AvatarUrl = avatarUrl;
+        Bio = bio; // "" if indo was deleted 
+        AvatarUrl = avatarUrl; // same
     }
 }
-/* 
+/*
+    Domain (User)
+	•	знает кто он
+	•	знает что ему можно
+	•	знает как себя менять
+	•	НЕ знает:
+	•	БД
+	•	HTTP
+	•	авторизацию
+
+
     1. Domain        → кто такой User
     2. Application   → что можно с ним делать (use-cases)
     3. API           → как это вызывается по HTTP
     4. Infrastructure→ как это хранится в БД
+
+    ✔ Controller → DTO
+    ✔ Service → DTO
+    ✔ Domain → values
+    ✔ Repository → Domain
+
 */

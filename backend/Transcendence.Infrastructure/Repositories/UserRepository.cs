@@ -12,7 +12,6 @@ public sealed class UserRepository : IUserRepository
         _db = db;
     }
 
-
     public Task<User?> GetByIdAsync(Guid id)
     {
         return _db.Users.SingleOrDefaultAsync(x => x.Id == id);

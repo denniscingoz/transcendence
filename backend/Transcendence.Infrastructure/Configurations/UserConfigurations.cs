@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Transcendence.Domain;
+using Transcendence.Domain.Users;
 
 public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {

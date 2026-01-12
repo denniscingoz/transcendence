@@ -11,7 +11,7 @@ public sealed class UserFollowRepository : IUserFollowRepository
     {
         _db = db;
     }
-    public Task <bool> IsFollowingAsync(Guid followerId, Guid followingId) 
+    public Task <bool> IsFollowingAsync(Guid followerId, Guid followingId) // database level logic, not service
     {
         return _db.UserFollows.AnyAsync(x => x.FollowingId == followingId &&
         x.FollowerId == followerId );
