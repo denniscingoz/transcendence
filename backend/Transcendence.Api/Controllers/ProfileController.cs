@@ -16,6 +16,31 @@ public sealed class ProfileController : ControllerBase
     public ProfileController(ProfileService profileService)
     {
         _profileService = profileService;
+
+    }
+    //GET /profile/me
+    [HttpGet ("me")]
+    public async Task<ActionResult<MyProfileDto>> GetMyProfile()
+    {
+        Guid userId = GetUserId();
+
+        var profile = await _profileService.GetMyProfileAsync(userId);
+        return Ok(profile);
     }
 
+
 }
+/*
+
+    ! Сервисы и репозитории НЕ хранят состояние.
+    ! Всё состояние — либо в Domain, либо в БД.
+
+    Короткий итог (зафиксируй)
+
+    ✔ Да, сервис создаётся на каждый запрос
+    ✔ Да, репозитории тоже
+    ✔ Да, DbContext тоже
+    ✔ Это осознанный дизайн
+    ✔ Это безопасно
+    ✔ Это масштабируемо 
+*/
