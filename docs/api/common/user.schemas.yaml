@@ -1,0 +1,10 @@
+UserShortDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    username:
+      type: string
+    email:
+      type: string

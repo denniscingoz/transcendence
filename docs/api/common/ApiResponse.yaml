@@ -1,0 +1,25 @@
+ApiMetadata: #data about data (for pagination)
+  type: object
+  properties: #fields
+    totalCount:
+      type: integer
+    pageSize:
+      type: integer
+    currentPage:
+      type: integer
+
+ApiResponseBase:
+  type: object
+  required: [isSuccess, errors]
+  properties:
+    isSuccess:
+      type: boolean
+    message:
+      type: string
+      nullable: true
+    errors:
+      type: array
+      items:
+        type: string
+    metadata:
+      $ref: '#/ApiMetadata'

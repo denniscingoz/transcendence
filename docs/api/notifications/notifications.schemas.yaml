@@ -1,0 +1,33 @@
+NotificationDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+
+    type:
+      type: string
+      enum: [LIKE, COMMENT, FOLLOW]
+
+    actor:
+      $ref: ../common/user.schemas.yaml#/UserShortDto
+
+    postId:
+      type: string
+      format: uuid
+      nullable: true
+
+    createdAt:
+      type: string
+      format: date-time
+
+    isRead:
+      type: boolean
+
+NotificationsListResponseDto:
+  type: object
+  properties:
+    items:
+      type: array
+      items:
+        $ref: "#/NotificationDto"

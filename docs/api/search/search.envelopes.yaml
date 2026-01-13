@@ -1,0 +1,7 @@
+SearchUsersEnvelope:
+  allOf:
+    - $ref: ../common/ApiResponse.yaml#/ApiResponseBase
+    - type: object
+      properties:
+        data:
+          $ref: ./search.schemas.yaml#/SearchUsersResponseDto

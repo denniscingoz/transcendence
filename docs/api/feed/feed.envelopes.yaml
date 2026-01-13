@@ -1,0 +1,47 @@
+FeedResponseEnvelope:
+  allOf:
+    - $ref: "../common/ApiResponse.yaml#/ApiResponseBase"
+    - type: object
+      properties:
+        data:
+          $ref: "./feed.schemas.yaml#/FeedResponseDto"
+
+PostDetailsEnvelope:
+  allOf:
+    - $ref: "../common/ApiResponse.yaml#/ApiResponseBase"
+    - type: object
+      properties:
+        data:
+          $ref: "./feed.schemas.yaml#/PostDetailsDto"
+
+CommentsEnvelope:
+  allOf:
+    - $ref: "../common/ApiResponse.yaml#/ApiResponseBase"
+    - type: object
+      properties:
+        data:
+          $ref: "./feed.schemas.yaml#/CommentsResponseDto"
+
+CommentEnvelope:
+  allOf:
+    - $ref: "../common/ApiResponse.yaml#/ApiResponseBase"
+    - type: object
+      properties:
+        data:
+          $ref: "./feed.schemas.yaml#/CommentDto"
+
+LikeEnvelope:
+  allOf:
+    - $ref: "../common/ApiResponse.yaml#/ApiResponseBase"
+    - type: object
+      properties:
+        data:
+          $ref: "./feed.schemas.yaml#/LikeResponseDto"
+
+PostLikesEnvelope:
+  allOf:
+    - $ref: "../common/ApiResponse.yaml#/ApiResponseBase"
+    - type: object
+      properties:
+        data:
+          $ref: "./feed.schemas.yaml#/PostLikesResponseDto"

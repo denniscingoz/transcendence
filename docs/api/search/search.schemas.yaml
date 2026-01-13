@@ -1,0 +1,22 @@
+SearchUsersResponseDto:
+  type: object
+  properties:
+    items:
+      type: array
+      items:
+        $ref: "#/SearchUserItemDto"
+
+SearchUserItemDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    username:
+      type: string
+    fullName:
+      type: string
+    avatarUrl:
+      type: string
+    isFollowedByMe:
+      type: boolean

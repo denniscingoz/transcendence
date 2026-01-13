@@ -1,0 +1,113 @@
+FeedResponseDto:
+  type: object
+  properties:
+    items:
+      type: array
+      items:
+        $ref: "#/FeedPostDto"
+
+FeedPostDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    imageUrl:
+      type: string
+    location:
+      type: string
+    likesCount:
+      type: integer
+    commentsCount:
+      type: integer
+    isLikedByMe:
+      type: boolean
+    createdAt:
+      type: string
+      format: date-time
+    author:
+      $ref: "../common/user.schemas.yaml#/UserShortDto"
+
+PostDetailsDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    imageUrl:
+      type: string
+    caption:
+      type: string
+    likesCount:
+      type: integer
+    isLikedByMe:
+      type: boolean
+    createdAt:
+      type: string
+      format: date-time
+    author:
+      $ref: "../common/user.schemas.yaml#/UserShortDto"
+
+CommentsResponseDto:
+  type: object
+  properties:
+    items:
+      type: array
+      items:
+        $ref: "#/CommentDto"
+
+CommentDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    text:
+      type: string
+    createdAt:
+      type: string
+      format: date-time
+    author:
+      $ref: "../common/user.schemas.yaml#/UserShortDto"
+
+CreateCommentRequest:
+  type: object
+  required:
+    - text
+  properties:
+    text:
+      type: string
+
+LikeResponseDto:
+  type: object
+  properties:
+    postId:
+      type: string
+      format: uuid
+    isLiked:
+      type: boolean
+    likesCount:
+      type: integer
+
+PostLikesResponseDto:
+  type: object
+  properties:
+    items:
+      type: array
+      items:
+        $ref: "#/PostLikeUserDto"
+
+PostLikeUserDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    username:
+      type: string
+    fullName:
+      type: string
+    avatarUrl:
+      type: string
+    isFollowedByMe:
+      type: boolean

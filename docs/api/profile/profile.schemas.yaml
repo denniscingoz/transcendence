@@ -1,0 +1,102 @@
+MyProfileDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    username:
+      type: string
+    fullName:
+      type: string
+    bio:
+      type: string
+      nullable: true
+    avatarUrl:
+      type: string
+      nullable: true
+    postsCount:
+      type: integer
+    followersCount:
+      type: integer
+    followingCount:
+      type: integer
+
+
+ProfilePostThumbDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    imageUrl:
+      type: string
+    createdAt:
+      type: string
+      format: date-time
+
+
+CreatePostRequest:
+  type: object
+  required: [image]
+  properties:
+    image:
+      type: string
+      format: binary
+    caption:
+      type: string
+      maxLength: 300
+
+
+PostCreatedDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    imageUrl:
+      type: string
+    caption:
+      type: string
+      nullable: true
+    createdAt:
+      type: string
+      format: date-time
+
+
+UpdateProfileRequest:
+  type: object
+  properties:
+    fullName:
+      type: string
+      maxLength: 50
+    bio:
+      type: string
+      maxLength: 150
+    username:
+      type: string
+      maxLength: 30
+
+OtherProfileDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    username:
+      type: string
+    fullName:
+      type: string
+    bio:
+      type: string
+      nullable: true
+    avatarUrl:
+      type: string
+      nullable: true
+    postsCount:
+      type: integer
+    followersCount:
+      type: integer
+    followingCount:
+      type: integer
+    isFollowedByMe:
+      type: boolean
