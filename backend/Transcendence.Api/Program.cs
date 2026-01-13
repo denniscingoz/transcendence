@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Transcendence.Application.Users.Interfaces;
 using Transcendence.Application.UserFollows.Interfaces;
 using Transcendence.Application.Users.Services;
+using Transcendence.Infrastructure.Persistence;
+using Transcendence.Infrastructure.Repositories;
+using Transcendence.Application.Posts.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer(); // scan endpoints for  OpenAPI
@@ -24,10 +28,12 @@ builder.Services.AddDbContext<TranscendenceDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserFollowRepository, UserFollowRepository>();
+builder.Services.AddScoped<IPostRepository, PostRepository>();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<FollowService>();
 builder.Services.AddScoped<ProfileService>();
+builder.Services.AddControllers();
 /*
 	If a class:
 	• has dependencies
@@ -39,15 +45,16 @@ builder.Services.AddScoped<ProfileService>();
 
 var app = builder.Build();
 
- 
-// app.UseMiddleware<ErrorHandlingMiddleware>();
-// app.UseMiddleware<LocalizationMiddleware>();
-
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapChatEndpoints();
-
+app.MapControllers();
 app.Run();
 
 
