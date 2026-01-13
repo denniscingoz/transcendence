@@ -1,6 +1,8 @@
 using Transcendence.Domain.Users;
 using Transcendence.Application.Users.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Transcendence.Infrastructure.Persistence;
+namespace Transcendence.Infrastructure.Repositories;
 
 public sealed class UserRepository : IUserRepository
 {

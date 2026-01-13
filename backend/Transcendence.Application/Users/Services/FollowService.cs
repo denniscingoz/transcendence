@@ -6,7 +6,7 @@ using Transcendence.Application.Users.Interfaces;
 
 using Transcendence.Domain.Users;
 
-public sealed class FollowService
+public sealed class FollowService // use-case (Command)
 {
     private readonly IUserFollowRepository _followRepository;
     private readonly IUserRepository _userRepository;

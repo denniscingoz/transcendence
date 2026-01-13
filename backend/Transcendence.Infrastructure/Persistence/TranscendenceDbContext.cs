@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Transcendence.Domain.UserFollows;
 using Transcendence.Domain.Users;
+using Transcendence.Domain.Posts;
+
+namespace Transcendence.Infrastructure.Persistence;
 
 
 public class TranscendenceDbContext: DbContext
@@ -9,6 +12,8 @@ public class TranscendenceDbContext: DbContext
           DbContextOptions<TranscendenceDbContext> options) : base (options){}
      public DbSet<User> Users => Set<User>();
      public DbSet<UserFollow> UserFollows => Set<UserFollow>();
+     public DbSet<Post> Posts => Set<Post>();
+
 
      /*
      public DbSet<User> Users // коллекция ползователй из БД

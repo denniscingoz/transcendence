@@ -5,6 +5,7 @@ public sealed class User
     public Guid Id { get; private set; } // Id created outside
     public  string Username {get; private set; }  // entity controles property only by itself's methods
     public  string Email {get; private set; } 
+    public string FullName { get; private set; }
 
     public string? Bio {get; private set; }
     public string? AvatarUrl {get; private set; }
@@ -15,21 +16,32 @@ public sealed class User
     private User() { } // constructor for EF
 #pragma warning restore CS8618
 
-
-
-
-    public User (Guid id, string username, string email)
+    public User (Guid id, string username, string email, string fullName)
     {
         Id = id;
         Username = username;
-        Email = email; 
+        FullName = fullName;
+        Email = email;
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateProfile(string? bio, string? avatarUrl) // recieves privimitives , not DTO
+    public void UpdateProfile(
+        string? fullName = null,
+        string? bio = null,
+        string? avatarUrl = null,
+        string? username = null)
     {
-        Bio = bio; // "" if indo was deleted 
-        AvatarUrl = avatarUrl; // same
+        if (fullName is not null)
+            FullName = fullName;
+
+        if (bio is not null)
+            Bio = bio;
+
+        if (avatarUrl is not null)
+            AvatarUrl = avatarUrl;
+
+        if (username is not null)
+            Username = username;
     }
 }
 /*
@@ -53,4 +65,20 @@ public sealed class User
     ✔ Domain → values
     ✔ Repository → Domain
 
+    Profile update logic lives in the Domain entity,
+    because the entity itself knows how it is allowed to change.
+    The service only orchestrates the use-case and does not modify fields directly.
+
+    Services decide WHEN something happens.
+    Entities decide HOW they change.
+
+    Domain entity содержит только то,
+    за что она отвечает и что контролирует.
+
+    Счётчики:
+    - не контролируются User
+
+    - не изменяются User
+
+    + считаются извне
 */

@@ -1,10 +1,12 @@
 namespace Transcendence.Application.Users.DTOs;
 public sealed class MyProfileDto
 {
-    public Guid Id {get; init; }
-    public string Username { get; init; } = default!; //null but temporary. !  garanties that will not be null
-    public string  Email { get; init; } = default!;
-    public string?  Bio { get; init; }
-    public string?  AvatarUrl { get; init; }
-
+    public Guid Id { get; init; }
+    public string Username { get; init; } = default!;
+    public string FullName { get; init; } = default!;
+    public string? Bio { get; init; }
+    public string? AvatarUrl { get; init; }
+    public int PostsCount { get; init; }
+    public int FollowersCount { get; init; }
+    public int FollowingCount { get; init; }
 }
