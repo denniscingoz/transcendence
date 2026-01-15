@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Transcendence.Application.Users.DTOs;
 using Transcendence.Application.Users.Services;
 using Microsoft.AspNetCore.Authorization;
+using Transcendence.Application.Common.Responses;
+using Transcendence.Api.Common.Extensions;
 
 namespace Transcendence.Api.Controllers;
 
@@ -21,33 +23,35 @@ public sealed class ProfileController : ControllerBase
     }
     //GET /profile/me
     [HttpGet ("me")]
-    public async Task<ActionResult<MyProfileDto>> GetMyProfile()
+    public async Task<ActionResult<ApiResponse<MyProfileDto>>> GetMyProfile()
     {
         Guid userId = GetUserId(); //todo auth
 
         var profile = await _profileService.GetMyProfileAsync(userId);
-        return Ok(profile);
+        return this.OkResponse(profile);
     }
 
     // PATCH /profile/me
     [HttpPatch("me")]
-    public async Task<IActionResult> UpdateProfile( // interface type while method can return different HTTP statuses but has no main type (ex:dto)
+    public async Task<ActionResult<ApiResponse<MyProfileDto>>> UpdateProfile( // interface type while method can return different HTTP statuses but has no main type (ex:dto)
         [FromBody] UpdateProfileDto dto) // parse from request to dto
     {
         Guid userId = GetUserId(); //todo auth
 
-        await _profileService.UpdateProfileAsync(userId, dto);
-        return NoContent(); //204
+        var updatedProfile = await _profileService.UpdateProfileAsync(userId, dto);
+
+        return this.OkResponse(updatedProfile);
     }
     
     //GET /profile/{userId}
     [HttpGet("{userId:guid}")]
-    public async Task<ActionResult<OtherProfileDto>> GetOtherProfile(Guid userId)
+    public async Task<ActionResult<ApiResponse<OtherProfileDto>>> GetOtherProfile(Guid userId)
     {
         Guid viewerId = GetUserId(); //todo auth
 
-        var profile = await _profileService.GetOtherProfileAsync(userId, viewerId);
-        return Ok(profile);
+        var otherProfile = await _profileService.GetOtherProfileAsync(userId, viewerId);
+        return this.OkResponse(otherProfile);
+
     }
     
     private Guid GetUserId() //tepmorary

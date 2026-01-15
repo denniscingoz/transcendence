@@ -21,15 +21,6 @@ builder.Services.AddSignalR();
 
 builder.Services.AddApplication(); //my extention method
 
-var connectionString =
-    builder.Configuration.GetConnectionString("DefaultConnection");
-
-builder.Services.AddDbContext<TranscendenceDbContext>(options =>
-    options.UseNpgsql(connectionString));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserFollowRepository, UserFollowRepository>();
-builder.Services.AddScoped<IPostRepository, PostRepository>();
-
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<FollowService>();
 builder.Services.AddScoped<ProfileService>();
