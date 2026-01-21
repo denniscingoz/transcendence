@@ -18,4 +18,4 @@ npm run dev
 
 ## Docs
 
-- `docs/FRONTEND_NOTES.md` — what we built + evaluation explanations.
+- `docs/FRONTEND_NOTES.md`
