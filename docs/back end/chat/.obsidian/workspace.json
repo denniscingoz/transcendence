@@ -1,0 +1,375 @@
+{
+  "main": {
+    "id": "39a21a6bcd5383c6",
+    "type": "split",
+    "children": [
+      {
+        "id": "16aad0f1e30bb83f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9a7012cbbf595653",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Welcome.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Welcome"
+            }
+          },
+          {
+            "id": "af044372de2ac7c9",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "MVP.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "MVP"
+            }
+          },
+          {
+            "id": "b4607868c20575e8",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "MVP.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "MVP"
+            }
+          },
+          {
+            "id": "9623dbc26a8e89ca",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "DTOs/ChatMessageDto.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "ChatMessageDto"
+            }
+          },
+          {
+            "id": "1766b12aaca11b45",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "message workflow.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "message workflow"
+            }
+          },
+          {
+            "id": "df63aa9c7876faa7",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "DTOs/SendMessageCommandDto.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "SendMessageCommandDto"
+            }
+          },
+          {
+            "id": "e21ae53cd58a9e90",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "DTOs/ChatMessageDto.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "ChatMessageDto"
+            }
+          },
+          {
+            "id": "8157080fe552f453",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "DTOs/PresenceEventDto.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "PresenceEventDto"
+            }
+          },
+          {
+            "id": "1d67464174520ac0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "message workflow.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "message workflow"
+            }
+          },
+          {
+            "id": "9b9a6c8aa6d6885b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "DTOs/ChatMessageDto.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "ChatMessageDto"
+            }
+          },
+          {
+            "id": "6c35e6413140578b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "DTOs/PresenceEventDto.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "PresenceEventDto"
+            }
+          },
+          {
+            "id": "854dd4eef0f554a5",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "message workflow.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "message workflow"
+            }
+          }
+        ],
+        "currentTab": 11
+      },
+      {
+        "id": "bd1e9df1a487a79d",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b03e492bba87af09",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "82ddd2c280686ea4",
+    "type": "split",
+    "children": [
+      {
+        "id": "fef3636cf44b4ec7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8d65b0389af38860",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "fde3f815b5fad933",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "38841fb93293c2d0",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "e469f432cfa1eced",
+    "type": "split",
+    "children": [
+      {
+        "id": "90cec28ea9c4fdd8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e593fec5ae2e670f",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "MVP.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for MVP"
+            }
+          },
+          {
+            "id": "2bacc9e64f7dc9bb",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "MVP.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from MVP"
+            }
+          },
+          {
+            "id": "ff7c224078a614cb",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "e6df272a29188d07",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "f8b72b9a214ac6ac",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "MVP.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of MVP"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "854dd4eef0f554a5",
+  "lastOpenFiles": [
+    "Events.md",
+    "message workflow.md",
+    "API old from Front.md",
+    "DTOs/ChatMessageDto.md",
+    "DTOs/SendMessageCommandDto.md",
+    "DTOs/PresenceEventDto.md",
+    "DTOs/NotificationDto.md",
+    "DTOs/MessageAckDto.md",
+    "MVP.md",
+    "Untitled.canvas",
+    "Presence - online status.md",
+    "Pres.md",
+    "Welcome.md",
+    "DTOs",
+    "DTO.md"
+  ]
+}
