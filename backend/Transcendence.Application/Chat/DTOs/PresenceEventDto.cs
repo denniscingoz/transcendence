@@ -1,13 +1,12 @@
+namespace Transcendence.Application.Chat.DTOs;
 
-Transcendence.Application.Chat.DTOs;
-```cs
 public sealed class PresenceEventDto
 {
     public Guid UserId { get; init; }
     public bool IsOnline { get; init; }
     public DateTimeOffset ChangedAt { get; init; }
 }
-```
+/*
 
 UserOnline(UserPresenceDto)
 UserOffline(UserPresenceDto)
@@ -34,4 +33,4 @@ resence — это **состояние**, а не событие чата.
     - header
     - chat list
         
-- он живёт **по userId**, а не по chatId
+- он живёт **по userId**, а не по chatId */
