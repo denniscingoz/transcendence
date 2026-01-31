@@ -9,9 +9,9 @@ namespace Transcendence.Domain.Exceptions
         
         }   
     }
-    public class FollowYourselfException : DomainException
+    public class CannotFriendYourselfException : DomainException
     {
-        public FollowYourselfException() : base("Cannot follow yourself")
+        public CannotFriendYourselfException() : base("Cannot follow yourself")
         {
         
         }   

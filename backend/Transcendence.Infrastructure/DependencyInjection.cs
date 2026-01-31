@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Transcendence.Application.Users.Interfaces;
-using Transcendence.Application.UserFollows.Interfaces;
-using Transcendence.Application.Posts.Interfaces;
 using Transcendence.Infrastructure.Persistence;
 using Transcendence.Infrastructure.Repositories;
+using Transcendence.Application.Users.Interfaces.Posts;
+using Transcendence.Application.Friends.Interfaces;
 
 namespace Transcendence.Infrastructure;
 
@@ -19,7 +19,7 @@ public static class DependencyInjection
         services.AddDbContext<TranscendenceDbContext>(options =>
             options.UseNpgsql(connectionString)); // config DBcontetx and uses Npgsql.EntityFrameworkCore.PostgreSQL
         services.AddScoped<IUserRepository, UserRepository>(); // when IUserRepository needed - creates UserRepository
-        services.AddScoped<IUserFollowRepository, UserFollowRepository>(); 
+        services.AddScoped<IFriendshipRepository, UserFollowRepository>(); 
         services.AddScoped<IPostRepository, PostRepository>(); 
         return services;
     }

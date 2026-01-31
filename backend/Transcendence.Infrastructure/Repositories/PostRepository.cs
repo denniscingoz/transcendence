@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using  Transcendence.Domain.Posts;
-using Transcendence.Application.Posts.Interfaces;
+using Transcendence.Domain.Posts;
 using System.Data;
 using Transcendence.Infrastructure.Persistence;
+using Transcendence.Application.Users.Interfaces.Posts;
 namespace Transcendence.Infrastructure.Repositories;
 
 

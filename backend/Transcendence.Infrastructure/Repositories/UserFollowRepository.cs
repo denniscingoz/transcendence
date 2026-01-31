@@ -1,10 +1,10 @@
 using Transcendence.Domain.UserFollows;
-using Transcendence.Application.UserFollows.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Transcendence.Infrastructure.Persistence;
+using Transcendence.Application.Friends.Interfaces;
 namespace Transcendence.Infrastructure.Repositories;
 
-public sealed class UserFollowRepository : IUserFollowRepository
+public sealed class UserFollowRepository : IFriendshipRepository
 {
     private readonly TranscendenceDbContext _db;
 
@@ -12,33 +12,28 @@ public sealed class UserFollowRepository : IUserFollowRepository
     {
         _db = db;
     }
-    public Task <bool> IsFollowingAsync(Guid followerId, Guid followingId) // database level logic, not service
+    public Task <bool> IsFriendAsync(Guid followerId, Guid followingId) // database level logic, not service
     {
-        return _db.UserFollows.AnyAsync(x => x.FollowingId == followingId &&
-        x.FollowerId == followerId );
+        return _db.UserFollows.AnyAsync(x => x.User2Id == followingId &&
+        x.User1Id == followerId );
         
     }
-    public async    Task AddAsync(UserFollow follow)
+    public async    Task AddFriendAsync(Friendship follow)
     {
        await  _db.UserFollows.AddAsync(follow);
     }
 
-    public  Task RemoveAsync(Guid followerId, Guid followingId)
+    public  Task RemoveFriendAsync(Guid followerId, Guid followingId)
     {
-        var follow = new UserFollow(followerId, followingId);
+        var follow = new Friendship(followerId, followingId);
         _db.UserFollows.Remove(follow);
         return Task.CompletedTask; // используется когда метод async по контракту, но внутри синхронный
     }
  
-    public async Task <int> CountFollowersAsync (Guid userId)
+    public async Task <int> CountFriendsAsync (Guid userId)
     {
-        return await _db.UserFollows.CountAsync(x => x.FollowingId == userId);
+        return await _db.UserFollows.CountAsync(x => x.User2Id == userId);
     }
-    public async Task <int> CountFollowingAsync (Guid userId)
-    {
-        return await _db.UserFollows.CountAsync(x => x.FollowerId == userId);
-    }
-
 
 
 }

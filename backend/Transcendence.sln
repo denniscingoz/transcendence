@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transcendence.Domain", "Transcendence.Domain\Transcendence.Domain.csproj", "{4BB9727C-CBD0-4665-ADB6-2020E778B323}"
 EndProject
@@ -9,13 +9,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transcendence.Application",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transcendence.Infrastructure", "Transcendence.Infrastructure\Transcendence.Infrastructure.csproj", "{31BDBEC7-370D-422D-BFC0-29327B288AB5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transcendence.Api", "Transcendence.Api\Transcendence.Api.csproj", "{A22BD3E5-9EF4-4C8B-87C6-F268C3BB4AD3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docss", "docss", "{CE7F67BD-6FC5-47E6-A7F3-659056272A6A}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\back end\OpenApi\OpenApi.yaml = ..\docs\back end\OpenApi\OpenApi.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{4BB9727C-CBD0-4665-ADB6-2020E778B323}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -30,5 +34,15 @@ Global
 		{31BDBEC7-370D-422D-BFC0-29327B288AB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31BDBEC7-370D-422D-BFC0-29327B288AB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31BDBEC7-370D-422D-BFC0-29327B288AB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A22BD3E5-9EF4-4C8B-87C6-F268C3BB4AD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A22BD3E5-9EF4-4C8B-87C6-F268C3BB4AD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A22BD3E5-9EF4-4C8B-87C6-F268C3BB4AD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A22BD3E5-9EF4-4C8B-87C6-F268C3BB4AD3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C2E3EFAD-C05B-43F4-87DE-502CC17F8874}
 	EndGlobalSection
 EndGlobal

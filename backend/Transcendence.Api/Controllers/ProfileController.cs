@@ -6,23 +6,20 @@ using Transcendence.Application.Users.Services;
 using Microsoft.AspNetCore.Authorization;
 using Transcendence.Application.Common.Responses;
 using Transcendence.Api.Common.Extensions;
+using Transcendence.Application.Users.Interfaces;
 
 namespace Transcendence.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("profile")]
-[Authorize]
 public sealed class ProfileController : ControllerBase
 {
-    private readonly ProfileService _profileService;
+    private readonly IProfileService _profileService;
+    public ProfileController(IProfileService profileService) {_profileService = profileService;}
 
-    public ProfileController(ProfileService profileService)
-    {
-        _profileService = profileService;
-
-    }
-    //GET /profile/me
-    [HttpGet ("me")]
+	//GET /profile/me
+	[HttpGet("me")]
     public async Task<ActionResult<ApiResponse<MyProfileDto>>> GetMyProfile()
     {
         Guid userId = GetUserId(); //todo auth
@@ -31,8 +28,9 @@ public sealed class ProfileController : ControllerBase
         return this.OkResponse(profile);
     }
 
-    // PATCH /profile/me
-    [HttpPatch("me")]
+
+	// PATCH /profile/me
+	[HttpPatch("me")]
     public async Task<ActionResult<ApiResponse<MyProfileDto>>> UpdateProfile( // interface type while method can return different HTTP statuses but has no main type (ex:dto)
         [FromBody] UpdateProfileDto dto) // parse from request to dto
     {
@@ -42,9 +40,9 @@ public sealed class ProfileController : ControllerBase
 
         return this.OkResponse(updatedProfile);
     }
-    
-    //GET /profile/{userId}
-    [HttpGet("{userId:guid}")]
+
+	//GET /profile/{userId}
+	[HttpGet("{userId:guid}")]
     public async Task<ActionResult<ApiResponse<OtherProfileDto>>> GetOtherProfile(Guid userId)
     {
         Guid viewerId = GetUserId(); //todo auth
@@ -53,12 +51,18 @@ public sealed class ProfileController : ControllerBase
         return this.OkResponse(otherProfile);
 
     }
-    
-    private Guid GetUserId() //tepmorary
-    {
-        // TODO: заменить на Claims позже
-        return Guid.Parse(User.FindFirst("sub")!.Value);
-    }
+
+	private Guid GetUserId()
+	{
+		var value =
+			User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+			?? User.FindFirst("sub")?.Value;
+
+		if (value is null || !Guid.TryParse(value, out var userId))
+			throw new UnauthorizedAccessException("Invalid token.");
+
+		return userId;
+	}
 }
 /*
 

@@ -2,17 +2,27 @@ using Transcendence.Application;
 using Transcendence.Infrastructure;
 using Transcendence.Api.Chat;
 using Microsoft.EntityFrameworkCore;
-using Transcendence.Application.Users.Interfaces;
-using Transcendence.Application.UserFollows.Interfaces;
-using Transcendence.Application.Users.Services;
+using Transcendence.Application.Friends.Interfaces;
 using Transcendence.Infrastructure.Persistence;
 using Transcendence.Infrastructure.Repositories;
 using Transcendence.Application.Posts.Interfaces;
+using Transcendence.Application.Friends.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer(); // scan endpoints for  OpenAPI
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("Frontend", policy =>
+		policy.WithOrigins("http://localhost:5173")
+			  .AllowAnyHeader()
+			  .AllowAnyMethod()
+	// Use AllowCredentials() only if we use cookies.
+	// .AllowCredentials() ???????????????
+	);
+});
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
@@ -22,8 +32,6 @@ builder.Services.AddSignalR();
 builder.Services.AddApplication(); //my extention method
 
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddScoped<FollowService>();
-builder.Services.AddScoped<ProfileService>();
 builder.Services.AddControllers();
 /*
 	If a class:
@@ -35,6 +43,8 @@ builder.Services.AddControllers();
 */
 
 var app = builder.Build();
+app.UseRouting();
+app.UseCors("Frontend");
 
 if (app.Environment.IsDevelopment())
 {

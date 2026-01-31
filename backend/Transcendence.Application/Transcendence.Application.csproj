@@ -15,4 +15,9 @@
     <ProjectReference Include="..\Transcendence.Domain\Transcendence.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Posts\Exceptions\" />
+    <Folder Include="Posts\Queries\" />
+  </ItemGroup>
+
 </Project>

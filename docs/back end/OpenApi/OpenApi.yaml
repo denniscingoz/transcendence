@@ -1,0 +1,82 @@
+openapi: 3.0.3                # REQUIRED: Tells the tool which grammar rules to use.
+info:
+  title: The Social Network API    # This appears as the BIG HEADER on the webpage.
+  version: 1.0.0                   # Helps us track changes (e.g., v1.1, v2.0).
+  description: |                   # The "|" allows multi-line text below.
+    API for the ft_transcendence social network project.
+    Managed by dcingoz.
+servers:
+  - url: http://localhost:5067     # The base URL where our C# backend lives.
+    description: Local Development (HTTP)
+  - url: https://localhost:7016 # Your current HTTPS port
+    description: Local Development (HTTPS)
+
+paths:
+#authentication
+#POST auth/login
+#POST auth/register
+#POST auth/google
+#POST auth/logout
+#POST auth/2fa/enable
+#POST auth/2fa/verify
+#POST auth/2fa/disable
+#POST auth/2fa/generate
+
+#users
+#GET profile/me
+#GET profile/{userId}
+#PATCH profile/me
+#PATCH profile/me/password
+#POST profile/me/avatar
+#DELETE me
+
+##friends
+#+--#GET friends/list
+#+--#POST friends/{username}
+#+--#DELETE friends/{username}
+#+--#GET friends/requests
+#+--#POST friends/requests/{requestId}/accept
+#+--#POST friends/requests/{requestId}/decline
+
+#post
+#GET post/{postId}
+#POST post
+#DELETE post/{postId}
+#POST post/{postId}/like
+#GET post/{postId}/likes
+#POST post/{postId}/comment
+#DELETE post/{postId}/comment/{commentId}
+
+#posts/feed
+#GET /posts/me?take=20
+#GET /posts/me?take=20&cursor=<nextCursor>
+#GET /posts/by-username/{username}?take=20
+#GET /posts/by-username/{username}?take=20&cursor=<nextCursor>
+#GET /posts/feed?take=20
+#GET /posts/feed?take=20&cursor=<nextCursor>
+
+#notifications
+#GET notifications/list
+
+#chat
+#GET chat/conversations
+#GET chat/{userId}/messages
+
+#admin (Protected: Admins only)
+#GET admin/users
+#PATCH admin/users/{id}/role
+#POST admin/users/{id}/ban
+#DELETE admin/users/{id}/ban
+
+
+#API:
+#Controller
+#
+#Application:
+#Dto
+#Exceptions
+#Interfaces
+#Services
+#
+#Domain:
+#Entities

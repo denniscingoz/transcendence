@@ -1,6 +1,6 @@
 @Transcendence.Api_HostAddress = http://localhost:5067
 
-GET {{Transcendence.Api_HostAddress}}/weatherforecast/
+GET {{Transcendence.Api_HostAddress}}/profile/me
 Accept: application/json
 
 ###

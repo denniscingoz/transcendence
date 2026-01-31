@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Transcendence.Domain.UserFollows;
 
-public sealed class UserFollowConfiguration : IEntityTypeConfiguration<UserFollow>
+public sealed class UserFollowConfiguration : IEntityTypeConfiguration<Friendship>
 {
-    public void Configure(EntityTypeBuilder<UserFollow> builder)
+    public void Configure(EntityTypeBuilder<Friendship> builder)
     {
         builder.ToTable("user_follows"); //table of connections
         builder.HasKey(x => new { x.FollowerId, x.FollowingId }); //composite key
