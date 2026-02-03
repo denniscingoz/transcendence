@@ -19,7 +19,9 @@ public static class DependencyInjection
         services.AddDbContext<TranscendenceDbContext>(options =>
             options.UseNpgsql(connectionString)); // config DBcontetx and uses Npgsql.EntityFrameworkCore.PostgreSQL
         services.AddScoped<IUserRepository, UserRepository>(); // when IUserRepository needed - creates UserRepository
-        services.AddScoped<IFriendshipRepository, UserFollowRepository>(); 
+        //services.AddScoped<IFriendshipRepository, UserFollowRepository>(); 
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<IFriendshipRequestRepository, FriendshipRequestRepository>();
         services.AddScoped<IPostRepository, PostRepository>(); 
         return services;
     }

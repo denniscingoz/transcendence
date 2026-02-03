@@ -1,5 +1,5 @@
 ﻿namespace Transcendence.Application.Friends.Exceptions;
-public sealed class FriendRequestAlreadyExistsException : Exception
+public sealed class FriendshipRequestAlreadyExistsException : Exception
 {
-	public FriendRequestAlreadyExistsException() : base("Users are already friends.") { }
+	public FriendshipRequestAlreadyExistsException() : base("Users are already friends.") { }
 }

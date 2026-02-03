@@ -1,11 +1,11 @@
 ﻿using Transcendence.Domain.Friends;
 
 namespace Transcendence.Application.Friends.Interfaces;
-public interface IFriendRequestRepository
+public interface IfriendshipRequestRepository
 {
 	Task<bool> ExistsPendingAsync(Guid requesterId, Guid targetUserId);
-	Task AddAsync(FriendRequest request);
+	Task AddAsync(FriendshipRequest request);
 	Task RemoveAsync(Guid requestId); // decline or cancel
-	Task<FriendRequest?> GetAsync(Guid requesterId);
-	Task<IReadOnlyList<FriendRequest>> ListIncomingAsync(Guid userId); // only if needed
+	Task<FriendshipRequest?> GetAsync(Guid requesterId);
+	Task<IReadOnlyList<FriendshipRequest>> ListIncomingAsync(Guid userId); // only if needed
 }

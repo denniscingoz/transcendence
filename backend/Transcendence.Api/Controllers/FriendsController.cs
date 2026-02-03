@@ -32,10 +32,10 @@ public sealed class FriendsController : ControllerBase
 
 	//POST /friends/{friendUserId}
 	[HttpPost("{targetUserId:guid}")]
-	public async Task<IActionResult> SendFriendRequest(Guid targetUserId)
+	public async Task<IActionResult> SendFriendshipRequest(Guid targetUserId)
 	{
 		Guid requesterId = GetUserId();
-		await _friendsService.SendFriendRequestAsync(requesterId, targetUserId);
+		await _friendsService.SendFriendshipRequestAsync(requesterId, targetUserId);
 		return StatusCode(StatusCodes.Status201Created); // 201, no body, no Location
 	}
 
@@ -50,28 +50,28 @@ public sealed class FriendsController : ControllerBase
 
 	//GET /friends/requests
 	[HttpGet("requests")]
-	public async Task<ActionResult<ApiResponse<IReadOnlyList<FriendRequestDto>>>> GetFriendRequestList()
+	public async Task<ActionResult<ApiResponse<IReadOnlyList<FriendshipRequestDto>>>> GetFriendshipRequestList()
 	{
 		Guid userId = GetUserId(); //todo auth
-		var requests = await _friendsService.GetFriendRequestListAsync(userId);
+		var requests = await _friendsService.GetFriendshipRequestListAsync(userId);
 		return this.OkResponse(requests);
 	}
 
 	//POST /friends/requests/{requestId}/accept
 	[HttpPost("requests/{requestId:guid}/accept")]
-	public async Task<IActionResult> AcceptFriendRequest(Guid requestId)
+	public async Task<IActionResult> AcceptFriendshipRequest(Guid requestId)
 	{
 		Guid currentUserId = GetUserId();
-		await _friendsService.AcceptFriendRequestAsync(requestId, currentUserId);
+		await _friendsService.AcceptFriendshipRequestAsync(requestId, currentUserId);
 		return NoContent(); // 204
 	}
 
 	//POST /friends/requests/{requestId}/decline
 	[HttpPost("requests/{requestId:guid}/decline")]
-	public async Task<IActionResult> DeclineFriendRequest(Guid requestId)
+	public async Task<IActionResult> DeclineFriendshipRequest(Guid requestId)
 	{
 		Guid currentUserId = GetUserId();
-		await _friendsService.DeclineFriendRequestAsync(requestId, currentUserId);
+		await _friendsService.DeclineFriendshipRequestAsync(requestId, currentUserId);
 		return NoContent(); // 204
 	}
 
