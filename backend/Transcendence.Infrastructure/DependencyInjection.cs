@@ -29,6 +29,7 @@ public static class DependencyInjection
 
         services.AddScoped<IUserRepository, UserRepository>(); // when IUserRepository needed - creates UserRepository
 
+
 		services.AddScoped<IPostsRepository, PostsRepository>();
 		services.AddScoped<IPostsFeedRepository, PostsFeedRepository>();
 		services.AddScoped<IPostsProfileRepository, PostsProfileRepository>();
@@ -51,7 +52,10 @@ public static class DependencyInjection
 		services.AddScoped<IFilesRepository, FilesRepository>();
         services.AddScoped<IFilesStorage, FilesStorage>();
 
+        //services.AddScoped<IMessageRepository, MessageRepository>();
+
 
 		return services;
+
     }
 }
