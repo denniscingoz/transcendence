@@ -20,21 +20,21 @@ public sealed class ProfileController : ControllerBase
 
 	//GET /profile/me
 	[HttpGet("me")]
-    public async Task<ActionResult<ApiResponse<MyProfileDto>>> GetMyProfile()
+    public async Task<ActionResult<ApiResponse<MyProfileDto>>> GetMyProfile(CancellationToken ct)
     {
         Guid userId = GetUserId(); //todo auth
 
-        var profile = await _profileService.GetMyProfileAsync(userId);
+        var profile = await _profileService.GetMyProfileAsync(userId, ct);
         return this.OkResponse(profile);
     }
 
 	//GET /profile/{userId}
 	[HttpGet("{userId:guid}")]
-	public async Task<ActionResult<ApiResponse<OtherProfileDto>>> GetOtherProfile(Guid userId)
+	public async Task<ActionResult<ApiResponse<OtherProfileDto>>> GetOtherProfile(Guid userId, CancellationToken ct)
 	{
 		Guid viewerId = GetUserId(); //todo auth
 
-		var otherProfile = await _profileService.GetOtherProfileAsync(userId, viewerId);
+		var otherProfile = await _profileService.GetOtherProfileAsync(userId, viewerId, ct);
 		return this.OkResponse(otherProfile);
 
 	}
@@ -42,21 +42,21 @@ public sealed class ProfileController : ControllerBase
 	// PATCH /profile/me
 	[HttpPatch("me")]
     public async Task<ActionResult<ApiResponse<MyProfileDto>>> UpdateProfile( // interface type while method can return different HTTP statuses but has no main type (ex:dto)
-        [FromBody] UpdateProfileDto dto) // parse from request to dto
+        [FromBody] UpdateProfileDto dto, CancellationToken ct) // parse from request to dto
     {
         Guid userId = GetUserId(); //todo auth
 
-        var updatedProfile = await _profileService.UpdateProfileAsync(userId, dto);
+        var updatedProfile = await _profileService.UpdateProfileAsync(userId, dto, ct);
 
         return this.OkResponse(updatedProfile);
     }
 
 	// PATCH /profile/password
     [HttpPatch("password")]
-    public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+    public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordDto dto, CancellationToken ct)
     {
         Guid userId = GetUserId(); //todo auth
-        await _profileService.ChangePasswordAsync(userId, dto);
+        await _profileService.ChangePasswordAsync(userId, dto, ct);
         return NoContent(); // 204 No Content
 	}
 

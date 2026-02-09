@@ -24,13 +24,13 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 		_postRepository = postRepository;
 		_passwordHasher = passwordHasher;
 	}
-	public async Task<MyProfileDto> GetMyProfileAsync(Guid userId)
+	public async Task<MyProfileDto> GetMyProfileAsync(Guid userId, CancellationToken ct)
 	{
-		var user = await _userRepository.GetByIdAsync(userId)
+		var user = await _userRepository.GetByIdAsync(userId, ct)
 			?? throw new NotFoundException("User not found.");
 
-		var postsCount = await _postRepository.CountByUserIdAsync(userId);
-		var friendsCount = await _friendsRepository.CountFriendsAsync(userId);
+		var postsCount = await _postRepository.CountByUserIdAsync(userId, ct);
+		var friendsCount = await _friendsRepository.CountFriendsAsync(userId, ct);
 
 		return new MyProfileDto
 		{
@@ -38,14 +38,14 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			Username = user.Username,
 			FullName = user.FullName,
 			Bio = user.Bio,
-			AvatarUrl = user.AvatarUrl,
+			AvatarUrl = user.AvatarFileId,
 			PostsCount = postsCount,
 			FriendsCount = friendsCount
 		};
 	}
-	public async Task<MyProfileDto> UpdateProfileAsync(Guid userId, UpdateProfileDto dto)
+	public async Task<MyProfileDto> UpdateProfileAsync(Guid userId, UpdateProfileDto dto, CancellationToken ct)
 	{
-		var user = await _userRepository.GetByIdAsync(userId)
+		var user = await _userRepository.GetByIdAsync(userId, ct)
 			?? throw new NotFoundException("User not found.");
 		//First we need to check if the username is changing and if the new username is already taken.
 		if (!string.IsNullOrWhiteSpace(dto.Username))
@@ -56,7 +56,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			// (Case-insensitive comparison is best practice for usernames)
 			if (!string.Equals(user.Username, newUsername, StringComparison.OrdinalIgnoreCase))
 			{
-				var existingUser = await _userRepository.GetByUsernameAsync(newUsername);
+				var existingUser = await _userRepository.GetByUsernameAsync(newUsername, ct);
 
 				if (existingUser != null)
 				{
@@ -85,25 +85,25 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			string? newAvatar = dto.AvatarUrl == "" ? null : dto.AvatarUrl;
 			user.UpdateAvatar(newAvatar);
 		}
-		await _userRepository.SaveChangesAsync();
+		await _userRepository.SaveChangesAsync(ct);
 		return new MyProfileDto
 		{
 			Id = user.Id,
 			Username = user.Username,
 			FullName = user.FullName,
 			Bio = user.Bio,
-			AvatarUrl = user.AvatarUrl,
-			PostsCount = await _postRepository.CountByUserIdAsync(userId),
-			FriendsCount = await _friendsRepository.CountFriendsAsync(userId)
+			AvatarUrl = user.AvatarFileId,
+			PostsCount = await _postRepository.CountByUserIdAsync(userId, ct),
+			FriendsCount = await _friendsRepository.CountFriendsAsync(userId, ct)
 		};
 	}
-	public async Task<OtherProfileDto> GetOtherProfileAsync(Guid targetUserId, Guid viewerUserId)
+	public async Task<OtherProfileDto> GetOtherProfileAsync(Guid targetUserId, Guid viewerUserId, CancellationToken ct)
 	{
-		var user = await _userRepository.GetByIdAsync(targetUserId)
+		var user = await _userRepository.GetByIdAsync(targetUserId, ct)
 			?? throw new InvalidOperationException("User not found.");
 
 		bool areWeFrinds =
-			await _friendsRepository.IsFriendAsync(viewerUserId, targetUserId);
+			await _friendsRepository.IsFriendAsync(viewerUserId, targetUserId, ct);
 
 		return new OtherProfileDto
 		{
@@ -111,24 +111,24 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			Username = user.Username,
 			FullName = user.FullName,
 			Bio = user.Bio,
-			AvatarUrl = user.AvatarUrl,
-			PostsCount = await _postRepository.CountByUserIdAsync(targetUserId), //TODO
-			FriendsCount = await _friendsRepository.CountFriendsAsync(targetUserId),
+			AvatarUrl = user.AvatarFileId,
+			PostsCount = await _postRepository.CountByUserIdAsync(targetUserId, ct), //TODO
+			FriendsCount = await _friendsRepository.CountFriendsAsync(targetUserId, ct),
 			AreWeFriends = areWeFrinds
 		};
 	}
 
 	//PATCH /profile/password
-	public async Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto)
+	public async Task ChangePasswordAsync(Guid userId, ChangePasswordDto dto, CancellationToken ct)
 	{
-		var user = await _userRepository.GetByIdAsync(userId)
+		var user = await _userRepository.GetByIdAsync(userId, ct)
 			?? throw new NotFoundException("User not found.");
 		// Verify current password
-		if (!_passwordHasher.VerifyHashedPassword(user.PasswordHash, dto.CurrentPassword))
+		if (!_passwordHasher.VerifyHashedPassword(user.PasswordHash, dto.CurrentPassword, ct))
 			throw new UnauthorizedAccessException("Current password is incorrect.");
 
-		user.SetPasswordHash(_passwordHasher.HashPassword(dto.NewPassword));
-		await _userRepository.SaveChangesAsync();
+		user.SetPasswordHash(_passwordHasher.HashPassword(dto.NewPassword, ct));
+		await _userRepository.SaveChangesAsync(ct);
 	}
 
 }

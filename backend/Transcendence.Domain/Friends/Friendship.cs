@@ -6,9 +6,13 @@ public sealed class Friendship
 
     public Guid User2Id {get; private set; }
     public DateTime CreatedAt {get; private set; } = DateTime.UtcNow;
-	private Friendship ( ) {}
 
-    public Friendship (Guid userAId, Guid userBId, DateTime createdAt)
+
+#pragma warning disable CS8618
+	private Friendship ( ) {}
+#pragma warning restore CS8618
+
+	public Friendship (Guid userAId, Guid userBId, DateTime createdAt)
     {
 		if (userAId == userBId) throw new CannotFriendYourselfException();
 

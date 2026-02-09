@@ -7,7 +7,10 @@ public sealed class FriendshipRequest
 	public Guid TargetUserId { get; private set; }
 	public DateTime CreatedAt { get; private set; }
 
+#pragma warning disable CS8618
 	private FriendshipRequest() { }
+#pragma warning disable CS8618
+
 
 	public FriendshipRequest(Guid id, Guid requesterId, Guid targetUserId, DateTime createdAt)
 	{

@@ -37,14 +37,22 @@ paths:
 #+--#POST friends/requests/{requestId}/accept
 #+--#POST friends/requests/{requestId}/decline
 
+#file upload
+#+--GET files/{fileId}
+#+--POST files
+#+--DELETE files/{fileId}
+
 #post
-#GET post/{postId}
-#POST post
-#DELETE post/{postId}
-#POST post/{postId}/like
-#GET post/{postId}/likes
-#POST post/{postId}/comment
-#DELETE post/{postId}/comment/{commentId}
+#+-#GET post/{postId}
+#+-#POST post
+#+-#DELETE post/{postId}
+
+#--#GET post/{postId}/likes?take=20&cursor=<nextCursor>
+#+-#POST post/{postId}/like
+#+-#DELETE post/{postId}/like
+
+#+-#POST post/{postId}/comment
+#+-#DELETE post/{postId}/comment/{commentId}
 
 #posts/feed
 #GET /posts/me?take=20
@@ -54,6 +62,8 @@ paths:
 #GET /posts/feed?take=20
 #GET /posts/feed?take=20&cursor=<nextCursor>
 
+
+
 #notifications
 #GET notifications/list
 
@@ -61,12 +71,13 @@ paths:
 #GET chat/conversations
 #GET chat/{userId}/messages
 
+
+#This is a maybe feature
 #admin (Protected: Admins only)
 #GET admin/users
 #PATCH admin/users/{id}/role
 #POST admin/users/{id}/ban
 #DELETE admin/users/{id}/ban
-
 
 #API:
 #Controller

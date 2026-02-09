@@ -23,55 +23,55 @@ public sealed class FriendsController : ControllerBase
 
 	//GET /friends/list
 	[HttpGet("list")]
-	public async Task<ActionResult<ApiResponse<IReadOnlyList<FriendDto>>>> GetFriendsList()
+	public async Task<ActionResult<ApiResponse<IReadOnlyList<FriendDto>>>> GetFriendsList(CancellationToken ct)
 	{
 		Guid userId = GetUserId(); //todo auth
-		var friendsList = await _friendsService.GetFriendsListAsync(userId);
+		var friendsList = await _friendsService.GetFriendsListAsync(userId, ct);
 		return this.OkResponse(friendsList);
 	}
 
 	//POST /friends/{friendUserId}
 	[HttpPost("{targetUserId:guid}")]
-	public async Task<IActionResult> SendFriendRequest(Guid targetUserId)
+	public async Task<IActionResult> SendFriendRequest(Guid targetUserId, CancellationToken ct)
 	{
 		Guid requesterId = GetUserId();
-		await _friendsService.SendFriendRequestAsync(requesterId, targetUserId);
+		await _friendsService.SendFriendRequestAsync(requesterId, targetUserId, ct);
 		return StatusCode(StatusCodes.Status201Created); // 201, no body, no Location
 	}
 
 	//DELETE /friends/{friendUserId}
 	[HttpDelete("{friendUserId:guid}")]
-	public async Task<ActionResult> RemoveFriend(Guid friendUserId)
+	public async Task<ActionResult> RemoveFriend(Guid friendUserId, CancellationToken ct)
 	{
 		Guid userId = GetUserId(); //todo auth
-		await _friendsService.RemoveFriendAsync(userId, friendUserId);
+		await _friendsService.RemoveFriendAsync(userId, friendUserId, ct);
 		return NoContent(); // 204
 	}
 
 	//GET /friends/requests
 	[HttpGet("requests")]
-	public async Task<ActionResult<ApiResponse<IReadOnlyList<FriendRequestDto>>>> GetFriendRequestList()
+	public async Task<ActionResult<ApiResponse<IReadOnlyList<FriendRequestDto>>>> GetFriendRequestList(CancellationToken ct)
 	{
 		Guid userId = GetUserId(); //todo auth
-		var requests = await _friendsService.GetFriendRequestListAsync(userId);
+		var requests = await _friendsService.GetFriendRequestListAsync(userId, ct);
 		return this.OkResponse(requests);
 	}
 
 	//POST /friends/requests/{requestId}/accept
 	[HttpPost("requests/{requestId:guid}/accept")]
-	public async Task<IActionResult> AcceptFriendRequest(Guid requestId)
+	public async Task<IActionResult> AcceptFriendRequest(Guid requestId, CancellationToken ct)
 	{
 		Guid currentUserId = GetUserId();
-		await _friendsService.AcceptFriendRequestAsync(requestId, currentUserId);
+		await _friendsService.AcceptFriendRequestAsync(requestId, currentUserId, ct);
 		return NoContent(); // 204
 	}
 
 	//POST /friends/requests/{requestId}/decline
 	[HttpPost("requests/{requestId:guid}/decline")]
-	public async Task<IActionResult> DeclineFriendRequest(Guid requestId)
+	public async Task<IActionResult> DeclineFriendRequest(Guid requestId, CancellationToken ct)
 	{
 		Guid currentUserId = GetUserId();
-		await _friendsService.DeclineFriendRequestAsync(requestId, currentUserId);
+		await _friendsService.DeclineFriendRequestAsync(requestId, currentUserId, ct);
 		return NoContent(); // 204
 	}
 

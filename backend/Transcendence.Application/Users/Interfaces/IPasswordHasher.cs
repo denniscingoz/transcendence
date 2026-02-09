@@ -4,6 +4,6 @@ namespace Transcendence.Application.Users.Interfaces;
 
 public interface IPasswordHasher
 {
-	string HashPassword(string password);
-	bool VerifyHashedPassword(string hashedPassword, string providedPassword);
+	string HashPassword(string password, CancellationToken ct);
+	bool VerifyHashedPassword(string hashedPassword, string providedPassword, CancellationToken ct);
 }

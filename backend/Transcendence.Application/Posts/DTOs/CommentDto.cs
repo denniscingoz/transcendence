@@ -1,11 +1,15 @@
 ﻿namespace Transcendence.Application.Posts.DTOs;
-public class CommentDto
+public sealed class CommentDto
 {
-	public int Id { get; set; }
+	public Guid Id { get; set; }
 	public Guid PostId { get; set; }
 	public Guid AuthorId { get; set; }
-	public DateTime CreatedAt { get; set; }
+	public DateTime CreatedAtUtc { get; set; }
 	public string Content { get; set; } = default!;
+
+	public string Username { get; set; } = default!;
+	public string FullName { get; set; } = default!;
+	public string AuthorProfileImageUrl { get; set; } = default!;
 
 }
 

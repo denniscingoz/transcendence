@@ -1,7 +1,7 @@
 ﻿using Transcendence.Application.Posts.DTOs;
 
 namespace Transcendence.Application.Posts.DTOs;
-public class PostDto
+public sealed class PostDto
 {
 	public Guid Id { get; set; }
 	public Guid AuthorId { get; set; }

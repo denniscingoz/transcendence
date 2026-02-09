@@ -11,7 +11,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.Username).IsRequired().HasMaxLength(50);
         builder.Property(x => x.Email).IsRequired().HasMaxLength(255);
         builder.Property(x => x.Bio).HasMaxLength(500);
-        builder.Property(x => x.AvatarUrl).HasMaxLength(500);
+        builder.Property(x => x.AvatarFileId).HasMaxLength(500);
         builder.Property(x => x.CreatedAt).IsRequired();
         
     }

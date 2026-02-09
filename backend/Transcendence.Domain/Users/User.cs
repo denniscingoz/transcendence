@@ -8,7 +8,7 @@ public sealed class User
 	public string Email { get; private set; } = default!;
 	public string FullName { get; private set; } = default!;
 	public string? Bio { get; private set; }
-	public string? AvatarUrl { get; private set; }
+	public Guid? AvatarFileId { get; private set; }
 	public DateTime CreatedAt { get; private set; }
 
 #pragma warning disable CS8618
@@ -35,9 +35,9 @@ public sealed class User
 		if (username != null) SetUsername(username);
 	}
 
-	public void UpdateAvatar(string? avatarUrl)
+	public void UpdateAvatar(Guid? avatarUrl)
 	{
-		AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl) ? null : avatarUrl.Trim();
+		AvatarFileId = avatarUrl;
 	}
 
 	public void UpdateBio(string? bio)

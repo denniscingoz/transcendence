@@ -3,6 +3,6 @@
 namespace Transcendence.Application.Friends.Queries;
 public interface IFriendsQuery
 {
-	Task<IReadOnlyList<FriendDto>> ListFriendsAsync(Guid userId);
-	Task<IReadOnlyList<FriendRequestDto>> ListFriendRequestsAsync(Guid userId);
+	Task<IReadOnlyList<FriendDto>> ListFriendsAsync(Guid userId, CancellationToken ct);
+	Task<IReadOnlyList<FriendRequestDto>> ListFriendRequestsAsync(Guid userId, CancellationToken ct);
 }
