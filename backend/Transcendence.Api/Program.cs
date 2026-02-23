@@ -1,4 +1,6 @@
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -12,7 +14,9 @@ using Transcendence.Application.Posts.Interfaces;
 using Transcendence.Infrastructure;
 using Transcendence.Infrastructure.Persistence;
 using Transcendence.Infrastructure.Repositories;
+
 using Transcendence.Api.Realtime;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,18 +73,12 @@ builder.Services.AddApplication(); //my extention method
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers();
-/*
-	If a class:
-	• has dependencies
-	• must live within a request
-	• is used through a constructor
 
-	it is registered in DI
-*/
 
 var app = builder.Build();
 app.UseRouting();
 app.UseCors("Frontend");
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -94,7 +92,7 @@ app.UseAuthorization();
 app.MapChatEndpoints();
 app.MapControllers();
 app.Run();
- 
+
 /*
 1. builder = WebApplication.CreateBuilder()
 2. builder.Services.AddXxx()        ← DependencyInjection

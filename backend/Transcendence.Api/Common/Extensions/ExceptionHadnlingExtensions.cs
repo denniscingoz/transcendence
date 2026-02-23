@@ -2,43 +2,47 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Transcendence.Application.Common.Responses;
+using Transcendence.Domain.Exceptions;
 
-namespace Transcendence.Api.Extensions;
 
-public static class ExceptionHandlingExtensions //just namespace
+namespace Transcendence.Api.Common.Extensions;
+
+public static class ExceptionHandlingExtensions
 {
-   public static IApplicationBuilder UseGlobalExceptionHandling(this IApplicationBuilder app ) // ext for builder
+    public static IApplicationBuilder UseGlobalExceptionHandling(this IApplicationBuilder app)
     {
-        app.UseExceptionHandler( // standart method middleware for error handling
-            errorApp =>  // Action<IApplicationBuilder>
+        app.UseExceptionHandler(errorApp => //  UseExceptionHandler(IApplicationBuilder);
+        {
+            errorApp.Run(async context => 
             {
-                errorApp.Run( async context => //  adds terminal (last )middleware,  delegate Func<HttpContext, Task> 
+                var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+                var exception = exceptionFeature?.Error;
+
+                var statusCode = exception switch
                 {
-                    var exceptionFeature = context.Features.Get<IExceptionHanlderFeature>();
-                    var exception = exceptionFeature?.Errror;
-                    
-                    var exceptionCode = exception switch
-                    {
-                        ValidationException => StatusCodes.Status400BadRequest,
-                        ForbiddenException =>  StatusCodes.Status403Forbidden,
-                        NotFoundException =>  StatusCodes.Status404NotFound,
-                        _ => StatusCodes.Status500InternalServerError
-                    };
+                    DomainValidationException => StatusCodes.Status400BadRequest,
+                    ForbiddenException  => StatusCodes.Status403Forbidden,
+                    NotFoundException  => StatusCodes.Status404NotFound,
+                    Transcendence.Domain.Exceptions.UnauthorizedAccessException => StatusCodes.Status401Unauthorized,                    _                  => StatusCodes.Status500InternalServerError
+                };
 
-                    var error = exception?.Message ?? "unknown error";
-                    
-                    var response = ApiResponse<Object>.Fail(error);
-                    context.Response.StatusCode = exceptionCode;
-                    
-                    context.Response.ContentType = "application/json";
-                    
-                    await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-                });
+                var response = ApiResponse<object>.Fail(
+                    exception?.Message ?? "Unknown error"
+                );
 
+                context.Response.StatusCode = statusCode;
+                context.Response.ContentType = "application/json";
+
+                await context.Response.WriteAsync(
+                    JsonSerializer.Serialize(response)
+                );
             });
+        });
+
         return app;
     }
-};
+}
 
 
 /*

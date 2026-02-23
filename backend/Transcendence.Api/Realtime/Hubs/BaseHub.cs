@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace Transcendence.Api.Realtime.Hubs;
-public abstract class BaseHub<TClient>: Hub<TClient> {
-    
-    private Guid GetUserIdOrThrow()
+public abstract class BaseHub<TClient>: Hub<TClient> where TClient : class {
+    /*
+    protected Guid GetUserIdOrThrow()
     {
         var id  = TryGetUserId();
         if (id is null)
@@ -12,7 +12,7 @@ public abstract class BaseHub<TClient>: Hub<TClient> {
             return id.Value; /////////
     }
 
-    private Guid? TryGetUserId()
+    protected Guid? TryGetUserId()
     {
         // fin: claim "sub" or NameIdentifier
         var claim =
@@ -30,7 +30,7 @@ public abstract class BaseHub<TClient>: Hub<TClient> {
 
         return null;
     }
-
+    */
 
 }
 

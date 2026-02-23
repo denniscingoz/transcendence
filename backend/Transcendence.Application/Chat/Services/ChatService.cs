@@ -33,6 +33,9 @@ public class ChatService : IChatService
             SenderId = message.SenderId,
             CreatedAt = message.CreatedAt
         };
+        // We map the domain Message to ChatMessageDto to avoid leaking domain entities,
+        // control what data is exposed, and keep the application boundary explicit.
+        // DTOs are stable contracts for transport, while domain models may change.
     }
     public async Task <ChatMessageDto> SendMessageAsync(
         Guid senderId, Guid conversationId, Guid clientMessageId, string? content
@@ -44,7 +47,7 @@ public class ChatService : IChatService
             return MapToDto(existing); 
 
         if (string.IsNullOrWhiteSpace(content))
-            throw new ValidationException("Message content is empty");
+            throw new DomainValidationException("Message content is empty");
   
         var conversation = await _coversationRepository.GetByIdAsync(conversationId) 
             ?? throw new NotFoundException("No such conversation");
@@ -64,7 +67,7 @@ public class ChatService : IChatService
         )
     {
         if (userA ==  userB)
-            throw new ValidationException("Cannot write to himself");
+            throw new DomainValidationException("Cannot write to himself");
         var existing = await _coversationRepository.GetDirectConversation(userA, userB);
         if (existing is not null)
             return existing.Id; 
@@ -83,7 +86,7 @@ public class ChatService : IChatService
         )
     {
         if (limit <= 0 || limit >= 100)
-            throw new ValidationException("Invalid input");
+            throw new DomainValidationException("Invalid input");
 
         var conversation = await _coversationRepository.GetByIdAsync(conversationId) 
             ?? throw new NotFoundException("No such conversation");

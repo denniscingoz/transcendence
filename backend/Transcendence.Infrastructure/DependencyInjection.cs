@@ -14,7 +14,9 @@ using Transcendence.Infrastructure.Auth;
 using Transcendence.Infrastructure.Persistence;
 using Transcendence.Infrastructure.Queries;
 using Transcendence.Infrastructure.Repositories;
+
 using Transcendence.Infrastructure.Storage;
+
 
 namespace Transcendence.Infrastructure;
 
@@ -56,6 +58,7 @@ public static class DependencyInjection
 
 
 		return services;
+
 
     }
 }
