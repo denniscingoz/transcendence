@@ -29,6 +29,20 @@ namespace Transcendence.Domain.Exceptions
         public ForbiddenException(): base ("No way ") {}
 
     }
+    
+    public class DomainValidationException : DomainException
+    {
+        public DomainValidationException(string message): base (message) {}
+        public DomainValidationException(): base ("Bad request") {}
+
+    }
+    
+    public class UnauthorizedAccessException : DomainException
+    {
+        public UnauthorizedAccessException(string message): base (message) {}
+        public UnauthorizedAccessException(): base ("Unathorized exception") {}
+
+    }
 
    public class InvalidArgumentException : DomainException
     {

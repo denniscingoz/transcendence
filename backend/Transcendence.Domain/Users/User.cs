@@ -13,11 +13,9 @@ public sealed class User
 
 	public string? GoogleId { get; private set; }
 
-<<<<<<< HEAD
+
 	public string Role { get; private set; } = default!; // e.g. "User", "Admin"
-=======
-    public DateTimeOffset CreatedAt { get; private set; }
->>>>>>> 1fd1d35 (exceptions)
+
 
 	#pragma warning disable CS8618 // for EF Core to silence non-nullable properties
 		private User() { }

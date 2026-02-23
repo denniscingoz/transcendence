@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.VisualBasic;
 using Transcendence.Application.Chat.Abstractions;
 using Transcendence.Application.Chat.DTOs;
-using Transcendence.Application.Chat.Realtime.Contracts;
-
+using Transcendence.Application.Realtime.Contracts;
+using Transcendence.Api.Common.Extensions;
 namespace Transcendence.Api.Realtime.Hubs;
 
-public sealed class ChatHub : BaseHub<IRealtimeClient>
+public sealed class ChatHub : BaseHub<IRealtimeClient> 
 {
     private readonly IChatService _chatService;
 
@@ -21,21 +21,21 @@ public sealed class ChatHub : BaseHub<IRealtimeClient>
 
     public override async Task OnConnectedAsync()
     {
-        var userId = GetUserIdOrThrow();
+        var userId = Context.User.GetUserId();
         await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.User(userId)); // add connId to user's collection of connections  
         var presence = new PresenceEventDto
         {
-            UserId = userId.Value,
+            UserId = userId,
             IsOnline = true,
             ChangedAt = DateTimeOffset.UtcNow
         };
-            await Clients.All.UserOnline(presence);
+            await Clients.All.UserOnLine(presence);
 
         await base.OnConnectedAsync();
     }
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var userId = TryGetUserId();
+        var userId = Context.User.TryGetUserId();
 
         if (userId is not null)
         {
@@ -48,30 +48,32 @@ public sealed class ChatHub : BaseHub<IRealtimeClient>
                 ChangedAt = DateTimeOffset.UtcNow
             };
 
-            await Clients.All.UserOffline(presence);
+            await Clients.All.UserOffLine(presence);
         }
         await base.OnDisconnectedAsync(exception);
+
+        //OnDisconnectedAsync is a lifecycle hook provided by SignalR. It is invoked by the framework when a client connection is terminated. We override it to execute domain-specific cleanup logic, while still calling the base implementation to allow SignalR to perform its internal resource cleanup. At this point, the HTTP request is already completed, but the authenticated user’s ClaimsPrincipal is still available via the Hub context.
     }
 
     public async Task JoinConversation(Guid conversationId)
     {
-        var userId = GetUserIdOrThrow();
-        await _chatService.AssertUserIsParticipant(conversationId, UserUd);
+        var userId = Context.User.GetUserId();
+        await _chatService.AssertUserIsParticipant(conversationId, userId);
         await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(conversationId)); //SignalR does all
     }
 
-    public async Task LeaveConversation(Guid converationId)
+    public async Task LeaveConversation(Guid conversationId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Conversation(conversationId)); 
     }
 
     public async Task SendMessage(SendMessageCommandDto dto)
     {
-        var senderId = GetUserIdOrThrow();
+        var senderId = Context.User.GetUserId();
 
         var messageDto = await _chatService.SendMessageAsync(
             senderId: senderId,
-            conversionId: dto.ConversationId,
+            conversationId: dto.ConversationId,
             clientMessageId: dto.ClientMessageId, 
             content: dto.Content
         );
@@ -82,12 +84,12 @@ public sealed class ChatHub : BaseHub<IRealtimeClient>
         await Clients.Caller.MessageAck(new MessageAckDto
         {
             ClientMessageId = dto.ClientMessageId,
-            MessageId = message.MessageId, 
-            CreatedAt = message.CreatedAt
+            MessageId = messageDto.MessageId, 
+            CreatedAt = messageDto.CreatedAt
         });
     }
 
-}      
+}
 /*
 Client
   │ SendMessageCommandDto

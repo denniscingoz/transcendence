@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
-
+using Transcendence.Api.Realtime.Hubs;
 namespace Transcendence.Api.Realtime;
 
 public static class RealtimeEndpoints

@@ -3,6 +3,8 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
 using Transcendence.Application.Chat.DTOs;
 using Transcendence.Application.Realtime.Contracts;
+using Transcendence.Api.Common.Extensions;
+ 
 
 namespace  Transcendence.Api.Realtime.Hubs;
 
@@ -10,12 +12,12 @@ public  sealed class PresenceHub : BaseHub<IRealtimeClient>
 {
     public override async Task OnConnectedAsync()
     {
-        var userId = GetUserIdOrThrow();
-        await Group.AddToGroupAsync(Context.ConnectionId, GroupNames.User(userId));
+        var userId =  Context.User.GetUserId();
+        await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.User(userId));
 
         var presence = new PresenceEventDto
         {
-            userId = userId,
+            UserId = userId,
             IsOnline = true,
             ChangedAt = DateTimeOffset.UtcNow
         };
@@ -27,17 +29,16 @@ public  sealed class PresenceHub : BaseHub<IRealtimeClient>
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
 
-        var userId = TryGetUserId();
-        if  (userId is not null)
+        if  (Context.User.TryGetUserId() is Guid userId)
         {
-            await Group.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.User(userId));
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.User(userId));
             var presence = new PresenceEventDto
             {
-                userId = userId,
+                UserId = userId,
                 IsOnline = false,
                 ChangedAt = DateTimeOffset.UtcNow
             };
-            await Clients.All.UserOffline(presence);
+            await Clients.All.UserOffLine(presence);
         }
 
         await base.OnDisconnectedAsync(exception); //  correct cleanup
