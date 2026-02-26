@@ -14,11 +14,11 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 {
 	private readonly IFriendshipRepository _friendshipRepository;
 	private readonly IUserRepository _userRepository;
-	private readonly IfriendshipRequestRepository _friendshipRequestRepository;
+	private readonly IFriendshipRequestRepository _friendshipRequestRepository;
 	private readonly IFriendsQuery _friendsQuery;
 
 	public FriendsService(IFriendshipRepository friendshipRepository, 
-						IfriendshipRequestRepository friendshipRequestRepository,
+						IFriendshipRequestRepository friendshipRequestRepository,
 						IUserRepository userRepository,
 						IFriendsQuery friendsQuery)
 	{
@@ -36,7 +36,7 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 		_ = await _userRepository.GetByIdAsync(requesterId) ?? throw new NotFoundException("Requester not found.");
 		_ = await _userRepository.GetByIdAsync(targetUserId) ?? throw new NotFoundException("Target user not found.");
 
-		if (await _friendshipRepository.ExistsAsync(requesterId, targetUserId))
+		if (await _friendshipRepository.IsFriendAsync(requesterId, targetUserId))
 			throw new AlreadyFriendsException();
 
 		if (await _friendshipRequestRepository.ExistsPendingAsync(requesterId, targetUserId) ||
@@ -59,7 +59,7 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 		if (request.TargetUserId != currentUserId)
 			throw new NotAllowedToFriendException("You cannot accept this friend request.");
 
-		if (await _friendshipRepository.ExistsAsync(request.RequesterId, request.TargetUserId))
+		if (await _friendshipRepository.IsFriendAsync(request.RequesterId, request.TargetUserId))
 		{
 			await _friendshipRequestRepository.RemoveAsync(requestId); // cleanup
 			return;
@@ -92,7 +92,7 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 	public async Task RemoveFriendAsync(Guid currentUserId, Guid friendUserId)
 	{
 		_ = await _userRepository.GetByIdAsync(friendUserId) ?? throw new NotFoundException("Friend user not found.");
-		if (!await _friendshipRepository.ExistsAsync(currentUserId, friendUserId))
+		if (!await _friendshipRepository.IsFriendAsync(currentUserId, friendUserId))
 			throw new NotFriendsException();
 		await _friendshipRepository.RemoveAsync(currentUserId, friendUserId);
 	}

@@ -1,7 +1,6 @@
 //persistent storage
 using Microsoft.EntityFrameworkCore;
-using Transcendence.Domain.Friendships;
-using Transcendence.Domain.FriendshipRequests;
+using Transcendence.Domain.Friends;
 using Transcendence.Domain.Users;
 using Transcendence.Domain.Posts;
 
@@ -29,9 +28,9 @@ public class TranscendenceDbContext: DbContext
      } */
       protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-          modelBuilder.HasDefaultSchema("app"); // 👈 tells EF: put tables into app schema
+          modelBuilder.HasDefaultSchema("app"); // tells EF: put tables into app schema
         modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(TranscendenceDbContext).Assembly);
+            typeof(TranscendenceDbContext).Assembly);// uses all IEntityTypeConfiguration<>
      base.OnModelCreating(modelBuilder); //calls the DbContext’s default configuration // if later you add features that rely on base behavior (common example: ASP.NET Identity), skipping it can break conventions and mappings.
     }
 }

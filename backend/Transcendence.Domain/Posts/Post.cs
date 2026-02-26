@@ -8,8 +8,10 @@ public sealed class Post //minimal, preliminary
     public string? Content {get; private set; }
 	public string ImageUrl {get; private set; } = default!;
 	public int LikesCount { get; set; }
-	public List<Likes> Likes { get; private set; } = new();
-	public List<Comment> Comments { get; private set; } = new();
+    // TODO: add Likes entity later
+	//public List<Likes> Likes { get; private set; } = new();
+    // TODO: add Comment entity later
+	//public List<Comment> Comments { get; private set; } = new();
 
 	private Post () {}
 

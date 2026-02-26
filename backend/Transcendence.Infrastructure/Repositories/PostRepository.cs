@@ -18,7 +18,7 @@ public PostRepository(
 
     public async Task<int> CountByUserIdAsync(Guid userId)
     {
-        return await _db.Posts.CountAsync(x => x.AuthorId == userId);
+        return await _db.Posts.CountByUserIdAsync(x => x.AuthorId == userId);
     }
     
 }

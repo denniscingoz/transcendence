@@ -27,7 +27,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			?? throw new NotFoundException("User not found.");
 
 		var postsCount = await _postRepository.CountByUserIdAsync(userId);
-		var friendsCount = await _friendsRepository.CountFriendsAsync(userId);
+		var friendsCount = await _friendsRepository.ListFriendsAsync(userId);
 
 		return new MyProfileDto
 		{
@@ -91,7 +91,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			Bio = user.Bio,
 			AvatarUrl = user.AvatarUrl,
 			PostsCount = await _postRepository.CountByUserIdAsync(userId),
-			FriendsCount = await _friendsRepository.CountFriendsAsync(userId)
+			FriendsCount = await _friendsRepository.ListFriendsAsync(userId)
 		};
 	}
 	public async Task<OtherProfileDto> GetOtherProfileAsync(Guid targetUserId, Guid viewerUserId)
@@ -110,7 +110,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			Bio = user.Bio,
 			AvatarUrl = user.AvatarUrl,
 			PostsCount = await _postRepository.CountByUserIdAsync(targetUserId), //TODO
-			FriendsCount = await _friendsRepository.CountFriendsAsync(targetUserId),
+			FriendsCount = await _friendsRepository.ListFriendsAsync(targetUserId),
 			AreWeFriends = areWeFrinds
 		};
 	}
