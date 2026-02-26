@@ -1,0 +1,33 @@
+.git
+.gitignore
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+
+# Secrets
+.env
+.env.*
+docker/nginx/certs/
+
+# Logs / temp
+*.log
+*.tmp
+*.cache
+*.swp
+*.bak
+
+# Backend build outputs
+**/bin
+**/obj
+
+# Frontend
+**/node_modules
+**/dist
+**/build
+
+# Tests
+coverage
+TestResults
