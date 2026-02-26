@@ -101,7 +101,7 @@ Console.WriteLine("Participants count: " + conversation.Participants.Count);
         var messages = await _messageRepository.GetByConversationIdAsync(conversationId, offset, limit);
 
         var temp = MapToDto(messages[0]);
-        Console.WriteLine($" try9ing ConvId: {temp.ConversationId}, meassageId: {temp.MessageId}, {temp.Content}");
+        Console.WriteLine($" try9ing ConvId: {temp.ConversationId},ahle meassageId: {temp.MessageId}, {temp.Content}");
         
         return messages
             .Select(MapToDto)

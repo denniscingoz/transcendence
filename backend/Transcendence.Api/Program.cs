@@ -4,17 +4,15 @@ using System.Text;
 
 using Transcendence.Api.Configurations;
 using Transcendence.Api.Realtime;
-using Transcendence.Api.Common.Middleware;
 
 using Transcendence.Application;
 using Transcendence.Application.Auth.DTOs;
 
 using Transcendence.Infrastructure;
 
-// =========================
-
 var builder = WebApplication.CreateBuilder(args);
 
+// ================= SERVICES =================
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -32,6 +30,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+// JWT
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var key = jwtSection["Key"]!;
 
@@ -56,25 +55,31 @@ builder.Services
         };
     });
 
-
 builder.Services.Configure<GoogleAuthOptions>(
     builder.Configuration.GetSection("GoogleAuth"));
 
-
 builder.Services.AddAuthorization();
+
+// SignalR
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
+})
+.AddJsonProtocol(o =>
+{
+    o.PayloadSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
+// Layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
 
-
+// Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+// ================= APP =================
 
 var app = builder.Build();
 
@@ -94,7 +99,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-
+// Endpoints
 app.MapChatEndpoints();
 app.MapControllers();
 

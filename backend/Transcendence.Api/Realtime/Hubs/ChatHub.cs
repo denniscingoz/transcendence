@@ -71,79 +71,28 @@ public sealed class ChatHub : BaseHub<IRealtimeClient>
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Conversation(conversationId)); 
     }
 
- 
-public async Task SendMessage(JsonElement payload)
-{
-    Console.WriteLine("RAW JSON = " + payload.GetRawText());
-
-    // пробуем достать поля как строки
-    if (!payload.TryGetProperty("ConversationId", out var convProp) &&
-        !payload.TryGetProperty("conversationId", out convProp))
+    public async Task SendMessage(SendMessageCommandDto dto)
     {
-        throw new Exception("Missing ConversationId");
+        var senderId = Context.User.GetUserId();
+
+        var messageDto = await _chatService.SendMessageAsync(
+            senderId,
+            dto.ConversationId,
+            dto.ClientMessageId,
+            dto.Content
+        );
+
+        await Clients.Group(GroupNames.Conversation(dto.ConversationId))
+                    .MessageReceived(messageDto);
+
+        await Clients.Caller.MessageAck(new MessageAckDto
+        {
+            ClientMessageId = dto.ClientMessageId,
+            MessageId = messageDto.MessageId,
+            CreatedAt = messageDto.CreatedAt
+        });
     }
-
-    if (!payload.TryGetProperty("ClientMessageId", out var clientProp) &&
-        !payload.TryGetProperty("clientMessageId", out clientProp))
-    {
-        throw new Exception("Missing ClientMessageId");
-    }
-
-    if (!payload.TryGetProperty("Content", out var contentProp) &&
-        !payload.TryGetProperty("content", out contentProp))
-    {
-        throw new Exception("Missing Content");
-    }
-
-    var conversationIdStr = convProp.GetString();
-    var clientMessageIdStr = clientProp.GetString();
-    var content = contentProp.GetString();
-
-    Console.WriteLine($"conversationIdStr=[{conversationIdStr}]");
-    Console.WriteLine($"clientMessageIdStr=[{clientMessageIdStr}]");
-    Console.WriteLine($"content=[{content}]");
-
-    if (!Guid.TryParse(conversationIdStr, out var conversationId))
-        throw new Exception("Bad ConversationId format");
-
-    if (!Guid.TryParse(clientMessageIdStr, out var clientMessageId))
-        throw new Exception("Bad ClientMessageId format");
-
-    var senderId = Context.User.GetUserId();
-
-    var messageDto = await _chatService.SendMessageAsync(
-        senderId,
-        conversationId,
-        clientMessageId,
-        content
-    );
-
-    await Clients.Group(GroupNames.Conversation(conversationId))
-        .MessageReceived(messageDto);
 }
-}
-//     public async Task SendMessage(SendMessageCommandDto dto)
-//     {
-//         var senderId = Context.User.GetUserId();
-
-//         var messageDto = await _chatService.SendMessageAsync(
-//             senderId,
-//             dto.ConversationId,
-//             dto.ClientMessageId,
-//             dto.Content
-//         );
-
-//         await Clients.Group(GroupNames.Conversation(dto.ConversationId))
-//                     .MessageReceived(messageDto);
-
-//         await Clients.Caller.MessageAck(new MessageAckDto
-//         {
-//             ClientMessageId = dto.ClientMessageId,
-//             MessageId = messageDto.MessageId,
-//             CreatedAt = messageDto.CreatedAt
-//         });
-//     }
-// }
 /*
 ChatHub — это transport layer.
 	•	принимает WebSocket-соединение

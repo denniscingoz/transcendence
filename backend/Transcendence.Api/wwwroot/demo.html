@@ -17,7 +17,7 @@
 <div>
     <label>Target UserId:</label>
     <input id="targetUserIdInput" value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb" />
-    <button onclick="createConversation()">Create Conversation</button>
+    <button onclick="createConversation()">Create or get existed Conversation</button>
 </div>
 
 <div>
@@ -91,30 +91,33 @@ async function joinConversation() {
 
 
 
-    async function connect() {
+async function connect() {
 
-        const userId =
-            document.getElementById("userIdInput").value;
+    const userId =
+        document.getElementById("userIdInput").value.trim();
 
-        connection = new signalR.HubConnectionBuilder()
-            .withUrl(`http://localhost:5067/hubs/chat?userId=${userId}`)
-            .withAutomaticReconnect()
-            .build();
-
-        connection.on("MessageReceived", (message) => {
-            console.log("Message received:", message);
-
-            const li = document.createElement("li");
-            li.textContent =
-                `[${message.createdAt}] ${message.senderId}: ${message.content}`;
-
-            document.getElementById("messages").appendChild(li);
-        });
-
-        await connection.start();
-
-        alert("Connected");
+    if (connection) {
+        // если уже есть — остановим старое соединение
+        await connection.stop();
+        connection = null;
     }
+
+    connection = new signalR.HubConnectionBuilder()
+        .withUrl(`http://localhost:5067/hubs/chat?userId=${userId}`)
+        .withAutomaticReconnect()
+        .build();
+
+    // ✅ важное: гарантируем один обработчик
+    connection.off("MessageReceived");
+    connection.on("MessageReceived", (message) => {
+        const li = document.createElement("li");
+        li.textContent = `[${message.createdAt}] ${message.senderId}: ${message.content}`;
+        document.getElementById("messages").appendChild(li);
+    });
+
+    await connection.start();
+    alert("Connected");
+}
 
 
 async function sendMessage() {
@@ -131,9 +134,9 @@ async function sendMessage() {
     }
 
     const dto = {
-        ConversationId: conversationId,
-        ClientMessageId: crypto.randomUUID(),
-        Content: content
+        conversationId: conversationId,
+        clientMessageId: crypto.randomUUID(),
+        content: content
     };
 
     console.log("DTO being sent:", dto);
@@ -146,47 +149,36 @@ async function sendMessage() {
 
 
 
-
 async function loadMessages(conversationId) {
+  const userId = document.getElementById("userIdInput").value.trim();
 
-    const userId =
-        document.getElementById("userIdInput").value;
+  const response = await fetch(
+    `http://localhost:5067/conversations/${conversationId}/messages?offset=0&limit=50`,
+    { headers: { "X-Dev-UserId": userId } }
+  );
 
-    const response = await fetch(
-        `http://localhost:5067/conversations/${conversationId}/messages?offset=0&limit=50`,
-        {
-            headers: {
-                "X-Dev-UserId": userId
-            }
-        }
-    );
+  const result = await response.json();
+  console.log("History result:", result);
 
-    const result = await response.json();
+  const ok = result.isSuccess ?? result.IsSuccess;
+  const messages = result.data ?? result.Data ?? [];
 
-    console.log("History result:", result);
+  if (!ok) {
+    alert("Failed to load messages");
+    return;
+  }
 
-    if (!result.IsSuccess) {
-        alert("Failed to load messages");
-        return;
-    }
+  // сервер уже сортирует по CreatedAt, но оставим на всякий:
+  messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
-    const messages = result.Data;
-    
-    messages.sort((a, b) =>
-        new Date(a.createdAt) - new Date(b.createdAt)
-    );
+  const list = document.getElementById("messages");
+  list.innerHTML = "";
 
-    const list = document.getElementById("messages");
-    list.innerHTML = ""; // очищаем старые
-
-    for (const message of messages) {
-
-        const li = document.createElement("li");
-        li.textContent =
-            `[${message.createdAt}] ${message.senderId}: ${message.content}`;
-
-        list.appendChild(li);
-    }
+  for (const m of messages) {
+    const li = document.createElement("li");
+    li.textContent = `[${m.createdAt}] ${m.senderId}: ${m.content}`;
+    list.appendChild(li);
+  }
 }
 </script>
 

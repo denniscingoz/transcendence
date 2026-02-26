@@ -6,8 +6,8 @@ public interface IMessageRepository
     Task <Message?> GetByClientMessageIdAsync(Guid senderId, Guid clientMessageId ); 
     Task <IReadOnlyList<Message>> GetByConversationIdAsync(
         Guid conversationId,
-        int limit,
-        int offset
+        int offset,
+        int limit
     );
 }
 
