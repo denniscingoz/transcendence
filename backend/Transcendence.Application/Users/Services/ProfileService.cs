@@ -38,7 +38,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			Username = user.Username,
 			FullName = user.FullName,
 			Bio = user.Bio,
-			AvatarUrl = user.AvatarFileId,
+			AvatarUrl = user.AvatarFileId is Guid id ? $"/files/{id}" : null,
 			PostsCount = postsCount,
 			FriendsCount = friendsCount
 		};
@@ -92,7 +92,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			Username = user.Username,
 			FullName = user.FullName,
 			Bio = user.Bio,
-			AvatarUrl = user.AvatarFileId,
+			AvatarUrl = user.AvatarFileId is Guid id ? $"/files/{id}" : null, //AvatarFileId is likely a Guid?, but AvatarUrl in your DTO expects string?. This won't compile.
 			PostsCount = await _postRepository.CountByUserIdAsync(userId, ct),
 			FriendsCount = await _friendsRepository.CountFriendsAsync(userId, ct)
 		};
@@ -111,7 +111,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			Username = user.Username,
 			FullName = user.FullName,
 			Bio = user.Bio,
-			AvatarUrl = user.AvatarFileId,
+			AvatarUrl = user.AvatarFileId is Guid id ? $"/files/{id}" : null, //AvatarFileId is likely a Guid?, but AvatarUrl in your DTO expects string?. This won't compile.
 			PostsCount = await _postRepository.CountByUserIdAsync(targetUserId, ct),
 			FriendsCount = await _friendsRepository.CountFriendsAsync(targetUserId, ct),
 			AreWeFriends = areWeFrinds
