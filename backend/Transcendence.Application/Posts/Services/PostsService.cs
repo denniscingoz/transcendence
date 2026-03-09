@@ -33,7 +33,7 @@ public class PostsService : IPostsService
 	}
 
 	// GET /posts/{postId}
-	public async Task<PostDetailedDto> GetPostAsync(Guid postId, Guid currentUserId, CancellationToken ct)
+	public async Task<PostDto> GetPostAsync(Guid postId, Guid currentUserId, CancellationToken ct)
 	{
 		var post = await _postRepository.GetPostAsync(postId, ct)
 			?? throw new NotFoundException("Post not found.");
@@ -57,22 +57,17 @@ public class PostsService : IPostsService
 		string BuildImageFileUrl(Guid fileId) => $"/files/{fileId}";
 
 
-		return new PostDetailedDto
+		return new PostDto
 		{
 			Id = post.Id,
 			AuthorId = post.AuthorId,
 			CreatedAtUtc = post.CreatedAtUtc,
 			Content = post.Content,
-
 			ImageUrl = BuildImageFileUrl(post.ImageFileId),
-
 			LikesCount = likesCount,
-			Comments = comments,
-
-			Username = author.Username,
-			FullName = author.FullName,
-
-			AuthorProfileImageUrl = BuildAvatarFileUrl(author.AvatarFileId),
+			AuthorUsername = author.Username,
+			AuthorFullName = author.FullName,
+			AuthorAvatarUrl = BuildAvatarFileUrl(author.AvatarFileId),
 		};
 	}
 
@@ -157,7 +152,7 @@ public class PostsService : IPostsService
 	}
 
 	// POST /posts/{postId}/comment
-	public async Task<CommentDto> AddCommentAsync(Guid postId, Guid currentUserId, string content, CancellationToken ct)
+	public async Task<CommentPreviewDto> AddCommentAsync(Guid postId, Guid currentUserId, string content, CancellationToken ct)
 	{
 		if (string.IsNullOrWhiteSpace(content))
 			throw new ValidationException("Content is required.");
@@ -178,7 +173,7 @@ public class PostsService : IPostsService
 		var comment = new Comment(commentId, postId, currentUserId, content);
 		await _postRepository.AddCommentAsync(comment, ct);
 		await _postRepository.SaveChangesAsync(ct);
-		return new CommentDto
+		return new CommentPreviewDto
 		{
 			Id = comment.Id,
 			AuthorId = comment.AuthorId,

@@ -4,7 +4,7 @@ namespace Transcendence.Application.Posts.Interfaces;
 
 public interface IPostsRepository
 {
-    Task<int> CountByUserIdAsync(Guid userId, CancellationToken ct);
+	Task<int> CountByUserIdAsync(Guid userId, CancellationToken ct);
 
 	//GET /posts/{postId}
 	Task<Post> GetPostAsync(Guid postId, CancellationToken ct);
@@ -32,7 +32,7 @@ public interface IPostsRepository
 
 	Task<Like> GetLikeAsync(Guid postId, Guid currentUserId, CancellationToken ct);
 	Task<int> GetLikeCountAsync(Guid postId, CancellationToken ct);
-	Task<IReadOnlyList<CommentDto>> GetCommentsAsync(Guid postId, CancellationToken ct);
+	Task<IReadOnlyList<CommentPreviewDto>> GetCommentsAsync(Guid postId, CancellationToken ct);
 
 
 	//SaveChangesAsync

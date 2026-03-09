@@ -26,12 +26,16 @@ public sealed class FilesController : ControllerBase
 
 	//POST /files
 	[HttpPost]
-	public async Task<ActionResult<ApiResponse<UploadFilesResultDto>>> UploadFile([FromForm] IFormFile file, CancellationToken ct)
+	[Consumes("multipart/form-data")]
+	public async Task<ActionResult<ApiResponse<UploadFilesResultDto>>> UploadFile(
+	[FromForm] UploadFileRequestDto request,
+	CancellationToken ct)
 	{
-		if (file is null || file.Length == 0)
+		if (request.File is null || request.File.Length == 0)
 			return BadRequest("File is empty.");
+
 		Guid userId = GetUserId();
-		var result = await _filesService.UploadFilesAsync(userId, file, ct);
+		var result = await _filesService.UploadFilesAsync(userId, request.File, ct);
 		return this.OkResponse(result);
 	}
 

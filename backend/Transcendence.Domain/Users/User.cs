@@ -35,9 +35,9 @@ public sealed class User
 		if (username != null) SetUsername(username);
 	}
 
-	public void UpdateAvatar(Guid? avatarUrl)
+	public void UpdateAvatar(Guid? avatarFileId)
 	{
-		AvatarFileId = avatarUrl;
+		AvatarFileId = avatarFileId;
 	}
 
 	public void UpdateBio(string? bio)

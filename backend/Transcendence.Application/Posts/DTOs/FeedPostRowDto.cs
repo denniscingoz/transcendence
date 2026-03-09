@@ -1,7 +1,5 @@
-﻿using Transcendence.Application.Posts.DTOs;
-
-namespace Transcendence.Application.Posts.DTOs;
-public sealed class PostDto
+﻿namespace Transcendence.Application.Posts.DTOs;
+public sealed class FeedPostRowDto
 {
 	public Guid Id { get; set; }
 	public Guid AuthorId { get; set; }
@@ -10,7 +8,8 @@ public sealed class PostDto
 	public string? ImageUrl { get; set; }
 	public bool IsLikedByCurrentUser { get; set; }
 	public int LikesCount { get; set; }
-	public string? AuthorUsername { get; set; }
-	public string? AuthorFullName { get; set; }
+	public string AuthorFullName { get; set; } = default!;
+	public string AuthorUsername { get; set; } = default!;
 	public string? AuthorAvatarUrl { get; set; }
+
 }

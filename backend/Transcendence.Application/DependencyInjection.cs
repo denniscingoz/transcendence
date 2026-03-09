@@ -22,7 +22,7 @@ public static class DependencyInjection
 		// Users & Profiles:
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IFriendsService, FriendsService>();
-
+		
 		return services;
 	}
 }

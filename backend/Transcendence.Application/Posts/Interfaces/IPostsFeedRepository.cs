@@ -11,7 +11,7 @@ public interface IPostsFeedRepository
 	/// <param name="currentUserId">Current user's ID (for filtering and personalization).</param>
 	/// <param name="ct">Cancellation token.</param>
 	/// <returns>A page of posts with pagination info.</returns>
-		Task<CursorPageDto<FeedPostRow>> GetFeedPageAsync(
+		Task<CursorPageDto<FeedPostRowDto>> GetFeedPageAsync(
 			Guid currentUserId,
 			int take,
 			string? cursor,

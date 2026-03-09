@@ -20,7 +20,7 @@ public sealed class PostsFeedController : ControllerBase
 
 	//#--#GET /posts/feed?take=20&cursor=<nextCursor>
 	[HttpGet("feed")]
-	public async Task<ActionResult<ApiResponse<CursorPageDto<FeedPostDto>>>> GetFeed(
+	public async Task<ActionResult<ApiResponse<CursorPageDto<PostDto>>>> GetFeed(
 		[FromQuery] int take  = 20,
 		[FromQuery] string? cursor = null,
 		CancellationToken ct = default)

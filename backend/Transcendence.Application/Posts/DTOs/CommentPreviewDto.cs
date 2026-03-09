@@ -1,5 +1,5 @@
 ﻿namespace Transcendence.Application.Posts.DTOs;
-public sealed class CommentDto
+public sealed class CommentPreviewDto
 {
 	public Guid Id { get; set; }
 	public Guid PostId { get; set; }
@@ -12,4 +12,3 @@ public sealed class CommentDto
 	public string AuthorProfileImageUrl { get; set; } = default!;
 
 }
-

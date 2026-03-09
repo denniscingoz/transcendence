@@ -22,30 +22,23 @@ paths:
 #POST /auth/2fa/disable
 #POST /auth/2fa/generate
 
-#users
-#+--#GET /profile/me
-#+--#GET /profile/{userId}
-#+--#PATCH /profile/me
-#+--#PATCH /profile/password
-#+--#DELETE /me
-
-##friends
-#+--#GET /friends/list
-#+--#POST /friends/{username}
-#+--#DELETE /friends/{username}
-#+--#GET /friends/requests
-#+--#POST /friends/requests/{requestId}/accept
-#+--#POST /friends/requests/{requestId}/decline
-
-#file upload
+#files
 #+--GET /files/{fileId}
 #+--POST /files
 #+--DELETE /files/{fileId}
 
+##friends
+#+--#GET /friends/list
+#+--#POST /friends/{targetUserId}
+#+--#DELETE /friends/{friendUserId}
+#+--#GET /friends/requests
+#+--#POST /friends/requests/{requestId}/accept
+#+--#POST /friends/requests/{requestId}/decline
+
 #posts
 #+-#GET /posts/{postId}
-#+-#POST /posts
 #+-#DELETE /posts/{postId}
+#+-#POST /posts
 
 #+-#POST /posts/{postId}/likes
 #+-#DELETE /posts/{postId}/likes
@@ -53,12 +46,21 @@ paths:
 #+-#POST /posts/{postId}/comments
 #+-#DELETE /posts/{postId}/comments/{commentId}
 
+#posts profile
 #--#GET /posts/{postId}/likes?take=20&cursor=<nextCursor>
 #--#GET /posts/{postId}/comments?take=20&cursor=<nextCursor>
 #--#GET /posts/me?take=20&cursor=<nextCursor>
-#--#GET /posts/by-username/{username}?take=20&cursor=<nextCursor>
+#--#GET /posts/by-userId/{targetUserId}?take=20&cursor=<nextCursor>
+
+#posts feed
 #--#GET /posts/feed?take=20&cursor=<nextCursor>
 
+#profile
+#+--#GET /profile/me
+#+--#GET /profile/{userId}
+#+--#PATCH /profile/me
+#+--#PATCH /profile/password
+#+--#DELETE /me
 
 #notifications
 #GET notifications/list

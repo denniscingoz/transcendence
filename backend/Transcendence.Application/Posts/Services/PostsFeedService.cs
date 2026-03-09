@@ -23,7 +23,7 @@ internal class PostsFeedService : IPostsFeedService
 		_friendshipRepository = friendshipRepository;
 	}
 
-	public async Task<CursorPageDto<FeedPostDto>> GetFeedAsync(
+	public async Task<CursorPageDto<PostDto>> GetFeedAsync(
 		int take,
 		string? cursor,
 		Guid currentUserId,
@@ -35,16 +35,22 @@ internal class PostsFeedService : IPostsFeedService
 		var page = await _postsFeedRepository.GetFeedPageAsync(currentUserId, take, cursor, ct);
 
 
-		// Map entity to DTO (manual mapping shown; use your mapper if you have one)
-		var items = page.Items.Select(p => new FeedPostDto
+		// Map entity to DTO
+		var items = page.Items.Select(p => new PostDto
 		{
-			// Fill fields you need for list view
-			// Id = p.Id,
-			// CreatedAt = p.CreatedAt,
-			// Content = p.Content,
+			Id = p.Id,
+			AuthorId = p.AuthorId,
+			CreatedAtUtc = p.CreatedAtUtc,
+			Content = p.Content,
+			ImageUrl = p.ImageUrl,
+			IsLikedByCurrentUser = p.IsLikedByCurrentUser,
+			LikesCount = p.LikesCount,
+			AuthorFullName = p.AuthorFullName,
+			AuthorUsername = p.AuthorUsername,
+			AuthorAvatarUrl = p.AuthorAvatarUrl
 		}).ToList();
 
-		return new CursorPageDto<FeedPostDto>(items, page.NextCursor);
+		return new CursorPageDto<PostDto>(items, page.NextCursor);
 	}
 }
 

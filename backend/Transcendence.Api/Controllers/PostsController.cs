@@ -19,7 +19,7 @@ public sealed class PostsController : ControllerBase
 
 	//GET /posts/{postId}
 	[HttpGet("{postId:guid}")]
-	public async Task<ActionResult<ApiResponse<PostDetailedDto>>> GetPost(Guid postId, CancellationToken ct)
+	public async Task<ActionResult<ApiResponse<PostDto>>> GetPost(Guid postId, CancellationToken ct)
 	{
 		Guid currentUserId = GetUserId();
 		var post = await _postsService.GetPostAsync(postId, currentUserId, ct);
@@ -64,11 +64,11 @@ public sealed class PostsController : ControllerBase
 
 	// POST /posts/{postId}/comments
 	[HttpPost("{postId:guid}/comments")]
-	public async Task<ActionResult<ApiResponse<CommentDto>>> AddComment(Guid postId, [FromBody] string content, CancellationToken ct)
+	public async Task<ActionResult<ApiResponse<CommentPreviewDto>>> AddComment(Guid postId, [FromBody] string content, CancellationToken ct)
 	{
 		Guid currentUserId = GetUserId();
-		var comment = await _postsService.AddCommentAsync(postId, currentUserId, content, ct);
-		return StatusCode(StatusCodes.Status201Created, this.OkResponse(comment));
+		var commentPreview = await _postsService.AddCommentAsync(postId, currentUserId, content, ct);
+		return StatusCode(StatusCodes.Status201Created, this.OkResponse(commentPreview));
 	}
 
 	// DELETE /posts/{postId}/comments/{commentId}

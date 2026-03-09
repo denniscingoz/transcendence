@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Transcendence.Application.Common.Exceptions;
 using Transcendence.Application.Friends.Interfaces;
 using Transcendence.Application.Posts.Interfaces;
@@ -24,6 +25,10 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 		_postRepository = postRepository;
 		_passwordHasher = passwordHasher;
 	}
+
+
+
+	//GET /profile/me
 	public async Task<MyProfileDto> GetMyProfileAsync(Guid userId, CancellationToken ct)
 	{
 		var user = await _userRepository.GetByIdAsync(userId, ct)
@@ -31,18 +36,20 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 
 		var postsCount = await _postRepository.CountByUserIdAsync(userId, ct);
 		var friendsCount = await _friendsRepository.CountFriendsAsync(userId, ct);
-
+		
 		return new MyProfileDto
 		{
 			Id = user.Id,
 			Username = user.Username,
 			FullName = user.FullName,
 			Bio = user.Bio,
-			AvatarUrl = user.AvatarFileId is Guid id ? $"/files/{id}" : null,
+			AvatarUrl = BuildAvatarFileUrl(user.AvatarFileId),
 			PostsCount = postsCount,
 			FriendsCount = friendsCount
 		};
 	}
+
+	//PATCH /profile/me
 	public async Task<MyProfileDto> UpdateProfileAsync(Guid userId, UpdateProfileDto dto, CancellationToken ct)
 	{
 		var user = await _userRepository.GetByIdAsync(userId, ct)
@@ -79,11 +86,22 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			user.UpdateBio(newBio);
 		}
 
-		// 3. Update Avatar (Same logic as Bio)
+		// 3. Update AvatarFileId (Same logic as Bio)
 		if (dto.AvatarUrl != null)
 		{
-			string? newAvatar = dto.AvatarUrl == "" ? null : dto.AvatarUrl;
-			user.UpdateAvatar(newAvatar);
+			Guid? newAvatarFileId = null;
+
+			if (!string.IsNullOrWhiteSpace(dto.AvatarUrl))
+			{
+				var lastPart = dto.AvatarUrl.Split('/').LastOrDefault();
+
+				if (!Guid.TryParse(lastPart, out var parsedFileId))
+					throw new ValidationException("Invalid avatar URL.");
+
+				newAvatarFileId = parsedFileId;
+			}
+
+			user.UpdateAvatar(newAvatarFileId);
 		}
 		await _userRepository.SaveChangesAsync(ct);
 		return new MyProfileDto
@@ -92,11 +110,13 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			Username = user.Username,
 			FullName = user.FullName,
 			Bio = user.Bio,
-			AvatarUrl = user.AvatarFileId is Guid id ? $"/files/{id}" : null, //AvatarFileId is likely a Guid?, but AvatarUrl in your DTO expects string?. This won't compile.
+			AvatarUrl = BuildAvatarFileUrl(user.AvatarFileId),
 			PostsCount = await _postRepository.CountByUserIdAsync(userId, ct),
 			FriendsCount = await _friendsRepository.CountFriendsAsync(userId, ct)
 		};
 	}
+
+	//GET /profile/{id}
 	public async Task<OtherProfileDto> GetOtherProfileAsync(Guid targetUserId, Guid viewerUserId, CancellationToken ct)
 	{
 		var user = await _userRepository.GetByIdAsync(targetUserId, ct)
@@ -111,8 +131,8 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			Username = user.Username,
 			FullName = user.FullName,
 			Bio = user.Bio,
-			AvatarUrl = user.AvatarFileId is Guid id ? $"/files/{id}" : null, //AvatarFileId is likely a Guid?, but AvatarUrl in your DTO expects string?. This won't compile.
-			PostsCount = await _postRepository.CountByUserIdAsync(targetUserId, ct),
+			AvatarUrl = BuildAvatarFileUrl(user.AvatarFileId),
+			PostsCount = await _postRepository.CountByUserIdAsync(targetUserId, ct), //TODO
 			FriendsCount = await _friendsRepository.CountFriendsAsync(targetUserId, ct),
 			AreWeFriends = areWeFrinds
 		};
@@ -123,39 +143,15 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 	{
 		var user = await _userRepository.GetByIdAsync(userId, ct)
 			?? throw new NotFoundException("User not found.");
-		// Verify current password
-		if (!_passwordHasher.VerifyHashedPassword(user.PasswordHash, dto.CurrentPassword, ct))
+
+		if (!_passwordHasher.VerifyHashedPassword(user.PasswordHash, dto.CurrentPassword))
 			throw new UnauthorizedAccessException("Current password is incorrect.");
 
-		user.SetPasswordHash(_passwordHasher.HashPassword(dto.NewPassword, ct));
+		user.SetPasswordHash(_passwordHasher.HashPassword(dto.NewPassword));
 		await _userRepository.SaveChangesAsync(ct);
 	}
 
+	string? BuildAvatarFileUrl(Guid? fileId)
+		=> fileId is Guid id ? $"/files/{id}" : null;
+
 }
-/*
-	Service (Application layer)
-		•	реализует конкретный сценарий
-		•	решает:
-			•	кого загрузить
-			•	в каком порядке
-			•	какие проверки нужны
-			•	какие domain-методы вызвать
-		•	управляет транзакцией (через DbContext)
-
-		X не хранит состояние
-		X не знает SQL
-		X не меняет поля напрямую
-		X не содержит сложных правил сущности
-
-		HTTP
-		↓
-		Controller  → перевод HTTP → вызов Use Case
-		↓
-		Service     → бизнес-сценарий
-		↓
-		Domain      → правила и поведение
-		↓
-		Repository  → сохранение
-		↓
-		DB
-*/
