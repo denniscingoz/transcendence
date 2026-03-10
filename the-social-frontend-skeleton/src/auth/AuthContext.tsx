@@ -36,9 +36,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const login = useCallback(async (req: LoginRequest) => {
-    //const res = await loginApi(req)
-    //setToken(res.token)
-    setToken('fake-jwt-token') //test
+    // Call backend (or MSW mock in dev) to obtain a JWT token.
+    const res = await loginApi(req)
+    setToken(res.token)
   }, [setToken])
 
   const logout = useCallback(() => setToken(null), [setToken])

@@ -1,52 +1,116 @@
 import { useState } from 'react'
 import { useAddFriend, useFriends, useRemoveFriend } from '../hooks/useFriends'
 import { useTranslation } from 'react-i18next'
+import { Header } from '../components/Header'
+import { BottomNav } from '../components/BottomNav'
+
+// Mock friends data
+const mockFriends = [
+  {
+    id: '1',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: true,
+  },
+  {
+    id: '2',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: false,
+  },
+  {
+    id: '3',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: true,
+  },
+  {
+    id: '4',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: false,
+  },
+  {
+    id: '5',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: true,
+  },
+]
 
 export function FriendsPage() {
   const { t } = useTranslation()
-  const { data, isLoading, error } = useFriends()
-  console.log('friends data typeof:', typeof data, 'isArray:', Array.isArray(data), data)
+  const { data: apiData, isLoading, error } = useFriends()
   const add = useAddFriend()
   const remove = useRemoveFriend()
-  const [friendId, setFriendId] = useState('')
 
-  if (isLoading) return <div>{t('common.loading')}</div>
-  if (error) return <div>{t('common.error')}</div>
+  // Use API data if available, otherwise mock
+  const friends = Array.isArray(apiData) ? apiData : mockFriends
+
+  const [followingState, setFollowingState] = useState<Record<string, boolean>>(
+    Object.fromEntries(friends.map((f) => [f.id, f.isFollowing ?? true]))
+  )
+
+  const toggleFollow = (id: string) => {
+    setFollowingState((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
 
   return (
-    <div className="flex justify-center">
-      <div className="w-full max-w-2xl space-y-6">
-        <div className="panel p-8">
-          <div className="text-xl tracking-widest mb-6">FRIENDS</div>
+    <div className="min-h-screen bg-white pb-24">
+      <Header />
 
-          <div className="flex gap-2">
-            <input className="input" placeholder="Friend userId" value={friendId} onChange={(e) => setFriendId(e.target.value)} />
-            <button className="btn-primary w-36" disabled={!friendId || add.isPending} onClick={() => add.mutate(friendId)}>
-              Add
-            </button>
+      <main className="max-w-2xl mx-auto px-4 py-6">
+        {/* Likes modal style list */}
+        <div className="panel">
+          <h2 className="text-xl font-bold tracking-wider mb-6">LIKES</h2>
+
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+            {friends.map((friend) => (
+              <div
+                key={friend.id}
+                className="flex items-center gap-4 p-4 bg-gray-200 rounded-2xl"
+              >
+                {/* Avatar */}
+                <img
+                  src={friend.avatarUrl ?? 'https://placehold.co/80x80'}
+                  alt={friend.displayName}
+                  className="w-14 h-14 rounded-full object-cover border-2 border-red-200"
+                />
+
+                {/* Name and username */}
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-gray-900">{friend.displayName}</div>
+                  <div className="text-sm text-gray-500">@{friend.username}</div>
+                </div>
+
+                {/* Follow button */}
+                <button
+                  onClick={() => toggleFollow(friend.id)}
+                  className={`px-6 py-2 rounded-full font-medium transition-colors ${
+                    followingState[friend.id]
+                      ? 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
+                >
+                  {followingState[friend.id] ? 'Following' : 'Follow'}
+                </button>
+              </div>
+            ))}
           </div>
         </div>
+      </main>
 
-        <div className="space-y-3">
-          {(Array.isArray(data) ? data : []).map((f) => (
-            <div key={f.id} className="card p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img className="h-12 w-12 rounded-full border object-cover" src={f.avatarUrl ?? 'https://placehold.co/96x96'} alt="" />
-                <div>
-                  <div className="font-semibold">{f.displayName}</div>
-                  <div className="text-sm opacity-60">
-                    {f.isOnline ? t('friends.online') : t('friends.offline')}
-                  </div>
-                </div>
-              </div>
-
-              <button className="btn-ghost" disabled={remove.isPending} onClick={() => remove.mutate(f.id)}>
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
+      <BottomNav />
     </div>
   )
 }

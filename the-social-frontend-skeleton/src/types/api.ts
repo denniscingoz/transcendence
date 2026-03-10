@@ -11,19 +11,25 @@ export type ProfileDto = {
   displayName: string
   email: string
   avatarUrl?: string | null
+  username?: string
+  bio?: string
+  postsCount?: number
+  followersCount?: number
+  followingCount?: number
 }
 
 export type FriendDto = {
   id: string
   displayName: string
   avatarUrl?: string | null
+  username?: string
   isOnline?: boolean
+  isFollowing?: boolean
 }
 
 export type ChatMessageDto = {
   id: string
   fromUserId: string
-  toUserId: string
   content: string
   sentAt: string
 }
