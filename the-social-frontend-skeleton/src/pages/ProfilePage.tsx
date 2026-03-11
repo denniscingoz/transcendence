@@ -1,121 +1,127 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMyProfile, useUpdateProfile, useUploadAvatar } from '../hooks/useProfile'
-import { Field } from '../components/ui/Field'
 import type { ProfileDto } from '../types/api'
 import { useTranslation } from 'react-i18next'
+import { Header } from '../components/Header'
+import { BottomNav } from '../components/BottomNav'
+
+// Mock profile data
+const mockProfile = {
+  id: '1',
+  displayName: 'My own Profile',
+  username: 'My_own_profile',
+  bio: "Welcome to my profile!!\nI am a photographer with a passion to nature. Hope you like it!!",
+  avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop',
+  postsCount: 100,
+  followersCount: 720,
+  followingCount: 1200,
+  email: 'user@example.com',
+}
+
+// Mock posts grid
+const mockPosts = [
+  { id: '1', imageUrl: 'https://images.unsplash.com/photo-1545893835-abaa50cbe628?w=400&h=400&fit=crop' },
+  { id: '2', imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=400&fit=crop' },
+  { id: '3', imageUrl: 'https://images.unsplash.com/photo-1545893835-abaa50cbe628?w=400&h=400&fit=crop' },
+  { id: '4', imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=400&fit=crop' },
+]
 
 export function ProfilePage() {
   const { t } = useTranslation()
-  const { data, isLoading, error } = useMyProfile()
+  const { data: apiData, isLoading, error } = useMyProfile()
   const update = useUpdateProfile()
   const upload = useUploadAvatar()
+
+  // Use API data if available, otherwise mock
+  const data = apiData ?? mockProfile
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const previewUrl = useMemo(() => (selectedFile ? URL.createObjectURL(selectedFile) : null), [selectedFile])
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { isSubmitting },
-  } = useForm<Partial<ProfileDto>>()
-
-  useEffect(() => {
-    if (data) reset({ displayName: data.displayName, email: data.email })
-  }, [data, reset])
-
-  const onSave = async (values: Partial<ProfileDto>) => {
-    await update.mutateAsync(values)
-  }
-
-  const onUpload = async () => {
-    if (!selectedFile) return
-    await upload.mutateAsync(selectedFile)
-    setSelectedFile(null)
-  }
-
-  if (isLoading) return <div>{t('common.loading')}</div>
-  if (error) return <div>{t('common.error')}</div>
-  if (!data) return null
-
   return (
-    <div className="flex justify-center">
-      <div className="w-full max-w-2xl space-y-6">
-        {/* Title panel */}
-        <div className="panel p-8">
-          <div className="text-xl tracking-widest mb-2">PROFILE</div>
-          <div className="text-sm opacity-60">Manage your identity and avatar.</div>
-        </div>
+    <div className="min-h-screen bg-white pb-24">
+      <Header />
 
-        {/* Avatar card */}
-        <div className="card p-6">
-          <div className="flex items-center gap-6">
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        {/* Profile header */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start md:items-center mb-8">
+          {/* Avatar with ring */}
+          <div className="relative">
             <img
-              className="h-24 w-24 rounded-3xl object-cover border"
-              src={previewUrl ?? data.avatarUrl ?? 'https://placehold.co/128x128'}
-              alt="avatar"
+              src={previewUrl ?? data.avatarUrl ?? 'https://placehold.co/200x200'}
+              alt={data.displayName}
+              className="w-32 h-32 rounded-full object-cover ring-4 ring-teal-500 ring-offset-4"
             />
+          </div>
 
-            <div className="flex-1 space-y-3">
-              <div className="text-sm tracking-widest opacity-60">AVATAR</div>
+          {/* Profile info */}
+          <div className="flex-1 space-y-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">{data.displayName}</h2>
+              <p className="text-gray-500">@{data.username ?? 'username'}</p>
+            </div>
 
-              <input
-                className="block w-full text-sm"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-              />
+            {data.bio && (
+              <p className="text-gray-700 whitespace-pre-line max-w-md">{data.bio}</p>
+            )}
+          </div>
 
-              <div className="flex gap-3">
-                <button
-                  className="btn-primary w-44"
-                  onClick={onUpload}
-                  disabled={!selectedFile || upload.isPending}
-                  type="button"
-                >
-                  {upload.isPending ? '...' : t('profile.uploadAvatar')}
-                </button>
-
-                {selectedFile ? (
-                  <button
-                    className="btn-ghost"
-                    type="button"
-                    onClick={() => setSelectedFile(null)}
-                  >
-                    Cancel
-                  </button>
-                ) : null}
-              </div>
+          {/* Stats */}
+          <div className="flex gap-6 text-center">
+            <div>
+              <div className="text-xl font-bold text-gray-900">{data.postsCount ?? 0}</div>
+              <div className="text-sm text-gray-500">posts</div>
+            </div>
+            <div>
+              <div className="text-xl font-bold text-gray-900">{data.followersCount ?? 0}</div>
+              <div className="text-sm text-gray-500">followers</div>
+            </div>
+            <div>
+              <div className="text-xl font-bold text-gray-900">{data.followingCount ?? 0}</div>
+              <div className="text-sm text-gray-500">following</div>
             </div>
           </div>
         </div>
 
-        {/* Form card */}
-        <div className="card p-6">
-          <div className="text-sm tracking-widest opacity-60 mb-4">ACCOUNT</div>
-
-          <form className="space-y-4" onSubmit={handleSubmit(onSave)}>
-            <Field label="Display name">
-              <input className="input" {...register('displayName')} />
-            </Field>
-
-            <Field label="Email">
-              <input className="input" {...register('email')} />
-            </Field>
-
-            <div className="flex justify-center pt-2">
-              <button
-                className="btn-primary w-64"
-                disabled={isSubmitting || update.isPending}
-                type="submit"
-              >
-                {update.isPending ? '...' : t('profile.save')}
-              </button>
-            </div>
-          </form>
+        {/* Action buttons */}
+        <div className="flex gap-3 mb-8">
+          <button className="btn-ghost flex-1 max-w-[200px]">Edit profile</button>
+          <button className="btn-ghost flex-1 max-w-[200px]">Settings</button>
         </div>
-      </div>
+
+        {/* Posts grid */}
+        <div className="grid grid-cols-2 gap-4">
+          {/* Add new post placeholder */}
+          <div className="aspect-square bg-gray-300 rounded-2xl flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors">
+            <PlusIcon className="w-16 h-16 text-white" />
+          </div>
+
+          {/* Posts */}
+          {mockPosts.map((post) => (
+            <div
+              key={post.id}
+              className="aspect-square rounded-2xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+            >
+              <img
+                src={post.imageUrl}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      </main>
+
+      <BottomNav active="profile" />
     </div>
+  )
+}
+
+function PlusIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
   )
 }

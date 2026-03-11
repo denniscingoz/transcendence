@@ -3,40 +3,129 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: light;
+  --gray-card: #d1d5db;
+  --gray-light: #e5e7eb;
+  --blue-primary: #3b82f6;
+  --blue-hover: #2563eb;
 }
 
-@layer components {
-  .page {
-    @apply min-h-screen bg-neutral-100 text-neutral-900;
-  }
+body {
+  @apply bg-white text-gray-900 antialiased;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
-  .container {
-    @apply mx-auto w-full max-w-5xl px-4;
-  }
+/* Card styles */
+.card {
+  @apply bg-gray-300 rounded-3xl;
+}
 
-  .card {
-    @apply rounded-3xl bg-white shadow-sm border border-black/5;
-  }
+.card-white {
+  @apply bg-white rounded-3xl shadow-sm;
+}
 
-  .panel {
-    @apply rounded-3xl bg-neutral-200/80 border border-black/5;
-  }
+/* Panel (gray background cards) */
+.panel {
+  @apply bg-gray-300 rounded-3xl p-6;
+}
 
-  .input {
-    @apply w-full rounded-full border border-black/10 bg-white px-5 py-3
-           focus:outline-none focus:ring-2 focus:ring-black/10;
-  }
+/* Input styles */
+.input {
+  @apply w-full px-5 py-3.5 bg-white rounded-full border-0 outline-none 
+         placeholder:text-gray-400 text-gray-900
+         focus:ring-2 focus:ring-blue-500/30 transition-shadow;
+}
 
-  .btn {
-    @apply rounded-full px-6 py-3 text-sm font-semibold transition disabled:opacity-50;
-  }
+/* Primary button */
+.btn-primary {
+  @apply px-8 py-3.5 bg-blue-500 text-white font-semibold rounded-full
+         hover:bg-blue-600 active:bg-blue-700 
+         disabled:opacity-50 disabled:cursor-not-allowed
+         transition-colors;
+}
 
-  .btn-primary {
-    @apply btn bg-blue-500 text-white hover:brightness-95;
-  }
+/* Ghost/secondary button */
+.btn-ghost {
+  @apply px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-full
+         hover:bg-gray-300 active:bg-gray-400
+         disabled:opacity-50 disabled:cursor-not-allowed
+         transition-colors;
+}
 
-  .btn-ghost {
-    @apply btn bg-white/60 hover:bg-white border border-black/10;
-  }
+/* Danger button */
+.btn-danger {
+  @apply px-8 py-4 bg-red-500 text-white font-bold rounded-full
+         hover:bg-red-600 active:bg-red-700
+         transition-colors;
+}
+
+/* Success button */
+.btn-success {
+  @apply px-8 py-4 bg-green-400 text-gray-900 font-bold rounded-full
+         hover:bg-green-500 active:bg-green-600
+         transition-colors;
+}
+
+/* Avatar styles */
+.avatar {
+  @apply rounded-full object-cover border-2 border-gray-200;
+}
+
+.avatar-ring {
+  @apply rounded-full object-cover ring-2 ring-offset-2 ring-teal-500;
+}
+
+/* Divider with text */
+.divider {
+  @apply flex items-center gap-4 text-gray-400 text-sm my-6;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  @apply flex-1 h-px bg-gray-400;
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-gray-100/95 backdrop-blur-sm
+         border-t border-gray-200 px-4 py-3 z-50;
+}
+
+.bottom-nav-inner {
+  @apply max-w-lg mx-auto flex justify-around items-center;
+}
+
+.nav-icon {
+  @apply p-3 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-200
+         transition-colors cursor-pointer;
+}
+
+.nav-icon.active {
+  @apply text-gray-900;
+}
+
+/* Message bubbles */
+.message-received {
+  @apply bg-white rounded-2xl px-4 py-3 max-w-[80%] shadow-sm;
+}
+
+.message-sent {
+  @apply bg-blue-500 text-white rounded-2xl px-4 py-3 max-w-[80%];
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
 }
