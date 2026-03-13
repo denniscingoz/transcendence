@@ -11,6 +11,10 @@ public sealed class User
 	public Guid? AvatarFileId { get; private set; }
 	public DateTime CreatedAt { get; private set; }
 
+	public string? GoogleId { get; private set; }
+
+	public string? Role { get; private set; }
+
 #pragma warning disable CS8618
 	private User() { }
 #pragma warning restore CS8618
@@ -29,6 +33,25 @@ public sealed class User
 		CreatedAt = createdAt;
 	}
 
+	public User(Guid id, string googleId, string username, string email, string fullName, DateTime createdAt)
+	{
+		Id = id;
+		SetUsername(username);
+		SetEmail(email);
+		SetFullName(fullName);
+		CreatedAt = createdAt;
+		GoogleId = googleId;
+	}
+
+	public User(Guid id, string username, string email, string fullName, DateTime createdAt, string role)
+	{
+		Id = id;
+		SetUsername(username);
+		SetEmail(email);
+		SetFullName(fullName);
+		CreatedAt = createdAt;
+		Role = role;
+	}
 	public void UpdateDetails(string? fullName = null, string? username = null)
 	{
 		if (fullName != null) SetFullName(fullName);
@@ -67,42 +90,3 @@ public sealed class User
 		Email = v;
 	}
 }
-
-/*
-	Domain (User)
-	•	знает кто он
-	•	знает что ему можно
-	•	знает как себя менять
-	•	НЕ знает:
-	•	БД
-	•	HTTP
-	•	авторизацию
-
-
-	1. Domain        → кто такой User
-	2. Application   → что можно с ним делать (use-cases)
-	3. API           → как это вызывается по HTTP
-	4. Infrastructure→ как это хранится в БД
-
-	✔ Controller → DTO
-	✔ Service → DTO
-	✔ Domain → values
-	✔ Repository → Domain
-
-	Profile update logic lives in the Domain entity,
-	because the entity itself knows how it is allowed to change.
-	The service only orchestrates the use-case and does not modify fields directly.
-
-	Services decide WHEN something happens.
-	Entities decide HOW they change.
-
-	Domain entity содержит только то,
-	за что она отвечает и что контролирует.
-
-	Счётчики:
-	- не контролируются User
-
-	- не изменяются User
-
-	+ считаются извне
-*/

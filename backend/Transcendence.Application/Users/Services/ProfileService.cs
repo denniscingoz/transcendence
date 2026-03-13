@@ -1,9 +1,13 @@
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using Transcendence.Application.Common.Exceptions;
 using Transcendence.Application.Friends.Interfaces;
 using Transcendence.Application.Posts.Interfaces;
 using Transcendence.Application.Users.DTOs;
 using Transcendence.Application.Users.Interfaces;
+using Transcendence.Domain.Users;
+
+
 
 namespace Transcendence.Application.Users.Services;
 
@@ -12,13 +16,13 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 	private readonly IUserRepository _userRepository;
 	private readonly IFriendshipRepository _friendsRepository;
 	private readonly IPostsRepository _postRepository;
-	private readonly IPasswordHasher _passwordHasher;
-
+	private readonly IPasswordHasher<User> _passwordHasher;
+	
 
 	public ProfileService(IFriendshipRepository friendsRepository, 
 						IUserRepository userRepository,
 						IPostsRepository postRepository,
-						IPasswordHasher passwordHasher)
+						IPasswordHasher<User> passwordHasher)
 	{
 		_friendsRepository = friendsRepository;
 		_userRepository = userRepository;
@@ -143,11 +147,19 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 	{
 		var user = await _userRepository.GetByIdAsync(userId, ct)
 			?? throw new NotFoundException("User not found.");
+		
+		
+		var verificationResult = _passwordHasher.VerifyHashedPassword(
+			user,
+			user.PasswordHash,
+			dto.CurrentPassword);
 
-		if (!_passwordHasher.VerifyHashedPassword(user.PasswordHash, dto.CurrentPassword))
-			throw new UnauthorizedAccessException("Current password is incorrect.");
+		if (verificationResult == PasswordVerificationResult.Failed)
+		{
+			throw new ArgumentException("Current password is incorrect.", nameof(dto.CurrentPassword));
+		}
 
-		user.SetPasswordHash(_passwordHasher.HashPassword(dto.NewPassword));
+		user.SetPasswordHash(_passwordHasher.HashPassword(user, dto.NewPassword));
 		await _userRepository.SaveChangesAsync(ct);
 	}
 

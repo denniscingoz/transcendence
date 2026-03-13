@@ -15,17 +15,29 @@ public class TranscendenceDbContext: DbContext
      public DbSet<Post> Posts => Set<Post>();
 
 
-     /*
-     public DbSet<User> Users // коллекция ползователй из БД
-     {
-          get
-          {
-               return Set<User>(); // Сет - метод возращающий всю коллекцибю юзеров
-          }
-     } */
-      protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(TranscendenceDbContext).Assembly);
-    }
+	/*
+	public DbSet<User> Users // коллекция ползователй из БД
+	{
+		 get
+		 {
+			  return Set<User>(); // Сет - метод возращающий всю коллекцибю юзеров
+		 }
+	} */
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+		base.OnModelCreating(modelBuilder);
+
+		modelBuilder.Entity<Friendship>(entity =>
+		{
+			entity.HasKey(f => new { f.User1Id, f.User2Id });
+		});
+
+		modelBuilder.ApplyConfigurationsFromAssembly(
+			typeof(TranscendenceDbContext).Assembly);
+	}
+	//protected override void OnModelCreating(ModelBuilder modelBuilder)
+ //   {
+ //       modelBuilder.ApplyConfigurationsFromAssembly(
+ //           typeof(TranscendenceDbContext).Assembly);
+ //   }
 }
