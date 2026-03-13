@@ -70,6 +70,7 @@ let connection;
 function renderUser(userId, online) {
 
     let li = document.getElementById("user-" + userId);
+    let unreadCount = 0;
 
     if (!li) {
 
@@ -142,10 +143,10 @@ async function joinConversation() {
         alert("ConversationId is empty");
         return;
     }
-
     await connection.invoke("JoinConversation", conversationId);
-
     await loadMessages(conversationId);
+
+
 
     console.log("Joined conversation:", conversationId);
 }
@@ -155,27 +156,47 @@ async function connect() {
     const userId =
         document.getElementById("userIdInput").value.trim();
 
-    if (connection) {
-
-        await connection.stop();
-        connection = null;
-    }
-
     connection = new signalR.HubConnectionBuilder()
         .withUrl(`http://localhost:5067/hubs/chat?userId=${userId}`)
         .withAutomaticReconnect()
         .build();
 
+    connection.onreconnected(async () => {
+
+        console.log("Reconnected");
+
+        const conversationId =
+            document.getElementById("conversationIdInput").value.trim();
+
+        if (conversationId) {
+            await connection.invoke("JoinConversation", conversationId);
+            await loadMessages(conversationId);
+        }
+
+        await connection.invoke("RequestPresenceSnapshot");
+    });
     connection.off("MessageReceived");
+
+
     connection.on("MessageReceived", (message) => {
 
-        const li = document.createElement("li");
+    if (document.hidden) {
 
-        li.textContent =
-            `[${message.createdAt}] ${message.senderId}: ${message.content}`;
+        unreadCount++;
+        updateTitle();
+        playBeep();
 
-        document.getElementById("messages").appendChild(li);
-    });
+        console.log("Message received in background");
+
+    }
+
+    const li = document.createElement("li");
+
+    li.textContent =
+        `[${message.createdAt}] ${message.senderId}: ${message.content}`;
+
+    document.getElementById("messages").appendChild(li);
+});
 
     connection.off("UserOnLine");
     connection.on("UserOnLine", (presence) => {
@@ -193,11 +214,82 @@ async function connect() {
         renderUser(presence.userId, false);
     });
 
+    connection.on("OnlineUsersSnapshot", (users) => {
+
+        for (const u of users) {
+            renderUser(u, true);
+        }
+    });
+
     await connection.start();
 
+    const conversationId =
+    document.getElementById("conversationIdInput").value.trim();
+
+    if (conversationId) {
+        await connection.invoke("JoinConversation", conversationId);
+}
     alert("Connected");
 }
+document.addEventListener("visibilitychange", async () => {
 
+    if (!document.hidden) {
+
+        unreadCount = 0;
+        updateTitle();
+
+        const conversationId =
+            document.getElementById("conversationIdInput").value.trim();
+
+        if (conversationId) {
+            await loadMessages(conversationId);
+        }
+    }
+});
+function updateTitle() {
+
+    if (unreadCount > 0) {
+        document.title = `(${unreadCount}) Chat Demo`;
+    } else {
+        document.title = "Chat Demo";
+    }
+}
+
+connection.on("NotificationReceived", (notification) => {
+
+    unreadCount++;
+    updateTitle();
+    playBeep();
+
+    console.log("Notification received:", notification);
+
+    const li = document.createElement("li");
+
+    li.textContent =
+        `🔔 New message from ${notification.payload.senderId}`;
+
+    document.getElementById("messages").appendChild(li);
+});
+
+function playBeep() {
+
+    const ctx = new AudioContext();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = 880;
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start();
+
+    setTimeout(() => {
+        oscillator.stop();
+        ctx.close();
+    }, 120);
+}
 async function sendMessage() {
 
     const conversationId =
@@ -224,6 +316,8 @@ async function sendMessage() {
 
     document.getElementById("messageInput").value = "";
 }
+
+ 
 
 async function loadMessages(conversationId) {
 
@@ -268,7 +362,7 @@ async function loadMessages(conversationId) {
         list.appendChild(li);
     }
 }
-
+ 
 </script>
 
 </body>

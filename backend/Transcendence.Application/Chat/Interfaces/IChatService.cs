@@ -1,7 +1,6 @@
-namespace Transcendence.Application.Chat.Abstractions;
 using Transcendence.Application.Chat.DTOs;
 using Transcendence.Domain.Chat;
-
+namespace Transcendence.Application.Chat.Interfaces;
 public interface IChatService
 {
     Task <ChatMessageDto> SendMessageAsync(
@@ -18,6 +17,8 @@ public interface IChatService
     );
     Task AssertUserIsParticipant(Guid conversationId, Guid UserId);
     Task <IReadOnlyList<Guid>>  GetUserConversationsIds(Guid userId);
+    Task <IReadOnlyList<Guid>>  GetParticipantsIds(Guid conversationId);
+   
 };
 
 /*

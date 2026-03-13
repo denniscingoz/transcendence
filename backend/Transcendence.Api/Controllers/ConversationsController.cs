@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Transcendence.Application.Chat.Services;
 using Transcendence.Application.Chat.DTOs;
-using  Transcendence.Application.Chat.Abstractions;
+using  Transcendence.Application.Chat.Interfaces;
 using Transcendence.Api.Realtime.Hubs;
 using Transcendence.Api.Common.Extensions;
 using Transcendence.Application.Common.Responses;

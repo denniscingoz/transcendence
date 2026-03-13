@@ -4,27 +4,28 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.VisualBasic;
-using Transcendence.Application.Chat.Abstractions;
+using Transcendence.Application.Chat.Interfaces;
 using Transcendence.Application.Chat.DTOs;
 using Transcendence.Application.Realtime.DTOs;
 using Transcendence.Application.Realtime.Contracts;
-using Transcendence.Application.Services;
 using Transcendence.Api.Common.Extensions;
 using  Transcendence.Api.Realtime.Hubs;
-using System.Text.Json;//
+using System.Text.Json;
+using System.IO.IsolatedStorage;
+using System.Collections.Specialized;
+
 namespace Transcendence.Api.Realtime.Hubs;
 
-public sealed class ChatHub : BaseHub<IRealtimeClient> 
+public sealed class ChatHub : Hub<IRealtimeClient> 
 {
     private readonly IChatService _chatService;
     private readonly IPresenceService _presenceService;
-
-
-    public ChatHub( IChatService chatService, IPresenceService presenceService )
+    private readonly INotificationService _notificationService;
+    public ChatHub( IChatService chatService, IPresenceService presenceService, INotificationService notificationService )
     {
         _chatService = chatService;
         _presenceService = presenceService;
-
+        _notificationService = notificationService;
     }
 
     public override async Task OnConnectedAsync() // зашел на сайт
@@ -32,18 +33,13 @@ public sealed class ChatHub : BaseHub<IRealtimeClient>
         var userId = Context.User.GetUserId();
 
         await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.User(userId)); // add connId to user's collection of connections  
+        Console.WriteLine($"User {userId} joined group user:{userId}");
         
         var userConversations = await _chatService.GetUserConversationsIds(userId);
-
-
         foreach (var c in userConversations)
-        {
-            await Groups.AddToGroupAsync(Context.ConnectionId,
-                GroupNames.Conversation(c)); 
-        }
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(c)); // это группы чатов сигналR он добавляет соеденине, то есть тут id conversations Signar и те что у нас в базе пересекаются
 
-
-        if (_presenceService.AddConnection(userId, Context.ConnectionId)) //became online
+          if (_presenceService.AddConnection(userId, Context.ConnectionId)) //became online
         {
             var presence = new PresenceEventDto
             {
@@ -51,9 +47,7 @@ public sealed class ChatHub : BaseHub<IRealtimeClient>
                 IsOnline = true,
                 ChangedAt = DateTimeOffset.UtcNow
             };
-            // await Clients.Group(GroupNames.User(userId)) // hisself connections
-            //              .UserOnLine(presence); // calling method on user's client sides
-            
+ 
             foreach(var c in userConversations)
                 await Clients.Group(GroupNames.Conversation(c)).UserOnLine(presence);
             /*  same faster:
@@ -63,8 +57,53 @@ public sealed class ChatHub : BaseHub<IRealtimeClient>
             */
            
         }
+
+        var onlineUsers = new HashSet<Guid>();
+        
+        foreach(var c in userConversations)
+        {
+            var participants = await _chatService.GetParticipantsIds(c);
+
+            foreach (var p in participants)
+            {
+                if (p != userId && _presenceService.IsOnline(p)) 
+                    onlineUsers.Add(p);
+            }
+        }
+         
+        await Clients.Caller.OnlineUsersSnapshot(onlineUsers);
+ 
         await base.OnConnectedAsync();
     }
+
+//     public override async Task OnConnectedAsync()
+// {
+//     var userId = Context.User.GetUserId();
+
+//     var becameOnline =
+//         _presenceService.AddConnection(userId, Context.ConnectionId);
+
+//     await Groups.AddToGroupAsync(
+//         Context.ConnectionId,
+//         GroupNames.User(userId));
+
+//     var conversations =
+//         await _chatService.GetUserConversationsIds(userId);
+
+//     foreach (var c in conversations)
+//         await Groups.AddToGroupAsync(
+//             Context.ConnectionId,
+//             GroupNames.Conversation(c));
+
+//     var onlineUsers =
+//         _presenceService.GetOnlineUsers();
+
+//     await Clients.Caller
+//         .OnlineUsersSnapshot(onlineUsers);
+
+//     await base.OnConnectedAsync();
+// }
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var userId = Context.User.TryGetUserId();
@@ -81,6 +120,7 @@ public sealed class ChatHub : BaseHub<IRealtimeClient>
                     ChangedAt = DateTimeOffset.UtcNow
                 };
                 var userConversations = await _chatService.GetUserConversationsIds(userId.Value);//??!!!
+
                 foreach(var c in userConversations)
                     await Clients.Group(GroupNames.Conversation(c)).UserOffLine(presence);
             }
@@ -111,9 +151,9 @@ public sealed class ChatHub : BaseHub<IRealtimeClient>
         await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(conversationId)); //SignalR does all
     }
 
-    public async Task LeaveConversation(Guid conversationId)
+    public async Task LeaveConversation(Guid conversationId) //browser tab closed
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Conversation(conversationId)); 
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Conversation(conversationId));  //signalR
     }
 
     public async Task SendMessage(SendMessageCommandDto dto)
@@ -126,16 +166,25 @@ public sealed class ChatHub : BaseHub<IRealtimeClient>
             dto.ClientMessageId,
             dto.Content
         );
+        await Clients.Group(GroupNames.Conversation(dto.ConversationId)) //message
+                    .MessageReceived(messageDto); //online users with opened chats
 
-        await Clients.Group(GroupNames.Conversation(dto.ConversationId))
-                    .MessageReceived(messageDto);
+        var receivers = await _chatService.GetParticipantsIds(dto.ConversationId);
 
+        await _notificationService.NotifyNewMessage(receivers, senderId, messageDto); // online users with closed chat window
+        
         await Clients.Caller.MessageAck(new MessageAckDto
         {
             ClientMessageId = dto.ClientMessageId,
             MessageId = messageDto.MessageId,
             CreatedAt = messageDto.CreatedAt
         });
+    }
+
+        public Task RequestPresenceSnapshot()
+    {
+        var online = _presenceService.GetOnlineUsers();
+        return Clients.Caller.OnlineUsersSnapshot(online);
     }
 }
 /*

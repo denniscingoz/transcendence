@@ -1,11 +1,10 @@
 ﻿
 using Microsoft.Extensions.DependencyInjection;
-using Transcendence.Application.Chat.Abstractions;
+using Transcendence.Application.Chat.Interfaces;
 using Transcendence.Application.Chat.Services;
-using Transcendence.Application.Messages.Abstractions;
-using Transcendence.Application.Messages.Services;
 using Transcendence.Application.Realtime.Contracts;
 using Transcendence.Application.Users.Services;
+<<<<<<< HEAD
 <<<<<<< HEAD
 using Transcendence.Application.Users.Interfaces;
 using Transcendence.Application.Friends.Interfaces;
@@ -19,6 +18,8 @@ using Transcendence.Application.Posts.Services;
 =======
 using Transcendence.Application.Services;
 >>>>>>> 8fcdb03 (presence added)
+=======
+>>>>>>> 5436581 (fixed presence issues, added notifications when not active tab)
 
 namespace Transcendence.Application;
 
@@ -59,10 +60,11 @@ public static class DependencyInjection
     {
         //my services:
         services.AddScoped<IChatService, ChatService>();
-        services.AddScoped<IMessageService, MessageService>();         
         services.AddScoped<FollowService>();
         services.AddScoped<ProfileService>();
-        services.AddScoped<IPresenceService, PresenceService>();         
+        services.AddSingleton<IPresenceService, PresenceService>();         
+        
+
 
         return services;    
     }

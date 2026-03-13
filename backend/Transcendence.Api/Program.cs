@@ -18,6 +18,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerDocumentation();
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevCors", policy =>
@@ -55,9 +56,11 @@ builder.Services
         };
     });
 
+// Google auth
 builder.Services.Configure<GoogleAuthOptions>(
     builder.Configuration.GetSection("GoogleAuth"));
 
+// Authorization
 builder.Services.AddAuthorization();
 
 // SignalR
@@ -92,7 +95,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
 }
 
 app.UseAuthentication();

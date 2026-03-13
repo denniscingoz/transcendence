@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
-using Transcendence.Application.Chat.Abstractions;
-using Transcendence.Application.Chat.DTOs;
 using Transcendence.Application.Chat.Interfaces;
+using Transcendence.Application.Chat.DTOs;
 using Transcendence.Domain.Chat;
 using Transcendence.Domain.Exceptions;
 using Transcendence.Domain.Users;
@@ -59,6 +58,7 @@ public class ChatService : IChatService
         var message = new Message(conversationId, senderId, clientMessageId, content);
 
         await _messageRepository.AddAsync(message);
+        
         await _coversationRepository.SaveChangesAsync();
         return MapToDto(message);
     }
@@ -97,9 +97,6 @@ public class ChatService : IChatService
 
         var messages = await _messageRepository.GetByConversationIdAsync(conversationId, offset, limit);
 
-        var temp = MapToDto(messages[0]);
-        Console.WriteLine($" try9ing ConvId: {temp.ConversationId},ahle meassageId: {temp.MessageId}, {temp.Content}");
-        
         return messages
             .Select(MapToDto)
             .ToList();
@@ -115,6 +112,14 @@ public class ChatService : IChatService
     public async Task <IReadOnlyList<Guid>>  GetUserConversationsIds(Guid userId)
     {
         return await _coversationRepository.GetUserConversationsIds(userId);
+    }
+        public async Task <IReadOnlyList<Guid>>  GetUserInterlocutors(Guid userId)
+    {
+        return await _coversationRepository.GetUserInterlocutors(userId);
+    }
+    public async Task <IReadOnlyList<Guid>>  GetParticipantsIds(Guid conversationId)
+    {
+        return await _coversationRepository.GetParticipantsIds(conversationId);
     }
 
 }
