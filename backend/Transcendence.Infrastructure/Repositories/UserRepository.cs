@@ -22,7 +22,12 @@ public sealed class UserRepository : IUserRepository
     {
         return _db.Users.SingleOrDefaultAsync(x=> x.Username == username);
     }
-    public async Task<Guid> GetUserIdByAvatarFileIdAsync(Guid fileId, CancellationToken ct)
+
+	public Task<User?> GetByEmailAsync(string email, CancellationToken ct)
+	{
+		return _db.Users.SingleOrDefaultAsync(x => x.Email == email);
+	}
+	public async Task<Guid> GetUserIdByAvatarFileIdAsync(Guid fileId, CancellationToken ct)
     {
         throw new NotImplementedException();
     }
