@@ -15,20 +15,20 @@ public sealed class UserRepository : IUserRepository
 	}
 	public Task<User?> GetByIdAsync(Guid id, CancellationToken ct)
 	{
-		return _db.Users.SingleOrDefaultAsync(x => x.Id == id, ct);
-	}
-	public Task<User?> GetByUsernameAsync(string username, CancellationToken ct)
+        return _db.Users.SingleOrDefaultAsync(x => x.Id == id, ct);
+    }
+    public Task<User?> GetByUsernameAsync(string username, CancellationToken ct)
+    {
+        return _db.Users.SingleOrDefaultAsync(x=> x.Username == username, ct);
+    }
+	public Task<User?> GetByEmailAsync(string email, CancellationToken ct)
 	{
-		return _db.Users.SingleOrDefaultAsync(x=> x.Username == username, ct);
+		return _db.Users.SingleOrDefaultAsync(x => x.Email == email);
 	}
-	public async Task<Guid?> GetUserIdByAvatarFileIdAsync(Guid fileId, CancellationToken ct)
-	{
-		//throw new NotImplementedException();
-		return await _db.Users
-		.Where(x => x.AvatarFileId == fileId)
-		.Select(x => (Guid?)x.Id)
-		.SingleOrDefaultAsync(ct);
-	}
+    public async Task<Guid> GetUserIdByAvatarFileIdAsync(Guid fileId, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
 	public async Task  AddAsync(User user, CancellationToken ct)
 	{
 	   await _db.Users.AddAsync(user, ct);

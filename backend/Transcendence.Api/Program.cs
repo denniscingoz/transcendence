@@ -1,12 +1,17 @@
-using Transcendence.Application;
-using Transcendence.Infrastructure;
-using Transcendence.Api.Chat;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Transcendence.Api.Chat;
+using Transcendence.Api.Configurations;
+using Transcendence.Application;
+using Transcendence.Application.Auth.DTOs;
 using Transcendence.Application.Friends.Interfaces;
+using Transcendence.Application.Friends.Services;
+using Transcendence.Application.Posts.Interfaces;
+using Transcendence.Infrastructure;
 using Transcendence.Infrastructure.Persistence;
 using Transcendence.Infrastructure.Repositories;
-using Transcendence.Application.Posts.Interfaces;
-using Transcendence.Application.Friends.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +29,36 @@ builder.Services.AddCors(options =>
 	);
 });
 
-builder.Services.AddAuthentication();
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var key = jwtSection["Key"]!;
+
+
+builder.Services
+	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+	.AddJwtBearer(options =>
+	{
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuerSigningKey = true,
+			IssuerSigningKey = new SymmetricSecurityKey(
+				Encoding.UTF8.GetBytes(key)),
+
+			ValidateIssuer = true,
+			ValidIssuer = jwtSection["Issuer"],
+
+			ValidateAudience = true,
+			ValidAudience = jwtSection["Audience"],
+
+			ValidateLifetime = true,
+			ClockSkew = TimeSpan.Zero
+		};
+	});
+
+builder.Services.Configure<GoogleAuthOptions>(
+	builder.Configuration.GetSection("GoogleAuth"));
+
+
+builder.Services.AddSwaggerDocumentation();
 builder.Services.AddAuthorization();
 
 builder.Services.AddSignalR();

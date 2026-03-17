@@ -2,7 +2,7 @@ using Transcendence.Domain.Exceptions;
 namespace Transcendence.Domain.Friends;
 public sealed class Friendship
 {
-    public Guid User1Id {get; private set; }
+	public Guid User1Id {get; private set; }
 
     public Guid User2Id {get; private set; }
     public DateTime CreatedAt {get; private set; } = DateTime.UtcNow;
