@@ -128,7 +128,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 	public async Task<OtherProfileDto> GetOtherProfileAsync(Guid targetUserId, Guid viewerUserId, CancellationToken ct)
 	{
 		var user = await _userRepository.GetByIdAsync(targetUserId, ct)
-			?? throw new InvalidOperationException("User not found.");
+			?? throw new NotFoundException("User not found.");
 
 		bool areWeFrinds =
 			await _friendsRepository.IsFriendAsync(viewerUserId, targetUserId, ct);
@@ -152,6 +152,8 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 		var user = await _userRepository.GetByIdAsync(userId, ct)
 			?? throw new NotFoundException("User not found.");
 		
+		if (string.IsNullOrWhiteSpace(user.PasswordHash))
+			throw new InvalidOperationException("This account does not support password change.");//created with Google
 		
 		var verificationResult = _passwordHasher.VerifyHashedPassword(
 			user,

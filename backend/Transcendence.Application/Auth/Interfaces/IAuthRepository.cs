@@ -15,7 +15,16 @@ public interface IAuthRepository
 			//googlePayload.Name,
 			//DateTime.UtcNow,
 			//ct);
-	Task<User> CreateUserWithGoogleDetailsAsync(Guid userId, string Subject, string username, string email, string name, DateTime createdAt, CancellationToken ct);
+	Task<User> CreateUserWithGoogleDetailsAsync(
+		Guid userId,
+		string Subject,
+		string username,
+		string email,
+		string name,
+		DateTime createdAt,
+		string role,
+		CancellationToken ct
+	);
 	Task SaveChangesAsync(CancellationToken ct);
 
 

@@ -20,12 +20,15 @@ public sealed class AuthService : IAuthService
 		IUserRepository userRepository,
 		IPasswordHasher<User> passwordHasher,
 		IJwtTokenGenerator jwtTokenGenerator,
-		IGoogleAuthService googleAuthService)
+		IGoogleAuthService googleAuthService,
+		IAuthRepository authRepository
+		)
 	{
 		_userRepository = userRepository;
 		_passwordHasher = passwordHasher;
 		_jwtTokenGenerator = jwtTokenGenerator;
 		_googleAuthService = googleAuthService;
+		_authRepository = authRepository;
 	}
 
 	public async Task<AuthResponseDto> SignUpAsync(SignUpRequestDto request, CancellationToken ct)
@@ -77,7 +80,7 @@ public sealed class AuthService : IAuthService
 		if (!request.Password.Any(ch => !char.IsLetterOrDigit(ch)))
 			throw new ArgumentException("Password must contain at least one special character.", nameof(request.Password));
 		
-		var user = new User(
+		var user = User.CreateLocal(
 			Guid.NewGuid(),
 			request.Username,
 			request.Email,
@@ -107,6 +110,9 @@ public sealed class AuthService : IAuthService
 
 		var user = await _userRepository.GetByEmailAsync(request.Email, ct)
 			?? throw new UnauthorizedAccessException("Invalid credentials.");
+			
+		if (string.IsNullOrWhiteSpace(user.PasswordHash))
+			throw new UnauthorizedAccessException("This account does not support password sign-in.");
 
 		var verificationResult = _passwordHasher.VerifyHashedPassword(
 			user,
@@ -124,12 +130,14 @@ public sealed class AuthService : IAuthService
 			Token = token
 		};
 	}
+	
 
 	public Task SignOutAsync(CancellationToken ct)
 	{
 		ct.ThrowIfCancellationRequested();
 		return Task.CompletedTask;
 	}
+	
 	public async Task<AuthResponseDto> SignInWithGoogleAsync(
 	GoogleSignInRequestDto request,
 	CancellationToken ct)
@@ -161,6 +169,7 @@ public sealed class AuthService : IAuthService
 				googlePayload.Email,
 				googlePayload.Name,
 				DateTime.UtcNow,
+				"User",
 				ct);
 			await _authRepository.SaveChangesAsync(ct);
 		}

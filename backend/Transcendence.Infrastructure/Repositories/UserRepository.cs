@@ -23,11 +23,14 @@ public sealed class UserRepository : IUserRepository
     }
 	public Task<User?> GetByEmailAsync(string email, CancellationToken ct)
 	{
-		return _db.Users.SingleOrDefaultAsync(x => x.Email == email);
+		return _db.Users.SingleOrDefaultAsync(x => x.Email == email, ct);
 	}
-    public async Task<Guid> GetUserIdByAvatarFileIdAsync(Guid fileId, CancellationToken ct)
+    public async Task<Guid?> GetUserIdByAvatarFileIdAsync(Guid fileId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        return await _db.Users
+			.Where(x => x.AvatarFileId == fileId)
+			.Select(x => (Guid?)x.Id)
+			.SingleOrDefaultAsync(ct);
     }
 	public async Task  AddAsync(User user, CancellationToken ct)
 	{
