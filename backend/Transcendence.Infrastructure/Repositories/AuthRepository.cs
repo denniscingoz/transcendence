@@ -18,7 +18,7 @@ public class AuthRepository : IAuthRepository
 	public async Task<User?> GetByGoogleIdAsync(string subject, CancellationToken ct) 
 	{
 		return await _db.Users
-		.FirstOrDefaultAsync(u => u.GoogleId == subject, ct);
+		.SingleOrDefaultAsync(u => u.GoogleId == subject, ct);
 
 	}
 

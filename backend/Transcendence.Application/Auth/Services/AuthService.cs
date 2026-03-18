@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http.HttpResults;//used?
 using Microsoft.AspNetCore.Identity;
 using Transcendence.Application.Auth.DTOs;
 using Transcendence.Application.Auth.Interfaces;
@@ -56,14 +56,14 @@ public sealed class AuthService : IAuthService
 		if(request.FullName.Length > 100) { throw new ArgumentException("FullName must not exceed 100 characters.", nameof(request.FullName)); }
 		
 		
-		if(request.Username.Length > 100) { throw new ArgumentException("Username must not exceed 100 characters.", nameof(request.Username)); }
+		if(request.Username.Length > 50) { throw new ArgumentException("Username must not exceed 50 characters.", nameof(request.Username)); }
 		if(request.Username.Any(char.IsWhiteSpace))
 			throw new ArgumentException("Username must not contain whitespace.", nameof(request.Username));
 		if(request.Username.Length < 6)
 			throw new ArgumentException("Username must be at least 6 characters long.", nameof(request.Username));
 
-		if (request.Email.Length > 100)
-			throw new ArgumentException("Email must not exceed 100 characters.", nameof(request.Email));
+		if (request.Email.Length > 255)
+			throw new ArgumentException("Email must not exceed 255 characters.", nameof(request.Email));
 		if(!request.Email.Contains('@') || !request.Email.Contains('.'))
 			throw new ArgumentException("Email must be a valid email address.", nameof(request.Email));
 		if(request.Email.Any(char.IsWhiteSpace))
@@ -71,6 +71,7 @@ public sealed class AuthService : IAuthService
 
 
 		if (request.Password.Length < 8) { throw new ArgumentException("Password must be at least 8 characters long.", nameof(request.Password)); }
+		if (request.Password.Length > 100) { throw new ArgumentException("Password must not exceed 100 characters.", nameof(request.Password)); }
 		if (request.Password.Any(char.IsWhiteSpace))
 			throw new ArgumentException("Password must not contain whitespace.", nameof(request.Password));
 		if(!request.Password.Any(char.IsUpper))

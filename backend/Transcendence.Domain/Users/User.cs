@@ -70,32 +70,6 @@ public sealed class User
 
 		return user;
 	}
-
-	// public User(
-	// 	Guid id,
-	// 	string username,
-	// 	string email,
-	// 	string fullName,
-	// 	DateTime createdAt,
-	// 	string role,
-	// 	string? passwordHash,
-	// 	string? googleId)
-	// {
-	// 	if (id == Guid.Empty)
-	// 		throw new InvalidOperationException("Id cannot be empty.");
-	// 	if (passwordHash == null && googleId == null)
-	// 		throw new InvalidOperationException("User must have at least one authentication method.");
-	
-	// 	Id = id;
-	// 	SetUsername(username);
-	// 	SetEmail(email);
-	// 	SetFullName(fullName);
-	// 	if (passwordHash is not null)
-	// 		SetPasswordHash(passwordHash);
-	// 	SetRole(role);
-	// 	SetGoogleId(googleId);
-	// 	CreatedAt = createdAt;
-	// }
 	
 	private void SetUsername(string value)
 	{
@@ -103,7 +77,7 @@ public sealed class User
 		if (v.Length == 0)
 			throw new InvalidOperationException("Username cannot be empty.");//max length check? Best practice: important rules should be enforced before DB too.
 		if (v.Length > 50)
-			throw new InvalidOperationException("Username cannot exceed 100 characters.");
+			throw new InvalidOperationException("Username cannot exceed 50 characters.");
 		Username = v;
 	}
 	
@@ -135,8 +109,10 @@ public sealed class User
 	private void SetRole(string value)
 	{
 		var v = value.Trim();
-		if (v.Length == 0)//othe role length limits?
+		if (v.Length == 0)
 			throw new InvalidOperationException("Role cannot be empty.");
+		if (v.Length > 50)
+			throw new InvalidOperationException("Role cannot exceed 50 characters.");
 
 		Role = v;
 	}

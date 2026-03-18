@@ -130,7 +130,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 		var user = await _userRepository.GetByIdAsync(targetUserId, ct)
 			?? throw new NotFoundException("User not found.");
 
-		bool areWeFrinds =
+		bool areWeFriends =
 			await _friendsRepository.IsFriendAsync(viewerUserId, targetUserId, ct);
 
 		return new OtherProfileDto
@@ -142,7 +142,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			AvatarUrl = BuildAvatarFileUrl(user.AvatarFileId),
 			PostsCount = await _postRepository.CountByUserIdAsync(targetUserId, ct), //TODO
 			FriendsCount = await _friendsRepository.CountFriendsAsync(targetUserId, ct),
-			AreWeFriends = areWeFrinds
+			AreWeFriends = areWeFriends
 		};
 	}
 
@@ -168,8 +168,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 		user.SetPasswordHash(_passwordHasher.HashPassword(user, dto.NewPassword));
 		await _userRepository.SaveChangesAsync(ct);
 	}
-
-	string? BuildAvatarFileUrl(Guid? fileId)
+	private static string? BuildAvatarFileUrl(Guid? fileId)
 		=> fileId is Guid id ? $"/files/{id}" : null;
 
 }
