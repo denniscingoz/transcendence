@@ -10,5 +10,6 @@ public interface IRealtimeClient
     Task UserOffLine(PresenceEventDto presence);
     Task NotificationReceived(NotificationDto notification);
     Task OnlineUsersSnapshot(IEnumerable<Guid> users);
-
+    Task MessageRead(MessageReadDto read);
+    Task MessageDelivered(MessageDeliveredDto delivered);
 }

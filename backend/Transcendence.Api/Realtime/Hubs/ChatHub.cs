@@ -37,7 +37,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
         
         var userConversations = await _chatService.GetUserConversationsIds(userId);
         foreach (var c in userConversations)
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(c)); // это группы чатов сигналR он добавляет соеденине, то есть тут id conversations Signar и те что у нас в базе пересекаются
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(c)); // это группы чатов сигналR он добавляет соеденине, то есть тут id conversations SignalR и те что у нас в базе пересекаются
 
           if (_presenceService.AddConnection(userId, Context.ConnectionId)) //became online
         {
@@ -60,9 +60,9 @@ public sealed class ChatHub : Hub<IRealtimeClient>
 
         var onlineUsers = new HashSet<Guid>();
         
-        foreach(var c in userConversations)
+        foreach(var conv in userConversations)
         {
-            var participants = await _chatService.GetParticipantsIds(c);
+            var participants = await _chatService.GetParticipantsIds(conv);
 
             foreach (var p in participants)
             {
@@ -111,7 +111,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
         if (userId is not null)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.User(userId.Value)); 
-            if (_presenceService.RemoveConnection(userId.Value, Context.ConnectionId))
+            if (_presenceService.RemoveConnection(userId.Value, Context.ConnectionId)) // no more
             {
                 var presence = new PresenceEventDto
                 {
@@ -121,8 +121,8 @@ public sealed class ChatHub : Hub<IRealtimeClient>
                 };
                 var userConversations = await _chatService.GetUserConversationsIds(userId.Value);//??!!!
 
-                foreach(var c in userConversations)
-                    await Clients.Group(GroupNames.Conversation(c)).UserOffLine(presence);
+                foreach(var conv in userConversations)
+                    await Clients.Group(GroupNames.Conversation(conv)).UserOffLine(presence);
             }
 
         }
@@ -144,13 +144,13 @@ public sealed class ChatHub : Hub<IRealtimeClient>
         //OnDisconnectedAsync is a lifecycle hook provided by SignalR. It is invoked by the framework when a client connection is terminated. We override it to execute domain-specific cleanup logic, while still calling the base implementation to allow SignalR to perform its internal resource cleanup. At this point, the HTTP request is already completed, but the authenticated user’s ClaimsPrincipal is still available via the Hub context.
     }
 
-    public async Task JoinConversation(Guid conversationId)
+    public async Task JoinConversation(Guid conversationId) //by client
     {
         var userId = Context.User.GetUserId();
         await _chatService.AssertUserIsParticipant(conversationId, userId); 
         await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(conversationId)); //SignalR does all
     }
-
+ 
     public async Task LeaveConversation(Guid conversationId) //browser tab closed
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.Conversation(conversationId));  //signalR
@@ -167,13 +167,13 @@ public sealed class ChatHub : Hub<IRealtimeClient>
             dto.Content
         );
         await Clients.Group(GroupNames.Conversation(dto.ConversationId)) //message
-                    .MessageReceived(messageDto); //online users with opened chats
+                    .MessageReceived(messageDto); //online users with opened chats (client's method MessageReceived calls )
 
         var receivers = await _chatService.GetParticipantsIds(dto.ConversationId);
 
         await _notificationService.NotifyNewMessage(receivers, senderId, messageDto); // online users with closed chat window
         
-        await Clients.Caller.MessageAck(new MessageAckDto
+        await Clients.Caller.MessageAck(new MessageAckDto  
         {
             ClientMessageId = dto.ClientMessageId,
             MessageId = messageDto.MessageId,
@@ -181,11 +181,86 @@ public sealed class ChatHub : Hub<IRealtimeClient>
         });
     }
 
-        public Task RequestPresenceSnapshot()
+    public Task RequestPresenceSnapshot()
     {
         var online = _presenceService.GetOnlineUsers();
         return Clients.Caller.OnlineUsersSnapshot(online);
     }
+   
+    public async Task DeliveredMessage(Guid messageId, Guid conversationId, Guid senderId)
+    {
+        var  userId = Context.User.GetUserId(); 
+        
+
+        await Clients
+                .Group(GroupNames.User(senderId))  
+                .MessageDelivered(new MessageDeliveredDto
+                {
+                    ReaderId = userId,
+                    MessageId = messageId                
+                });
+    }
+
+    public  async Task MarkAsRead(Guid conversationId) //callling by client
+    {
+        var  userId = Context.User.GetUserId(); 
+
+        await _chatService.MarkConversationAsRead(userId, conversationId);
+        var lastMessageId = await _chatService.GetLastMessageId(conversationId);
+
+       await Clients
+            .OthersInGroup(GroupNames.Conversation(conversationId))
+            .MessageRead(new MessageReadDto
+            {
+                ConversationId = conversationId,
+                ReaderId = userId,
+                MessageId = lastMessageId ?? Guid.Empty
+            });
+    }   
+    /*
+
+    connection.invoke → запрос к серверу
+
+    Clients.* → сервер пушит событие
+
+    connection.on → клиент слушает события
+
+
+    CLIENT (reader)
+   |
+   | invoke MarkAsRead
+   v
+
+    HUB
+   |
+   | → ChatService.MarkConversationAsRead
+   |       (запись в БД)
+   |
+   | → Clients.OthersInGroup
+           (уведомление отправителей)
+
+        UserA sends message
+                |
+                v
+
+        Server saves message
+                |
+                v
+
+        UserB opens chat
+                |
+                v
+
+        ClientB -> MarkAsRead
+                |
+                v
+
+        Server updates DB
+                |
+                v
+
+        Server -> MessageRead -> UserA       
+    */
 }
 /*
 

@@ -2,18 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Transcendence.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace Transcendence.Infrastructure.Migrations
+namespace Transcendence.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(TranscendenceDbContext))]
-    partial class TranscendenceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260319160355_LastReadAt")]
+    partial class LastReadAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

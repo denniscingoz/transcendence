@@ -10,5 +10,8 @@ public interface IConversationRepository
     Task SaveChangesAsync();
     Task <IReadOnlyList <Guid>> GetUserConversationsIds(Guid userId);
     Task <IReadOnlyList<Guid>>  GetParticipantsIds(Guid conversationId);
-    Task <IReadOnlyList<Guid>>  GetUserInterlocutors(Guid userId);    
+     Task <IReadOnlyList<ConversationParticipant>>  GetConversationParticipants( Guid conversationId);
+     Task <ConversationParticipant>  GetParticipant(Guid userId, Guid conversationId);
+    // Task <IReadOnlyList<ConversationParticipant>>  GetOtherParticipants(Guid userId, Guid conversationId);
+    
 } 

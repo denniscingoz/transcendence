@@ -19,7 +19,7 @@ public class NotificationService : INotificationService
 
             // await _hub.Clients.Groups(groups)
             //                   .NotificationReceived(NotificationDto.NewMessage(message));
-            await _hub.Clients.All
+            await _hub.Clients.Groups(groups)
                 .NotificationReceived(NotificationDto.NewMessage(message));
             Console.WriteLine(
              $"Notify message {message.MessageId} to {string.Join(",", groups)}");

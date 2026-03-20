@@ -22,6 +22,9 @@ public sealed class Conversation
         {
             _participants.Add(new ConversationParticipant(Id, userId));
         }
+ /* Conversation
+    └── Participants (ConversationParticipant) //
+*/
     }
     public bool HasParticipant(Guid userId) => _participants.Any(p => p.UserId == userId);
 

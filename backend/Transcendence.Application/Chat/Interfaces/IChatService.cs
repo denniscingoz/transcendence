@@ -18,7 +18,8 @@ public interface IChatService
     Task AssertUserIsParticipant(Guid conversationId, Guid UserId);
     Task <IReadOnlyList<Guid>>  GetUserConversationsIds(Guid userId);
     Task <IReadOnlyList<Guid>>  GetParticipantsIds(Guid conversationId);
-   
+    Task MarkConversationAsRead(Guid userId, Guid conversationId);
+    Task<Guid?> GetLastMessageId(Guid conversationId);
 };
 
 /*

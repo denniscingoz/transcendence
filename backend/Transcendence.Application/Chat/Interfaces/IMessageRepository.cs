@@ -9,6 +9,8 @@ public interface IMessageRepository
         int offset,
         int limit
     );
+    Task<Guid?> GetLastMessageId(Guid conversationId);
+
 }
 
 /*

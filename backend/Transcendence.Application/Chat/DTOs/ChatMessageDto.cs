@@ -4,7 +4,10 @@ public sealed class ChatMessageDto
     public Guid MessageId { get; init; }
     public Guid ConversationId { get; init; }
     public Guid SenderId { get; init; }
+    public bool IsReadByUser { get; set; }
     public string Content { get; init; } = default!;
+    public bool IsReadByOthers { get; set; }
+
     public DateTimeOffset CreatedAt { get; init; }
 }
 /*

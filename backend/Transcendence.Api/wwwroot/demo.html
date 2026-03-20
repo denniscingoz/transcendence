@@ -1,369 +1,402 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Chat Demo</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
     <style>
+
         body {
             font-family: Arial;
         }
 
         .status-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 6px;
-            background-color: gray;
+            display:inline-block;
+            width:10px;
+            height:10px;
+            border-radius:50%;
+            margin-right:6px;
+            background-color:gray;
         }
+
+        .message-status {
+            font-size:12px;
+            margin-left:6px;
+            color:gray;
+        }
+
+        .read {
+            color:blue;
+        }
+
     </style>
 </head>
 
 <body>
 
-<h2>SignalR Chat Demo</h2>
+    <h2>SignalR Chat Demo</h2>
 
-<div>
-    <label>UserId:</label>
-    <input id="userIdInput" value="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" />
-</div>
+    <div>
+        <label>UserId:</label>
+        <input id="userIdInput" value="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"/>
+    </div>
 
-<div>
-    <label>Target UserId:</label>
-    <input id="targetUserIdInput" value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb" />
-    <button onclick="createConversation()">Create or get existed Conversation</button>
-</div>
+    <div>
+        <label>Target UserId:</label>
+        <input id="targetUserIdInput" value="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"/>
+        <button onclick="createConversation()">Create or get existed Conversation</button>
+    </div>
 
-<div>
-    <label>ConversationId:</label>
-    <input id="conversationIdInput" />
-</div>
+    <div>
+        <label>ConversationId:</label>
+        <input id="conversationIdInput"/>
+    </div>
 
-<hr/>
+    <hr/>
 
-<button onclick="connect()">Connect</button>
-<button onclick="joinConversation()">Join Conversation</button>
+    <button onclick="connect()">Connect</button>
+    <button onclick="joinConversation()">Join Conversation</button>
 
-<hr/>
+    <hr/>
 
-<div>
-    <input id="messageInput" placeholder="Type message..." />
-    <button onclick="sendMessage()">Send</button>
-</div>
+    <div>
+        <input id="messageInput" placeholder="Type message..."/>
+        <button onclick="sendMessage()">Send</button>
+    </div>
 
-<hr/>
+    <hr/>
 
-<h3>Users</h3>
-<ul id="users"></ul>
+    <h3>Users</h3>
+    <ul id="users"></ul>
 
-<hr/>
+    <hr/>
 
-<ul id="messages"></ul>
+    <ul id="messages"></ul>
 
-<script>
+    <script>
 
-let connection;
+        let connection;
+        let unreadCount = 0;
+        let messageMap = new Map();
+        let serverMessageMap = new Map();
 
-function renderUser(userId, online) {
+        function renderUser(userId, online){
+            let li = document.getElementById("user-" + userId);
 
-    let li = document.getElementById("user-" + userId);
-    let unreadCount = 0;
+            if(!li){
+                li = document.createElement("li");
+                li.id = "user-" + userId;
 
-    if (!li) {
+                const dot = document.createElement("span");
+                dot.className = "status-dot";
 
-        li = document.createElement("li");
-        li.id = "user-" + userId;
+                const name = document.createElement("span");
+                name.textContent = userId;
 
-        const dot = document.createElement("span");
-        dot.className = "status-dot";
+                li.appendChild(dot);
+                li.appendChild(name);
 
-        const name = document.createElement("span");
-        name.textContent = userId;
+                document.getElementById("users").appendChild(li);
+            }
 
-        li.appendChild(dot);
-        li.appendChild(name);
-
-        document.getElementById("users").appendChild(li);
-    }
-
-    const dot = li.querySelector(".status-dot");
-
-    if (online) {
-        dot.style.backgroundColor = "green";
-    } else {
-        dot.style.backgroundColor = "gray";
-    }
-}
-
-async function createConversation() {
-
-    const userId = document.getElementById("userIdInput").value;
-    const targetUserId = document.getElementById("targetUserIdInput").value;
-
-    const response = await fetch("http://localhost:5067/conversations/direct", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Dev-UserId": userId
-        },
-        body: JSON.stringify({ targetUserId })
-    });
-
-    const result = await response.json();
-
-    if (result.isSuccess || result.IsSuccess) {
-
-        const conversationId = result.data || result.Data;
-
-        document.getElementById("conversationIdInput").value = conversationId;
-
-        alert("Conversation created: " + conversationId);
-
-    } else {
-
-        alert("Error creating conversation");
-        console.log(result);
-    }
-}
-
-async function joinConversation() {
-
-    if (!connection) {
-        alert("Connect first!");
-        return;
-    }
-
-    const conversationId =
-        document.getElementById("conversationIdInput").value.trim();
-
-    if (!conversationId) {
-        alert("ConversationId is empty");
-        return;
-    }
-    await connection.invoke("JoinConversation", conversationId);
-    await loadMessages(conversationId);
-
-
-
-    console.log("Joined conversation:", conversationId);
-}
-
-async function connect() {
-
-    const userId =
-        document.getElementById("userIdInput").value.trim();
-
-    connection = new signalR.HubConnectionBuilder()
-        .withUrl(`http://localhost:5067/hubs/chat?userId=${userId}`)
-        .withAutomaticReconnect()
-        .build();
-
-    connection.onreconnected(async () => {
-
-        console.log("Reconnected");
-
-        const conversationId =
-            document.getElementById("conversationIdInput").value.trim();
-
-        if (conversationId) {
-            await connection.invoke("JoinConversation", conversationId);
-            await loadMessages(conversationId);
+            const dot = li.querySelector(".status-dot");
+            dot.style.backgroundColor = online ? "green" : "gray";
         }
 
-        await connection.invoke("RequestPresenceSnapshot");
-    });
-    connection.off("MessageReceived");
+        async function createConversation(){
+            const userId = document.getElementById("userIdInput").value;
+            const targetUserId = document.getElementById("targetUserIdInput").value;
 
+            const response = await fetch("http://localhost:5067/conversations/direct", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Dev-UserId": userId
+                },
+                body: JSON.stringify({targetUserId})
+            });
 
-    connection.on("MessageReceived", (message) => {
+            const result = await response.json();
+            const ok = result.isSuccess ?? result.IsSuccess;
 
-    if (document.hidden) {
-
-        unreadCount++;
-        updateTitle();
-        playBeep();
-
-        console.log("Message received in background");
-
-    }
-
-    const li = document.createElement("li");
-
-    li.textContent =
-        `[${message.createdAt}] ${message.senderId}: ${message.content}`;
-
-    document.getElementById("messages").appendChild(li);
-});
-
-    connection.off("UserOnLine");
-    connection.on("UserOnLine", (presence) => {
-
-        console.log("User online:", presence);
-
-        renderUser(presence.userId, true);
-    });
-
-    connection.off("UserOffLine");
-    connection.on("UserOffLine", (presence) => {
-
-        console.log("User offline:", presence);
-
-        renderUser(presence.userId, false);
-    });
-
-    connection.on("OnlineUsersSnapshot", (users) => {
-
-        for (const u of users) {
-            renderUser(u, true);
-        }
-    });
-
-    await connection.start();
-
-    const conversationId =
-    document.getElementById("conversationIdInput").value.trim();
-
-    if (conversationId) {
-        await connection.invoke("JoinConversation", conversationId);
-}
-    alert("Connected");
-}
-document.addEventListener("visibilitychange", async () => {
-
-    if (!document.hidden) {
-
-        unreadCount = 0;
-        updateTitle();
-
-        const conversationId =
-            document.getElementById("conversationIdInput").value.trim();
-
-        if (conversationId) {
-            await loadMessages(conversationId);
-        }
-    }
-});
-function updateTitle() {
-
-    if (unreadCount > 0) {
-        document.title = `(${unreadCount}) Chat Demo`;
-    } else {
-        document.title = "Chat Demo";
-    }
-}
-
-connection.on("NotificationReceived", (notification) => {
-
-    unreadCount++;
-    updateTitle();
-    playBeep();
-
-    console.log("Notification received:", notification);
-
-    const li = document.createElement("li");
-
-    li.textContent =
-        `🔔 New message from ${notification.payload.senderId}`;
-
-    document.getElementById("messages").appendChild(li);
-});
-
-function playBeep() {
-
-    const ctx = new AudioContext();
-    const oscillator = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = 880;
-
-    oscillator.connect(gain);
-    gain.connect(ctx.destination);
-
-    oscillator.start();
-
-    setTimeout(() => {
-        oscillator.stop();
-        ctx.close();
-    }, 120);
-}
-async function sendMessage() {
-
-    const conversationId =
-        document.getElementById("conversationIdInput").value.trim();
-
-    const content =
-        document.getElementById("messageInput").value;
-
-    if (!conversationId || !content) {
-
-        alert("ConversationId or message is empty");
-        return;
-    }
-
-    const dto = {
-        conversationId: conversationId,
-        clientMessageId: crypto.randomUUID(),
-        content: content
-    };
-
-    console.log("DTO being sent:", dto);
-
-    await connection.invoke("SendMessage", dto);
-
-    document.getElementById("messageInput").value = "";
-}
-
- 
-
-async function loadMessages(conversationId) {
-
-    const userId =
-        document.getElementById("userIdInput").value.trim();
-
-    const response = await fetch(
-        `http://localhost:5067/conversations/${conversationId}/messages?offset=0&limit=50`,
-        {
-            headers: {
-                "X-Dev-UserId": userId
+            if(ok){
+                const conversationId = result.data ?? result.Data;
+                document.getElementById("conversationIdInput").value = conversationId;
+                alert("Conversation created: " + conversationId);
+            }else{
+                alert("Error creating conversation");
+                console.log(result);
             }
         }
-    );
 
-    const result = await response.json();
+        async function joinConversation(){
+            if(!connection){
+                alert("Connect first!");
+                return;
+            }
 
-    const ok = result.isSuccess ?? result.IsSuccess;
-    const messages = result.data ?? result.Data ?? [];
+            const conversationId = document.getElementById("conversationIdInput").value.trim();
 
-    if (!ok) {
+            if(!conversationId){
+                alert("ConversationId empty");
+                return;
+            }
 
-        alert("Failed to load messages");
-        return;
-    }
+            await connection.invoke("JoinConversation", conversationId);
+            await loadMessages(conversationId);
+            await connection.invoke("MarkAsRead", conversationId);
 
-    messages.sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-    );
+            console.log("Joined conversation:", conversationId);
+        }
 
-    const list = document.getElementById("messages");
+        async function connect(){
+            const userId = document.getElementById("userIdInput").value.trim();
 
-    list.innerHTML = "";
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(`http://localhost:5067/hubs/chat?userId=${userId}`)
+                .withAutomaticReconnect()
+                .build();
 
-    for (const m of messages) {
+            connection.on("MessageReceived", async (message) => {
 
+                const myUserId = document.getElementById("userIdInput").value.trim();
+
+                // 👉 если это НЕ моё сообщение
+                if (message.senderId !== myUserId) {
+
+                    const li = document.createElement("li");
+                    li.textContent = `[${message.createdAt}] ${message.senderId}: ${message.content}`;
+                    document.getElementById("messages").appendChild(li);
+
+                    await connection.invoke(
+                        "DeliveredMessage",
+                        message.messageId,
+                        message.conversationId,
+                        message.senderId
+                    );
+                if (!document.hidden) {
+                        await connection.invoke("MarkAsRead", message.conversationId);
+                    }
+
+                } 
+            });
+
+            connection.on("MessageAck", (ack) => {
+                console.log("ACK:", ack);
+
+                messageMap.set(ack.clientMessageId, ack.messageId);
+
+
+                const status = document.getElementById("status-" + ack.clientMessageId);
+                if(status){
+                    status.textContent = "sent ✓";
+                }
+            });
+
+            connection.on("MessageDelivered", (data) => {
+                console.log("Delivered:", data);
+
+                // data.messageId приходит с сервера
+                for (let [clientId, msgId] of messageMap.entries()) {
+                    if (msgId === data.messageId) {
+
+                        const status = document.getElementById("status-" + clientId);
+                        if (status) {
+                            status.textContent = "delivered ✓✓";
+                        }
+
+                        break;
+                    }
+                }
+            });
+            connection.on("MessageRead", (data) => {
+
+                for (let [clientId, msgId] of messageMap.entries()) {
+                    if (msgId === data.messageId) {
+
+                        const status = document.getElementById("status-" + clientId);
+                        if (status) {
+                            status.textContent = "read ✓✓";
+                            status.classList.add("read");
+                        }
+
+                        break;
+                    }
+                }
+            });
+            connection.on("NotificationReceived", (notification) => {
+
+                const currentConversationId =
+                    document.getElementById("conversationIdInput").value.trim();
+
+                // если это другой чат → показываем ВСЕГДА
+                if (notification.payload.conversationId !== currentConversationId) {
+                    unreadCount++;
+                    updateTitle();
+                    playBeep();
+                    return;
+                }
+
+                // если тот же чат — только если вкладка скрыта
+                if (document.hidden) {
+                    unreadCount++;
+                    updateTitle();
+                    playBeep();
+                }
+            });
+            connection.on("UserOnLine", (presence) => {
+                renderUser(presence.userId, true);
+            });
+
+            connection.on("UserOffLine", (presence) => {
+                renderUser(presence.userId, false);
+            });
+
+            connection.on("OnlineUsersSnapshot", (users) => {
+                for(const u of users){
+                    renderUser(u, true);
+                }
+            });
+            connection.onreconnected(async () => {
+
+                console.log("Reconnected");
+
+                const conversationId =
+                    document.getElementById("conversationIdInput").value.trim();
+
+                if (conversationId) {
+
+                    await connection.invoke("JoinConversation", conversationId);
+
+                }
+
+                await connection.invoke("RequestPresenceSnapshot");
+
+            });
+            await connection.start();
+            await connection.invoke("RequestPresenceSnapshot");
+            alert("Connected");
+       
+            connection.onclose(() => {
+                 document.querySelectorAll(".status-dot").forEach(dot => {
+            dot.style.backgroundColor = "gray";
+                });
+            });
+        }
+
+        function updateTitle(){
+            document.title = unreadCount > 0 ? `(${unreadCount}) Chat Demo` : "Chat Demo";
+        }
+
+        function playBeep(){
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.frequency.value = 880;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start();
+
+            setTimeout(() => {
+                osc.stop();
+                ctx.close();
+            }, 120);
+        }
+
+         async function sendMessage(){
+            const conversationId = document.getElementById("conversationIdInput").value.trim();
+            const content = document.getElementById("messageInput").value;
+
+            if(!conversationId || !content){
+                alert("ConversationId or message empty");
+                return;
+            }
+
+            const clientMessageId = crypto.randomUUID();
+
+            createMyMessage(content, clientMessageId);
+
+            const dto = {
+                conversationId,
+                clientMessageId,
+                content
+            };
+
+            try {
+                await connection.invoke("SendMessage", dto);
+            } catch (e) {
+                const status = document.getElementById("status-" + clientMessageId);
+                if(status){
+                    status.textContent = "failed ❌";
+                    status.style.color = "red";
+                }
+            }
+
+            document.getElementById("messageInput").value = "";
+        }
+
+        async function loadMessages(conversationId){
+            const userId = document.getElementById("userIdInput").value.trim();
+
+            const response = await fetch(
+                `http://localhost:5067/conversations/${conversationId}/messages?offset=0&limit=50`,
+                {
+                    headers: {
+                        "X-Dev-UserId": userId
+                    }
+                }
+            );
+
+            const result = await response.json();
+            const ok = result.isSuccess ?? result.IsSuccess;
+            const messages = result.data ?? result.Data ?? [];
+
+            if(!ok){
+                alert("Failed load messages");
+                return;
+            }
+
+            messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+            const list = document.getElementById("messages");
+            list.innerHTML = "";
+
+            for(const m of messages){
+                const li = document.createElement("li");
+                li.textContent = `[${m.createdAt}] ${m.senderId}: ${m.content}`;
+                list.appendChild(li);
+            }
+        }
+
+        document.addEventListener("visibilitychange", async () => {
+            if(!document.hidden){
+                unreadCount = 0;
+                updateTitle();
+
+                const conversationId = document.getElementById("conversationIdInput").value.trim();
+
+                if(conversationId){
+                    await connection.invoke("MarkAsRead", conversationId);
+                    await loadMessages(conversationId);
+                }
+            }
+        });
+
+        function createMyMessage(content, clientMessageId) {
         const li = document.createElement("li");
+        li.id = "msg-" + clientMessageId;
 
-        li.textContent =
-            `[${m.createdAt}] ${m.senderId}: ${m.content}`;
+        li.innerHTML = `You: ${content}
+        <span id="status-${clientMessageId}" class="message-status">sending...</span>`;
 
-        list.appendChild(li);
-    }
-}
- 
-</script>
+        document.getElementById("messages").appendChild(li);
+        }
+
+    </script>
 
 </body>
 </html>

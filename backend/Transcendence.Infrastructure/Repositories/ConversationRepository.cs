@@ -49,20 +49,40 @@ public sealed class ConversationRepository : IConversationRepository
                         .ToListAsync();
        
     }
-     public async Task <IReadOnlyList<Guid>>  GetUserInterlocutors(Guid userId)
+
+    // public async Task <IReadOnlyList<ConversationParticipant>>  GetOtherParticipants(Guid userId, Guid conversationId)
+    // {
+    //     return await  _db.ConversationParticipants
+    //                     .Where(p => p.ConversationId == conversationId && p.UserId != userId).ToListAsync();
+       
+    // }
+    public async Task <IReadOnlyList<ConversationParticipant>>  GetConversationParticipants( Guid conversationId)
     {
-            return await _db.ConversationParticipants
-                    .Where(p => p.UserId != userId)                 //  3
-                        .Where(p => _db.ConversationParticipants            //  2 all participants in the conversations
-                                .Where(cp => cp.UserId == userId)           //  1 finds the lines where our user is involved
-                                .Select(cp => cp.ConversationId)            //  1 takes the ConversationId of his conversations
-                                .Contains(p.ConversationId)                 //  2 check: conversationId of current p is among these conversations
-                        )
-                    .Select(p => p.UserId)                          //  3  
-                    .Distinct()                                     //  3 
-                    .ToListAsync();                                 //  3 
+        return await  _db.ConversationParticipants
+                        .Where(p => p.ConversationId == conversationId).ToListAsync();
        
     }
+        public async Task <ConversationParticipant>  GetParticipant(Guid userId, Guid conversationId)
+    {
+        return await  _db.ConversationParticipants
+                        .FirstAsync(p => p.ConversationId == conversationId &&
+                             p.UserId == userId);
+       
+    }
+    //  public async Task <IReadOnlyList<Guid>>  GetUserInterlocutors(Guid userId)
+    // {
+    //         return await _db.ConversationParticipants
+    //                 .Where(p => p.UserId != userId)                 //  3
+    //                     .Where(p => _db.ConversationParticipants            //  2 all participants in the conversations
+    //                             .Where(cp => cp.UserId == userId)           //  1 finds the lines where our user is involved
+    //                             .Select(cp => cp.ConversationId)            //  1 takes the ConversationId of his conversations
+    //                             .Contains(p.ConversationId)                 //  2 check: conversationId of current p is among these conversations
+    //                     )
+    //                 .Select(p => p.UserId)                          //  3  
+    //                 .Distinct()                                     //  3 
+    //                 .ToListAsync();                                 //  3 
+       
+    // }
     /*
                     SELECT DISTINCT p.UserId
                     FROM ConversationParticipants p

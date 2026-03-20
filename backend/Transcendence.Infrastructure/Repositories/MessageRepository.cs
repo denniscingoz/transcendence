@@ -32,6 +32,13 @@ public sealed class  MessageRepository : IMessageRepository
         .Take(limit)
         .ToListAsync();
     }
+        public async Task<Guid?> GetLastMessageId(Guid conversationId)
+        {
+                    return await _db.Messages.Where(m => m.ConversationId == conversationId)
+                .OrderByDescending(m => m.CreatedAt)
+                .Select(m => m.Id)
+                .FirstOrDefaultAsync();
+        }
 }
 
  
