@@ -9,7 +9,7 @@ public interface IFriendshipRepository
 	Task AddAsync(Friendship friendship, CancellationToken ct);
 	Task RemoveAsync(Guid userAId, Guid userBId, CancellationToken ct);
 	Task<int> CountFriendsAsync(Guid userId, CancellationToken ct);
-	Task<IReadOnlyList<Guid>> CountFriendsAsync(Guid userId, CancellationToken ct);
+	Task<IReadOnlyList<Guid>> ListFriendsAsync(Guid userId, CancellationToken ct);
 	Task SaveChangesAsync(CancellationToken ct);
 
 }

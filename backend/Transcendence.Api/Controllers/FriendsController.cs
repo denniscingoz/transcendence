@@ -32,10 +32,10 @@ public sealed class FriendsController : ControllerBase
 
 	//POST /friends/{friendUserId}
 	[HttpPost("{targetUserId:guid}")]
-	public async Task<IActionResult> SendFriendshipRequest(Guid targetUserId)
+	public async Task<IActionResult> SendFriendshipRequest(Guid targetUserId, CancellationToken ct)
 	{
 		Guid requesterId = GetUserId();
-		await _friendsService.SendFriendRequestAsync(requesterId, targetUserId, ct);
+		await _friendsService.SendFriendshipRequestAsync(requesterId, targetUserId, ct);
 		return StatusCode(StatusCodes.Status201Created); // 201, no body, no Location
 	}
 
@@ -50,28 +50,28 @@ public sealed class FriendsController : ControllerBase
 
 	//GET /friends/requests
 	[HttpGet("requests")]
-	public async Task<ActionResult<ApiResponse<IReadOnlyList<FriendshipRequestDto>>>> GetFriendshipRequestList()
+	public async Task<ActionResult<ApiResponse<IReadOnlyList<FriendshipRequestDto>>>> GetFriendshipRequestList(CancellationToken ct)
 	{
 		Guid userId = GetUserId(); //todo auth
-		var requests = await _friendsService.GetFriendshipRequestListAsync(userId);
+		var requests = await _friendsService.GetFriendshipRequestListAsync(userId, ct);
 		return this.OkResponse(requests);
 	}
 
 	//POST /friends/requests/{requestId}/accept
 	[HttpPost("requests/{requestId:guid}/accept")]
-	public async Task<IActionResult> AcceptFriendshipRequest(Guid requestId)
+	public async Task<IActionResult> AcceptFriendshipRequest(Guid requestId, CancellationToken ct)
 	{
 		Guid currentUserId = GetUserId();
-		await _friendsService.AcceptFriendshipRequestAsync(requestId, currentUserId);
+		await _friendsService.AcceptFriendshipRequestAsync(requestId, currentUserId, ct);
 		return NoContent(); // 204
 	}
 
 	//POST /friends/requests/{requestId}/decline
 	[HttpPost("requests/{requestId:guid}/decline")]
-	public async Task<IActionResult> DeclineFriendshipRequest(Guid requestId)
+	public async Task<IActionResult> DeclineFriendshipRequest(Guid requestId, CancellationToken ct)
 	{
 		Guid currentUserId = GetUserId();
-		await _friendsService.DeclineFriendshipRequestAsync(requestId, currentUserId);
+		await _friendsService.DeclineFriendshipRequestAsync(requestId, currentUserId, ct);
 		return NoContent(); // 204
 	}
 

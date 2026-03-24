@@ -39,12 +39,12 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 		if (await _friendshipRepository.IsFriendAsync(requesterId, targetUserId, ct))
 			throw new AlreadyFriendsException();
 
-		if (await _friendRequestRepository.ExistsPendingAsync(requesterId, targetUserId, ct) ||
-			await _friendRequestRepository.ExistsPendingAsync(targetUserId, requesterId, ct))
-			throw new FriendRequestAlreadyExistsException();
+		if (await _friendshipRequestRepository.ExistsPendingAsync(requesterId, targetUserId, ct) ||
+			await _friendshipRequestRepository.ExistsPendingAsync(targetUserId, requesterId, ct))
+			throw new FriendshipRequestAlreadyExistsException();
 
 		var requestId = Guid.NewGuid();
-		var request = new FriendshipshipRequest(requestId, requesterId, targetUserId, DateTime.UtcNow);
+		var request = new FriendshipRequest(requestId, requesterId, targetUserId, DateTime.UtcNow);
 		await _friendshipRequestRepository.AddAsync(request, ct);
 		await _friendshipRequestRepository.SaveChangesAsync(ct);
 
@@ -81,7 +81,7 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 		if (request.TargetUserId != currentUserId)
 			throw new NotAllowedToFriendException("You cannot decline this friend request.");
 		await _friendshipRequestRepository.RemoveAsync(requestId, ct);
-		await _friendRequestRepository.SaveChangesAsync(ct);
+		await _friendshipRequestRepository.SaveChangesAsync(ct);
 	}
 
 	// GET friends/requests

@@ -26,7 +26,7 @@ public sealed class FriendshipRepository : IFriendshipRepository
         // NOTE: SaveChanges is usually done by UnitOfWork / transaction pipeline, not here.
     }
 
-    public async Task RemoveAsync(Guid userAId, Guid userBId)
+    public async Task RemoveAsync(Guid userAId, Guid userBId, CancellationToken ct)
     {
         var (u1, u2) = Normalize(userAId, userBId);
 
@@ -44,16 +44,12 @@ public sealed class FriendshipRepository : IFriendshipRepository
     
     public async Task <int> CountFriendsAsync (Guid userId, CancellationToken ct)
     {
-        return await _db.UserFollows.CountAsync(x => x.User2Id == userId);
-    }
-	
-	// public Task<int> CountByUserIdAsync(Guid userId)
-    // {
-    //     return _db.Friendships.CountByUserIdAsync(f => f.User1Id == userId || f.User2Id == userId);
-    //     //return await _db.UserFollows.CountAsync(x => x.User2Id == userId);
-    // }
+        throw new NotImplementedException("Should be implemented");
 
-    public async Task<IReadOnlyList<Guid>> ListFriendsAsync(Guid userId)
+        //return await _db.UserFollows.CountAsync(x => x.User2Id == userId);
+    }
+
+    public async Task<IReadOnlyList<Guid>> ListFriendsAsync(Guid userId, CancellationToken ct)
     {
         //throw new NotImplementedException("Should be implemented");
         // returns friend IDs, not User objects

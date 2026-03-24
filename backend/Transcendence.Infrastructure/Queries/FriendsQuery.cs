@@ -12,31 +12,40 @@ public sealed class FriendsQuery : IFriendsQuery
     public FriendsQuery(TranscendenceDbContext db)
         => _db = db;
 
-    public async Task<IReadOnlyList<FriendDto>> ListFriendsAsync(Guid userId)
+    public async Task<IReadOnlyList<FriendDto>> ListFriendsAsync(Guid userId, CancellationToken ct)
     {
         // Friendships are stored normalized: (User1Id < User2Id).
         // For a given user, friend is the "other" side.
         var friendIds = await _db.Friendships
             .Where(f => f.User1Id == userId || f.User2Id == userId)
             .Select(f => f.User1Id == userId ? f.User2Id : f.User1Id)
-            .ToListAsync();
+            .ToListAsync(ct);
 
-        // Adjust mapping depending on what FriendDto contains.
-        var friends = await _db.Users
+        var users = await _db.Users
             .Where(u => friendIds.Contains(u.Id))
+            .Select(u => new
+            {
+                u.Id,
+                u.Username,
+                u.FullName,
+                u.AvatarFileId
+            })
+            .ToListAsync(ct);
+
+        var friends = users
             .Select(u => new FriendDto
             {
                 Id = u.Id,
-                Username = u.Username,     // adapt field names
-                FullName = u.FullName,     // adapt field names
-                AvatarUrl = u.AvatarUrl    // adapt field names
+                Username = u.Username,
+                FullName = u.FullName,
+                AvatarUrl = u.AvatarFileId.HasValue ? $"/files/{u.AvatarFileId.Value}" : null
             })
-            .ToListAsync();
+            .ToList();
 
         return friends;
     }
 
-    public async Task<IReadOnlyList<FriendshipRequestDto>> ListFriendshipRequestsAsync(Guid userId)
+    public async Task<IReadOnlyList<FriendshipRequestDto>> ListFriendshipRequestsAsync(Guid userId, CancellationToken ct)
     {
         // Requests *to* me: I’m TargetUserId and somebody else requested me.
         var requests = await _db.FriendshipRequests
@@ -49,7 +58,7 @@ public sealed class FriendsQuery : IFriendsQuery
                 TargetUserId = r.TargetUserId,
                 CreatedAt = r.CreatedAt
             })
-            .ToListAsync();
+            .ToListAsync(ct);
 
         return requests;
     }

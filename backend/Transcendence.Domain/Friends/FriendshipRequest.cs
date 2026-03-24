@@ -1,6 +1,6 @@
 using Transcendence.Domain.Exceptions;
 namespace Transcendence.Domain.Friends;
-public sealed class FriendshipshipRequest
+public sealed class FriendshipRequest
 {
 	public Guid Id { get; private set; }
 	public Guid RequesterId { get; private set; }
