@@ -3,7 +3,8 @@
 namespace Transcendence.Application.Friends.Interfaces;
 public interface IFriendshipRequestRepository
 {
-	Task<bool> ExistsPendingAsync(Guid requesterId, Guid targetUserId, CancellationToken ct);
+	//Task<bool> ExistsPendingAsync(Guid requesterId, Guid targetUserId, CancellationToken ct);
+	Task<bool> ExistsPendingBetweenAsync(Guid userAId, Guid userBId, CancellationToken ct);
 	Task AddAsync(FriendshipRequest request, CancellationToken ct);
 	Task RemoveAsync(Guid requestId, CancellationToken ct); // decline or cancel
 	Task<FriendshipRequest?> GetAsync(Guid requesterId, CancellationToken ct);

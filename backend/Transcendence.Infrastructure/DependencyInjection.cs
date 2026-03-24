@@ -20,14 +20,14 @@ namespace Transcendence.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
-    {
-        var connectionString =
-            configuration.GetConnectionString("DefaultConnection");
+	public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+	{
+		var connectionString =
+			configuration.GetConnectionString("DefaultConnection");
 
-        services.AddDbContext<TranscendenceDbContext>(options =>options.UseNpgsql(connectionString)); // config DBcontetx and uses Npgsql.EntityFrameworkCore.PostgreSQL
+		services.AddDbContext<TranscendenceDbContext>(options =>options.UseNpgsql(connectionString)); // config DBcontetx and uses Npgsql.EntityFrameworkCore.PostgreSQL
 
-        services.AddScoped<IUserRepository, UserRepository>(); // when IUserRepository needed - creates UserRepository
+		services.AddScoped<IUserRepository, UserRepository>(); // when IUserRepository needed - creates UserRepository
 
 		services.AddScoped<IPostsRepository, PostsRepository>();
 		services.AddScoped<IPostsFeedRepository, PostsFeedRepository>();
@@ -36,22 +36,18 @@ public static class DependencyInjection
 
 		services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 		services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-        services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+		services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+		services.AddScoped<IAuthRepository, AuthRepository>();
 
 
 		services.AddScoped<IFriendsQuery, FriendsQuery>();
-        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<IFriendshipRequestRepository, FriendshipRequestRepository>();
-		
-
-        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-        services.AddScoped<IAuthRepository, AuthRepository>();
-
+		services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+		services.AddScoped<IFriendshipRequestRepository, FriendshipRequestRepository>();
 
 		services.AddScoped<IFilesRepository, FilesRepository>();
-        services.AddScoped<IFilesStorage, FilesStorage>();
+		services.AddScoped<IFilesStorage, FilesStorage>();
 
 
 		return services;
-    }
+	}
 }

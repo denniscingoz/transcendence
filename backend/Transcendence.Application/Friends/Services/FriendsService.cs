@@ -39,8 +39,7 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 		if (await _friendshipRepository.IsFriendAsync(requesterId, targetUserId, ct))
 			throw new AlreadyFriendsException();
 
-		if (await _friendshipRequestRepository.ExistsPendingAsync(requesterId, targetUserId, ct) ||
-			await _friendshipRequestRepository.ExistsPendingAsync(targetUserId, requesterId, ct))
+		if (await _friendshipRequestRepository.ExistsPendingBetweenAsync(requesterId, targetUserId, ct))
 			throw new FriendshipRequestAlreadyExistsException();
 
 		var requestId = Guid.NewGuid();
@@ -68,9 +67,8 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 
 		var friendship = new Friendship(request.RequesterId, request.TargetUserId, DateTime.UtcNow);
 		await _friendshipRepository.AddAsync(friendship, ct);
-		await _friendshipRepository.SaveChangesAsync(ct);
 		await _friendshipRequestRepository.RemoveAsync(requestId, ct);
-		await _friendshipRequestRepository.SaveChangesAsync(ct);
+		await _friendshipRepository.SaveChangesAsync(ct);// Save both changes in one transaction.
 	}
 
 	// DELETE friends/requests/{requestId}
