@@ -50,7 +50,7 @@ public class PostsService : IPostsService
 		var author = await _userRepository.GetByIdAsync(authorId, ct)
 				?? throw new NotFoundException("Author not found.");
 		var likesCount = await _postRepository.GetLikeCountAsync(postId, ct);
-		var comments = await _postRepository.GetCommentsAsync(postId, ct);
+		//var comments = await _postRepository.GetCommentsAsync(postId, ct);//not used
 
 		string? BuildAvatarFileUrl(Guid? fileId)
 			=> fileId is Guid id ? $"/files/{id}" : null;
@@ -133,6 +133,11 @@ public class PostsService : IPostsService
 			if (!isFriend)
 				throw new ForbiddenException("You do not have permission to like this post.");
 		}
+		
+		var existingLike = await _postRepository.GetLikeAsync(postId, currentUserId, ct);//idempotency check
+		if (existingLike is not null)
+			return;
+		
 		await _postRepository.AddLikeAsync(postId, currentUserId, ct);
 		await _postRepository.SaveChangesAsync(ct);
 	}
@@ -141,8 +146,9 @@ public class PostsService : IPostsService
 	// DELETE /posts/{postId}/like
 	public async Task UnlikePostAsync(Guid postId, Guid currentUserId, CancellationToken ct)
 	{
-		var like = await _postRepository.GetLikeAsync(postId, currentUserId, ct)
-			?? throw new NotFoundException("Like not found.");
+		var like = await _postRepository.GetLikeAsync(postId, currentUserId, ct);
+		if (like is null)
+			return; // idempotency: if like doesn't exist, consider it already "unliked"
 
 		if (like.AuthorId != currentUserId)
 			throw new ForbiddenException("You do not have permission to unlike this post.");

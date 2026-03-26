@@ -26,20 +26,28 @@ public sealed class Post
 		Id = id;
 		AuthorId = authorId;
 		ImageFileId = imageFileId;
-		Content = content;
+		Content = NormalizeContent(content);
 		CreatedAtUtc = DateTime.UtcNow;
 	}
 
 	public void UpdateContent(string? content)
 	{
-		Content = content;
+		Content = NormalizeContent(content);// if empty content, trim and convert to null for consistency.
 		UpdatedAtUtc = DateTime.UtcNow;
 	}
-
+	
 	public void ChangeImage(Guid newImageFileId)
 	{
 		if (newImageFileId == Guid.Empty) throw new ArgumentException("ImageFileId is required.", nameof(newImageFileId));
 		ImageFileId = newImageFileId;
 		UpdatedAtUtc = DateTime.UtcNow;
+	}
+	
+	private static string? NormalizeContent(string? content)
+	{
+		if (content is null) return null;
+	
+		var trimmed = content.Trim();
+		return trimmed.Length == 0 ? null : trimmed;
 	}
 }

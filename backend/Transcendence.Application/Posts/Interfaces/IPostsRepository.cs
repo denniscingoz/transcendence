@@ -7,7 +7,7 @@ public interface IPostsRepository
 	Task<int> CountByUserIdAsync(Guid userId, CancellationToken ct);
 
 	//GET /posts/{postId}
-	Task<Post> GetPostAsync(Guid postId, CancellationToken ct);
+	Task<Post?> GetPostAsync(Guid postId, CancellationToken ct);//dasha: added ? as service uses it as nullable ??
 
 	//POST /posts
 	Task AddPostAsync(Post post, CancellationToken ct);
@@ -27,10 +27,10 @@ public interface IPostsRepository
 
 	// DELETE /posts/{postId}/comment/{commentId}
 	Task RemoveCommentAsync(Comment comment, CancellationToken ct);
-	Task<Comment> GetCommentAsync(Guid postId, Guid commentId, CancellationToken ct);
+	Task<Comment?> GetCommentAsync(Guid postId, Guid commentId, CancellationToken ct);
 
 
-	Task<Like> GetLikeAsync(Guid postId, Guid currentUserId, CancellationToken ct);
+	Task<Like?> GetLikeAsync(Guid postId, Guid currentUserId, CancellationToken ct);
 	Task<int> GetLikeCountAsync(Guid postId, CancellationToken ct);
 	Task<IReadOnlyList<CommentPreviewDto>> GetCommentsAsync(Guid postId, CancellationToken ct);
 

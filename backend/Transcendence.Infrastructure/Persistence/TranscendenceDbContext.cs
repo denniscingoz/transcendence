@@ -7,7 +7,6 @@ using Transcendence.Domain.Files;
 
 namespace Transcendence.Infrastructure.Persistence;
 
-
 public class TranscendenceDbContext: DbContext
 {
 	public TranscendenceDbContext( 

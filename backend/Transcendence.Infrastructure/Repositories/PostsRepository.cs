@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using System.Data;
+//using System.Data;
 using Transcendence.Application.Posts.DTOs;
 using Transcendence.Application.Posts.Interfaces;
 using Transcendence.Domain.Posts;
@@ -9,83 +9,111 @@ namespace Transcendence.Infrastructure.Repositories;
 
 public sealed class PostsRepository : IPostsRepository
 {
-	private readonly Transcendence.Infrastructure.Persistence.TranscendenceDbContext _db;
+	private readonly TranscendenceDbContext _db;
 
-	public PostsRepository( Transcendence.Infrastructure.Persistence.TranscendenceDbContext db)
+	public PostsRepository(TranscendenceDbContext db)
 	{
 		_db = db;
 	}
 	
-	public async Task<int> CountByUserIdAsync(Guid userId, CancellationToken ct)
+	public Task<int> CountByUserIdAsync(Guid userId, CancellationToken ct)
 	{
-		return await _db.Posts.CountAsync(x => x.AuthorId == userId);
+		return _db.Posts.CountAsync(x => x.AuthorId == userId, ct);
 	}
 
-
-
 	//GET /posts/{postId}
-	public async Task<Post> GetPostAsync(Guid postId, CancellationToken ct)
+	public Task<Post?> GetPostAsync(Guid postId, CancellationToken ct)
 	{
-		throw new NotImplementedException("Should be implemented");
+		return _db.Posts.SingleOrDefaultAsync(x => x.Id == postId, ct);
 	}
 	//POST /posts
 	public async Task AddPostAsync(Post post, CancellationToken ct)
 	{
-		throw new NotImplementedException("Should be implemented");
+		await _db.Posts.AddAsync(post, ct);
 	}
 	//DELETE /posts/{postId}
-	public async void Remove(Post post)
+	public void Remove(Post post)
 	{
-		throw new NotImplementedException("Should be implemented");
+		_db.Posts.Remove(post);
 	}
 
 	//POST /posts/{postId}/like
 	public async Task AddLikeAsync(Guid postId, Guid userId, CancellationToken ct) // you have to check if like already exists before calling this, otherwise it will throw (due to PK constraint)
 	{
-		throw new NotImplementedException("Should be implemented");
+		var like = new Like(Guid.NewGuid(), postId, userId);
+		await _db.Likes.AddAsync(like, ct);
 	}
 	//DELETE /posts/{postId}/like
-	public async Task RemoveLikeAsync(Like like, CancellationToken ct) // you have to check if like exists before calling this, otherwise it will throw (due to PK constraint)
+	public Task RemoveLikeAsync(Like like, CancellationToken ct) // you have to check if like exists before calling this, otherwise it will throw (due to PK constraint)
 	{
-		throw new NotImplementedException("Should be implemented");
+		_db.Likes.Remove(like);
+		return Task.CompletedTask;
 	}
 
 	// POST /posts/{postId}/comment
 	public async Task AddCommentAsync(Comment comment, CancellationToken ct)
 	{
-		throw new NotImplementedException("Should be implemented");
+		await _db.Comments.AddAsync(comment, ct);
 	}
 	// DELETE /posts/{postId}/comment/{commentId}
-	public async Task RemoveCommentAsync(Comment comment, CancellationToken ct)
+	public Task RemoveCommentAsync(Comment comment, CancellationToken ct)
 	{
-		throw new NotImplementedException("Should be implemented");
+		_db.Comments.Remove(comment);
+		return Task.CompletedTask;
 	}
 	
-	public async Task<Comment> GetCommentAsync(Guid postId, Guid commentId, CancellationToken ct)
+	public Task<Comment?> GetCommentAsync(Guid postId, Guid commentId, CancellationToken ct)
 	{
-		throw new NotImplementedException("Should be implemented");
+		return _db.Comments.SingleOrDefaultAsync(
+			x => x.Id == commentId && x.PostId == postId,
+			ct);
 	}
 
-	public async Task<Like> GetLikeAsync(Guid postId, Guid currentUserId, CancellationToken ct)
+	public Task<Like?> GetLikeAsync(Guid postId, Guid currentUserId, CancellationToken ct)
 	{
-		throw new NotImplementedException("Should be implemented");
+		return _db.Likes.SingleOrDefaultAsync(
+			x => x.PostId == postId && x.AuthorId == currentUserId,
+			ct);
 	}
-	public async Task<int> GetLikeCountAsync(Guid postId, CancellationToken ct)
+	public Task<int> GetLikeCountAsync(Guid postId, CancellationToken ct)
 	{
-		throw new NotImplementedException("Should be implemented");
+		return _db.Likes.CountAsync(x => x.PostId == postId, ct);
 	}
 	public async Task<IReadOnlyList<CommentPreviewDto>> GetCommentsAsync(Guid postId, CancellationToken ct)
 	{
-		throw new NotImplementedException("Should be implemented");
+		var items = await (
+			from c in _db.Comments
+			join u in _db.Users on c.AuthorId equals u.Id
+			where c.PostId == postId
+			orderby c.CreatedAtUtc //ascending
+			select new CommentPreviewDto
+			{
+				Id = c.Id,
+				PostId = c.PostId,
+				AuthorId = c.AuthorId,
+				CreatedAtUtc = c.CreatedAtUtc,
+				Content = c.Content,
+				Username = u.Username,
+				FullName = u.FullName,
+				AuthorProfileImageUrl = u.AvatarFileId != null
+					? "/files/" + u.AvatarFileId
+					: ""
+			}
+			).ToListAsync(ct);
+
+		return items;
 	}
 
 	//SaveChangesAsync
-	public async Task SaveChangesAsync(CancellationToken ct)
+	public Task SaveChangesAsync(CancellationToken ct)
 	{
-		throw new NotImplementedException("Should be implemented");
+		return _db.SaveChangesAsync(ct);
 	}
 	public async Task<Guid?> GetAuthorIdByImageFileIdAsync(Guid fileId, CancellationToken ct)
 	{
-		throw new NotImplementedException("Should be implemented");
+		return await _db.Posts
+			.Where(x => x.ImageFileId == fileId)
+			.Select(x => (Guid?)x.AuthorId)
+			.SingleOrDefaultAsync(ct);
 	}
 }

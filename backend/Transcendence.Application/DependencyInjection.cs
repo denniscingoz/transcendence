@@ -28,7 +28,6 @@ public static class DependencyInjection
 
 		// Users & Profiles:
 		services.AddScoped<IProfileService, ProfileService>();
-		services.AddScoped<IFriendsService, FriendsService>();
 		services.AddScoped<IAuthService, AuthService>();
 		services.AddScoped<IFilesService, FilesService>();
 
@@ -38,9 +37,7 @@ public static class DependencyInjection
 		services.AddScoped<IPostsFeedService, PostsFeedService>();
 
 		//Auth
-		services.AddScoped<IAuthService, AuthService>();
 		services.AddScoped<IGoogleAuthService, GoogleAuthService>();
-
 
 		//Friends
 		services.AddScoped<IFriendsService, FriendsService>();
