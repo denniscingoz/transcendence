@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Transcendence.Application.Chat.DTOs;
 using Transcendence.Application.Realtime.Contracts;
 using Transcendence.Api.Realtime.Hubs;
+
 using System.Collections.Generic;
 namespace  Transcendence.Api.Realtime.Services;
 

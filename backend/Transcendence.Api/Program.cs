@@ -9,7 +9,8 @@ using Transcendence.Application;
 using Transcendence.Application.Auth.DTOs;
 
 using Transcendence.Infrastructure;
-
+using Transcendence.Api.Realtime.Services;
+using Transcendence.Application.Realtime.Contracts;
 var builder = WebApplication.CreateBuilder(args);
 
 // ================= SERVICES =================
@@ -54,7 +55,26 @@ builder.Services
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
+
+        // SignalR
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     });
+        
 
 // Google auth
 builder.Services.Configure<GoogleAuthOptions>(
@@ -76,6 +96,7 @@ builder.Services.AddSignalR(options =>
 // Layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddControllers();
 
 // Logging
