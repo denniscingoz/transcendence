@@ -19,4 +19,4 @@ public sealed class ApiResponse<T>
 
     public static ApiResponse<T> Fail(params string[] errors)
         => new(false, default, errors);
-} 
+}

@@ -13,7 +13,9 @@ public sealed class User
 
 	public string? GoogleId { get; private set; }
 
+
 	public string Role { get; private set; } = default!; // e.g. "User", "Admin"
+
 
 	#pragma warning disable CS8618 // for EF Core to silence non-nullable properties
 		private User() { }

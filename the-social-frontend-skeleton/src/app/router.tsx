@@ -14,6 +14,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <Navigate to="/feed" replace /> },
       { path: '/login', element: <LoginPage /> },
+<<<<<<< HEAD
       {
         element: <RequireAuth />,
         children: [
@@ -24,6 +25,15 @@ export const router = createBrowserRouter([
           { path: '/search', element: <SearchPage /> },
         ],
       },
+=======
+
+      // 👇 БЕЗ лишнего children
+      { path: '/feed', element: <FeedPage /> },
+      { path: '/profile', element: <ProfilePage /> },
+      { path: '/friends', element: <FriendsPage /> },
+      { path: '/chat', element: <ChatPage /> },
+      { path: '/search', element: <SearchPage /> },
+>>>>>>> f537e23 (-)
     ],
   },
 ])

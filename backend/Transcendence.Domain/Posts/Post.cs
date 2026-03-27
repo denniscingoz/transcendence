@@ -1,3 +1,4 @@
+
 namespace Transcendence.Domain.Posts;
 
 public sealed class Post

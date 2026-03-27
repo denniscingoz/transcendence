@@ -14,7 +14,10 @@ using Transcendence.Infrastructure.Auth;
 using Transcendence.Infrastructure.Persistence;
 using Transcendence.Infrastructure.Queries;
 using Transcendence.Infrastructure.Repositories;
+using Transcendence.Application.Chat.Interfaces;
+
 using Transcendence.Infrastructure.Storage;
+
 
 namespace Transcendence.Infrastructure;
 
@@ -28,6 +31,7 @@ public static class DependencyInjection
         services.AddDbContext<TranscendenceDbContext>(options =>options.UseNpgsql(connectionString)); // config DBcontetx and uses Npgsql.EntityFrameworkCore.PostgreSQL
 
         services.AddScoped<IUserRepository, UserRepository>(); // when IUserRepository needed - creates UserRepository
+
 
 		services.AddScoped<IPostsRepository, PostsRepository>();
 		services.AddScoped<IPostsFeedRepository, PostsFeedRepository>();
@@ -51,7 +55,12 @@ public static class DependencyInjection
 		services.AddScoped<IFilesRepository, FilesRepository>();
         services.AddScoped<IFilesStorage, FilesStorage>();
 
+        services.AddScoped<IConversationRepository, ConversationRepository>();
+                services.AddScoped<IMessageRepository, MessageRepository>();
+
 
 		return services;
+
+
     }
 }
