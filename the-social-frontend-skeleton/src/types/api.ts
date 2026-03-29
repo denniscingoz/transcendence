@@ -36,6 +36,16 @@ export type ChatMessageDto = {
 
 export type PostDto = 
 {
+  // public Guid Id { get; set; }
+	// public Guid AuthorId { get; set; }
+	// public DateTime CreatedAtUtc { get; set; }
+	// public string? Content { get; set; }
+	// public string? ImageUrl { get; set; }
+	// public bool IsLikedByCurrentUser { get; set; }
+	// public int LikesCount { get; set; }
+	// public string? AuthorUsername { get; set; }
+	// public string? AuthorFullName { get; set; }
+	// public string? AuthorAvatarUrl { get; set; }
   Id: string
 	AuthorId : string
 	CreatedAtUtc : string
@@ -111,4 +121,28 @@ export type UpdateProfileDto =
   Bio?: string | null
   AvatarUrl?: string | null
   Password?: string | null
+}
+
+export type CommentPreviewDto = 
+{
+	// public Guid Id { get; set; }
+	// public Guid PostId { get; set; }
+	// public Guid AuthorId { get; set; }
+	// public DateTime CreatedAtUtc { get; set; }
+	// public string Content { get; set; } = default!;
+	
+  // public string Username { get; set; } = default!;
+	// public string FullName { get; set; } = default!;
+	// public string AuthorProfileImageUrl { get; set; } = default!;
+
+  Id: string
+  PostId: string
+  AuthorId: string
+  CreatedAtUtc: string
+  Content: string
+
+  Username: string
+  FullName: string
+  AuthorProfileImageUrl: string | null
+
 }

@@ -9,6 +9,6 @@ public sealed class CommentPreviewDto
 
 	public string Username { get; set; } = default!;
 	public string FullName { get; set; } = default!;
-	public string AuthorProfileImageUrl { get; set; } = default!;
+	public string? AuthorProfileImageUrl { get; set; }
 
 }

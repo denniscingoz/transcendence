@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { mockPosts, mockComments, mockFeedComments, mockFeedPosts } from '../../mocks/posts'
+import { usePost } from '../../hooks/usePost'
+import { useComments } from '../../hooks/useComments'
 
 type PostDetailModalProps = {
   postId: string
@@ -10,9 +12,11 @@ export function PostDetailModal({
   postId,
   onClose,
 }: PostDetailModalProps) {
-  const post = mockPosts.find((p) => p.Id === postId) ?? mockFeedPosts.find((p) => p.Id === postId)
-  const allComments = [...mockComments, ...mockFeedComments]
-  const comments = allComments.filter((comment) => comment.postId === postId)
+  const { data: post, isLoading: isPostLoading, error: postError } = usePost(postId)
+  const { data: commentsData, isLoading: areCommentsLoading, error: commentsError } = useComments(postId)   
+  const comments = commentsData?.Items ?? []
+
+  // const comments = allComments.filter((comment) => comment.postId === postId)
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow
@@ -26,6 +30,15 @@ export function PostDetailModal({
   if (!post) {
     return null
   }
+  
+  if (isPostLoading) return <div>Loading...</div>
+  
+  if (isPostLoading || !post) return <div>Post not found.</div>
+
+  if (areCommentsLoading) return <div>Loading...</div>
+  
+  if (commentsError || !post) return <div>Comments not found.</div>
+
 
   return (
     <div
@@ -45,7 +58,7 @@ export function PostDetailModal({
 
         <div className="flex items-center gap-3">
           <img
-            src={post.AuthorAvatarUrl || 'https://via.placeholder.com/40'}
+            src={post.AuthorAvatarUrl || 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'}
             alt=""
             className="w-12 h-12 rounded-full object-cover"
           />
@@ -70,7 +83,7 @@ export function PostDetailModal({
               <img
                 src={
                   comment.AuthorProfileImageUrl ||
-                  'https://via.placeholder.com/40'
+                  'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
                 }
                 alt=""
                 className="w-10 h-10 rounded-full object-cover"

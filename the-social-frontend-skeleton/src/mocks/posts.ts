@@ -87,9 +87,9 @@ export const mockPosts = [
 ]
 
 export const mockComments = [
-  { Id: 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaaa', postId: '1', authorId: '99999999-9999-9999-9999-999999999999', createdAtUtc: 23123123, Content: 'mockCommentsTry', Username: 'michaUser', FullName: 'Micha', AuthorProfileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop' },
-  { Id: 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaaa', postId: '1', authorId: '99999999-9999-9999-9999-999999999999', createdAtUtc: 23123125, Content: 'mockCommentsTry2', Username: 'michaUser', FullName: 'Micha', AuthorProfileImageUrl: '' },
-  { Id: 'aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaaa', postId: '1', authorId: '99999999-9999-9999-9999-999999999999', createdAtUtc: 23123126, Content: 'mockCommentsTry3', Username: 'michaUser', FullName: 'Micha', AuthorProfileImageUrl: '' },
+  { Id: 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaaa', PostId: '1', AuthorId: '99999999-9999-9999-9999-999999999999', CreatedAtUtc: "2026-03-29T15:30:00Z", Content: 'mockCommentsTry', Username: 'michaUser', FullName: 'Micha', AuthorProfileImageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop' },
+  { Id: 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaaa', PostId: '1', AuthorId: '99999999-9999-9999-9999-999999999999', CreatedAtUtc: "2026-03-29T15:10:00Z", Content: 'mockCommentsTry2', Username: 'michaUser', FullName: 'Micha', AuthorProfileImageUrl: '' },
+  { Id: 'aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaaa', PostId: '1', AuthorId: '99999999-9999-9999-9999-999999999999', CreatedAtUtc: "2026-03-29T12:20:00Z", Content: 'mockCommentsTry3', Username: 'michaUser', FullName: 'Micha', AuthorProfileImageUrl: '' },
 ]
 
 
@@ -103,7 +103,7 @@ export const mockFeedPosts = [
     CreatedAtUtc: '2026-03-28T08:15:00Z',
     Content: 'Morning walk before the city wakes up.',
     ImageUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&h=900&fit=crop',
-    IsLikedByCurrentUser: false,
+    IsLikedByCurrentUser: true,
     LikesCount: 42,
     AuthorUsername: 'lena.moves',
     AuthorFullName: 'Lena Weiss',
