@@ -170,7 +170,6 @@ setActiveConversationId(conversationId)
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header />
 
       <div className="flex-1 flex max-w-6xl mx-auto w-full">
 <<<<<<< HEAD

@@ -2,55 +2,31 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import api from '../api/axios'
 import { BottomNav } from '../components/BottomNav'
-import { Header } from '../components/Header'
+import type { PostDto } from '../types/api'
+import { mockFeedPosts } from '../mocks/posts'
+import { PostDetailModal } from '../components/modals/PostDetailModal'
+import { CursorPageDto } from '../types/api'
 
-type PostDto = {
-  id: string
-  authorName: string
-  authorUsername?: string
-  authorLocation?: string
-  authorAvatarUrl?: string | null
-  imageUrl: string
-  likesCount: number
-  commentsCount: number
-  isLiked?: boolean
-}
-
-async function getFeed(): Promise<PostDto[]> {
-  const { data } = await api.get<PostDto[]>('/feed')
+async function getFeed(cursor?: string): Promise<CursorPageDto<PostDto>> {
+  const { data } = await api.get<CursorPageDto<PostDto>>('/posts/feed', {
+    params: {
+      take: 20,
+      cursor,
+    },
+  })
   return data
 }
 
-// Mock data for demo
-const mockPosts: PostDto[] = [
-  {
-    id: '1',
-    authorName: 'Dipprokash Sardar',
-    authorUsername: 'dipp_sardar',
-    authorAvatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&h=600&fit=crop',
-    likesCount: 7500,
-    commentsCount: 425,
-    isLiked: true,
-  },
-  {
-    id: '2',
-    authorName: 'Joyprokash Sardar',
-    authorUsername: 'joy_sardar',
-    authorLocation: 'Mednipur',
-    authorAvatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop',
-    imageUrl: 'https://images.unsplash.com/photo-1545893835-abaa50cbe628?w=800&h=600&fit=crop',
-    likesCount: 7500,
-    commentsCount: 425,
-    isLiked: false,
-  },
-]
-
 export function FeedPage() {
-  const { data, isLoading } = useQuery({ queryKey: ['feed'], queryFn: getFeed })
-  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set(['1']))
+  const { data, isLoading } = useQuery({
+    queryKey: ['feed'],
+    queryFn: () => getFeed(),
+  })
 
-  const posts = data ?? mockPosts
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set(['1']))
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+
+  const posts = data?.Items ?? mockFeedPosts
 
   const toggleLike = (postId: string) => {
     setLikedPosts((prev) => {
@@ -71,62 +47,62 @@ export function FeedPage() {
 
   return (
     <div className="min-h-screen bg-white pb-24">
-      <Header />
-
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-8">
         {isLoading ? (
           <div className="text-center py-12 text-gray-500">Loading...</div>
         ) : (
           posts.map((post) => (
-            <article key={post.id} className="space-y-4">
-              {/* Author header */}
+            <article key={post.Id} className="space-y-4">
               <div className="flex items-center gap-3">
                 <img
                   className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
-                  src={post.authorAvatarUrl ?? 'https://placehold.co/80x80'}
-                  alt={post.authorName}
+                  src={post.AuthorAvatarUrl ?? 'https://placehold.co/80x80'}
+                  alt={post.AuthorUsername}
                 />
                 <div>
-                  <div className="font-semibold text-gray-900">{post.authorName}</div>
-                  {post.authorLocation && (
-                    <div className="text-sm text-gray-500">{post.authorLocation}</div>
-                  )}
+                  <div className="font-semibold text-gray-900">{post.AuthorUsername}</div>
                 </div>
               </div>
 
-              {/* Post image */}
               <img
                 className="w-full aspect-[4/3] object-cover rounded-2xl"
-                src={post.imageUrl}
+                src={post.ImageUrl}
                 alt=""
               />
 
-              {/* Actions */}
               <div className="flex items-center gap-6">
                 <button
-                  onClick={() => toggleLike(post.id)}
+                  onClick={() => toggleLike(post.Id)}
                   className="flex items-center gap-2 group"
                 >
-                  {likedPosts.has(post.id) ? (
+                  {likedPosts.has(post.Id) ? (
                     <HeartFilledIcon className="w-7 h-7 text-red-500" />
                   ) : (
                     <HeartIcon className="w-7 h-7 text-gray-700 group-hover:text-red-500 transition-colors" />
                   )}
-                  <span className="text-sm text-gray-600">{formatCount(post.likesCount)}</span>
+                  <span className="text-sm text-gray-600">{formatCount(post.LikesCount)}</span>
                 </button>
 
-                <button className="flex items-center gap-2 group">
+                <button
+                  onClick={() => setSelectedPostId(post.Id)}
+                  className="flex items-center gap-2 group"
+                >
                   <CommentIcon className="w-7 h-7 text-gray-700 group-hover:text-gray-900 transition-colors" />
-                  <span className="text-sm text-gray-600">{formatCount(post.commentsCount)}</span>
                 </button>
               </div>
 
-              {/* Divider */}
               <div className="border-t border-gray-100" />
             </article>
           ))
         )}
       </main>
+
+      {selectedPostId && (
+        <PostDetailModal
+          postId={selectedPostId}
+          onClose={() => setSelectedPostId(null)}
+        />
+      )}
 
       <BottomNav active="home" />
     </div>

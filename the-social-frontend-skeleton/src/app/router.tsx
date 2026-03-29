@@ -6,15 +6,20 @@ import { ProfilePage } from '../pages/ProfilePage'
 import { FriendsPage } from '../pages/FriendsPage'
 import { ChatPage } from '../pages/ChatPage'
 import { FeedPage } from '../pages/FeedPage'
-import { SearchPage } from '../pages/SearchPage'
+import { EditProfilePage } from '../pages/EditProfilePage'
+import { SettingsPage } from '../pages/SettingsPage'
+import { PostDetailPage} from '../pages/PostDetailPage'
+//import { SearchPage } from '../pages/SearchPage'
 
 export const router = createBrowserRouter([
+  
+  { path: '/login', element: <LoginPage /> },
+  
   {
     element: <Layout />,
     children: [
       { path: '/', element: <Navigate to="/feed" replace /> },
       { path: '/login', element: <LoginPage /> },
-<<<<<<< HEAD
       {
         element: <RequireAuth />,
         children: [
@@ -22,18 +27,12 @@ export const router = createBrowserRouter([
           { path: '/profile', element: <ProfilePage /> },
           { path: '/friends', element: <FriendsPage /> },
           { path: '/chat', element: <ChatPage /> },
-          { path: '/search', element: <SearchPage /> },
+          { path: '/edit-profile', element: <EditProfilePage /> },
+          { path: 'settings', element: <SettingsPage /> },
+          //{ path: '/posts/:postId', element: <PostDetailPage /> },
+          {/*{ path: '/search', element: <SearchPage /> },*/}
         ],
       },
-=======
-
-      // 👇 БЕЗ лишнего children
-      { path: '/feed', element: <FeedPage /> },
-      { path: '/profile', element: <ProfilePage /> },
-      { path: '/friends', element: <FriendsPage /> },
-      { path: '/chat', element: <ChatPage /> },
-      { path: '/search', element: <SearchPage /> },
->>>>>>> f537e23 (-)
     ],
   },
 ])

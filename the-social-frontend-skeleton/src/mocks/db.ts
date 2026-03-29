@@ -1,8 +1,15 @@
+import { ProfilePostPreviewDto } from "../types/api"
+
 export type User = {
-  id: string
-  email: string
-  displayName: string
-  avatarUrl?: string | null
+  Id: string
+  Username: string
+  Email: string
+  FullName: string
+  Bio: string | null
+  AvatarUrl?: string | null
+  Role: string | null
+  FriendsCount: number
+  PostsCount: number
 }
 
 export type Friend = {
@@ -28,10 +35,15 @@ export const db: {
 } = {
   token: 'mock-jwt-token',
   me: {
-    id: 'u-me',
-    email: 'micha@mail.com',
-    displayName: 'Micha',
-    avatarUrl: null,
+    Id: 'u-me',
+    Username: 'michauser',
+    FullName: 'Micha',
+    Email: 'micha@mail.com',
+    Bio: 'Bio details for Micha',
+    AvatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
+    PostsCount: 134,
+    FriendsCount: 222,
+    Role: null,
   },
   friends: [ /* ... */ ],
   chat: new Map(),

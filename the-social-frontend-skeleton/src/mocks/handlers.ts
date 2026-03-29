@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { db, requireAuth } from './db'
+import { mockPosts } from './posts'
 
 export const handlers = [
   // Auth
@@ -18,17 +19,66 @@ export const handlers = [
   http.get('/profile/me', ({ request }) => {
     const auth = requireAuth(request)
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
-    return HttpResponse.json(db.me)
+    
+    return HttpResponse.json({
+      IsSuccess: true,
+      Data: db.me,
+      Errors: [],
+    })
   }),
 
-  http.put('/profile/me', async ({ request }) => {
+
+http.get('/posts/me', ({ request }) => {
     const auth = requireAuth(request)
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
 
-    const patch = (await request.json()) as Partial<typeof db.me>
-    db.me = { ...db.me, ...patch }
-    return HttpResponse.json(db.me)
-  }),
+    const url = new URL(request.url)
+    const takeParam = url.searchParams.get('take')
+    const cursorParam = url.searchParams.get('cursor')
+
+    const take = takeParam ? Number(takeParam) : 20
+    const cursor = cursorParam ?? null
+
+    const allPosts = mockPosts ?? []
+
+    let startIndex = 0
+
+    if (cursor) {
+      const foundIndex = allPosts.findIndex((post) => post.Id === cursor)
+      startIndex = foundIndex >= 0 ? foundIndex + 1 : 0
+    }
+
+    const items = allPosts.slice(startIndex, startIndex + take)
+    const lastItem = items[items.length - 1]
+
+    const nextCursor =
+      startIndex + take < allPosts.length && lastItem ? lastItem.Id : null
+
+    return HttpResponse.json({
+      IsSuccess: true,
+      Data: {
+        Items: items,
+        NextCursor: nextCursor,
+      },
+      Errors: [],
+    })
+}),
+
+
+  http.patch('/profile/me', async ({ request }) => {
+  const auth = requireAuth(request)
+  if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
+
+  const patch = (await request.json()) as Partial<typeof db.me>
+  db.me = { ...db.me, ...patch }
+
+  return HttpResponse.json({
+    IsSuccess: true,
+    Data: db.me,
+    Errors: [],
+  })
+}),
+
 
   http.post('/profile/me/avatar', ({ request }) => {
     const auth = requireAuth(request)
@@ -79,25 +129,31 @@ export const handlers = [
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
         return HttpResponse.json([
         {
-            id: 'm1',
-            authorName: 'Frontend Dev',
-            imageUrl: 'https://i.imgflip.com/4t0m5.jpg',
-            likesCount: 1337,
+            Id: 'm1',
+            AuthorId: '1001',
+            AuthorUsername: 'Frontend Dev',
+            ImageUrl: 'https://i.imgflip.com/4t0m5.jpg',
+            LikesCount: 1337,
             commentsCount: 42,
+            IsLikedByCurrentUser: true,
+
+              // {
         },
         {
-            id: 'm2',
-            authorName: 'React Enjoyer',
-            imageUrl: 'https://i.imgflip.com/2wifvo.jpg',
-            likesCount: 9001,
+            Id: 'm2',
+            AuthorUsername: 'React Enjoyer',
+            ImageUrl: 'https://i.imgflip.com/2wifvo.jpg',
+            LikesCount: 9001,
             commentsCount: 256,
+            IsLikedByCurrentUser: true,
         },
         {
-            id: 'm3',
-            authorName: 'CSS Survivor',
-            imageUrl: 'https://i.imgflip.com/1ihzfe.jpg',
-            likesCount: 666,
+            Id: 'm3',
+            AuthorUsername: 'CSS Survivor',
+            ImageUrl: 'https://i.imgflip.com/1ihzfe.jpg',
+            LikesCount: 666,
             commentsCount: 13,
+            IsLikedByCurrentUser: true,
         },
         ])
     })

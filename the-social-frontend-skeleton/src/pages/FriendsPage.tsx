@@ -3,38 +3,38 @@ import { useAddFriend, useFriends, useRemoveFriend } from '../hooks/useFriends'
 import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
 import { BottomNav } from '../components/BottomNav'
-
+import { useNavigate } from 'react-router-dom'
 // Mock friends data
 const mockFriends = [
   {
     id: '1',
-    displayName: 'Dipprokash Sardar',
-    username: 'dipp_sardar',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    displayName: 'Lena Weiss',
+    username: 'lena.moves',
+    avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop',
     isFollowing: true,
     isOnline: true,
   },
   {
     id: '2',
-    displayName: 'Dipprokash Sardar',
-    username: 'dipp_sardar',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    displayName: 'Emir Kaya',
+    username: 'emir.codes',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop',
     isFollowing: true,
     isOnline: false,
   },
   {
     id: '3',
-    displayName: 'Dipprokash Sardar',
-    username: 'dipp_sardar',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    displayName: 'Sofia Marin',
+    username: 'sofia.frames',
+    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop',
     isFollowing: true,
     isOnline: true,
   },
   {
     id: '4',
-    displayName: 'Dipprokash Sardar',
-    username: 'dipp_sardar',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    displayName: 'Noah Fischer',
+    username: 'noah.cooks',
+    avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop',
     isFollowing: true,
     isOnline: false,
   },
@@ -46,35 +46,103 @@ const mockFriends = [
     isFollowing: true,
     isOnline: true,
   },
+  {
+    id: '6',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: true,
+  },
+    {
+    id: '7',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: true,
+  },
+      {
+    id: '8',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: true,
+  },
+        {
+    id: '9',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: true,
+  },
+          {
+    id: '10',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: true,
+  },
+          {
+    id: '11',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: true,
+  },
+          {
+    id: '12',
+    displayName: 'Dipprokash Sardar',
+    username: 'dipp_sardar',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isFollowing: true,
+    isOnline: true,
+  },
 ]
+
 
 export function FriendsPage() {
   const { t } = useTranslation()
   const { data: apiData, isLoading, error } = useFriends()
   const add = useAddFriend()
   const remove = useRemoveFriend()
-
+  const navigate = useNavigate()
   // Use API data if available, otherwise mock
-  const friends = Array.isArray(apiData) ? apiData : mockFriends
+  const friends = Array.isArray(apiData) && apiData.length > 0 ? apiData : mockFriends
 
   const [followingState, setFollowingState] = useState<Record<string, boolean>>(
     Object.fromEntries(friends.map((f) => [f.id, f.isFollowing ?? true]))
   )
+  function handleClose() {
+    navigate(-1)
+  }
 
   const toggleFollow = (id: string) => {
     setFollowingState((prev) => ({ ...prev, [id]: !prev[id] }))
   }
 
-  return (
-    <div className="min-h-screen bg-white pb-24">
-      <Header />
+return (
+  <div className="h-[calc(100dvh-250px)] overflow-hidden bg-white">
+    <main className="mx-auto h-full max-w-2xl px-4 py-6">
+      <div className="panel flex h-[85%] flex-col overflow-hidden">
+        <div className="mb-8 flex items-start justify-between">
+          <h1 className="text-2xl font-semibold text-text">Friends</h1>
 
-      <main className="max-w-2xl mx-auto px-4 py-6">
-        {/* Likes modal style list */}
-        <div className="panel">
-          <h2 className="text-xl font-bold tracking-wider mb-6">LIKES</h2>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="btn-ghost flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-text hover:bg-gray-100"
+            aria-label="Close settings"
+          >
+            ×
+          </button>
+        </div>
 
-          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
             {friends.map((friend) => (
               <div
                 key={friend.id}
@@ -110,7 +178,7 @@ export function FriendsPage() {
         </div>
       </main>
 
-      <BottomNav />
+      <BottomNav onSearchClick={() => {}} />
     </div>
   )
 }

@@ -16,7 +16,6 @@ export function SearchPage() {
 
   return (
     <div className="min-h-screen bg-white pb-24">
-      <Header showNotification={false} />
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <div className="panel min-h-[70vh]">
