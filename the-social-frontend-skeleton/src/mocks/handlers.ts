@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { db, requireAuth } from './db'
-import { mockPosts } from './posts'
+import { mockPosts, mockComments, mockFeedPosts } from './posts'
 
 export const handlers = [
   // Auth
@@ -26,6 +26,8 @@ export const handlers = [
       Errors: [],
     })
   }),
+
+
 
 
 http.get('/posts/me', ({ request }) => {
@@ -63,6 +65,69 @@ http.get('/posts/me', ({ request }) => {
       Errors: [],
     })
 }),
+
+http.get('/posts/feed', ({ request }) => {
+  const auth = requireAuth(request)
+  if (!auth.ok) {
+    return HttpResponse.json(auth.body, { status: auth.status })
+  }
+
+  const url = new URL(request.url)
+  const take = Number(url.searchParams.get('take') ?? 20)
+  const cursor = url.searchParams.get('cursor')
+
+  let startIndex = 0
+
+  if (cursor) {
+    const index = mockFeedPosts.findIndex((post) => post.Id === cursor)
+    if (index >= 0) {
+      startIndex = index + 1
+    }
+  }
+
+  const items = mockFeedPosts.slice(startIndex, startIndex + take)
+  const nextCursor =
+    startIndex + take < mockFeedPosts.length
+      ? items[items.length - 1]?.Id ?? null
+      : null
+
+  return HttpResponse.json({
+    IsSuccess: true,
+    Data: {
+      Items: items,
+      NextCursor: nextCursor,
+    },
+    Errors: [],
+  })
+}),
+
+http.get('/posts/:postId', ({ request, params }) => {
+  const auth = requireAuth(request)
+  if (!auth.ok) {
+    return HttpResponse.json(auth.body, { status: auth.status })
+  }
+
+  const postId = params.postId as string
+  const post = mockPosts.find((p) => p.Id === postId) ?? mockFeedPosts.find((p) => p.Id === postId)
+
+  if (!post) {
+    return HttpResponse.json(
+      {
+        IsSuccess: false,
+        Data: null,
+        Errors: ['Post not found.'],
+      },
+      { status: 404 }
+    )
+  }
+
+  return HttpResponse.json({
+    IsSuccess: true,
+    Data: post,
+    Errors: [],
+  })
+}),
+
 
 
   http.patch('/profile/me', async ({ request }) => {
@@ -124,37 +189,53 @@ http.get('/posts/me', ({ request }) => {
     return HttpResponse.json({}, { status: 200 })
   }),
 
-  http.get('/feed', ({ request }) => {
-    const auth = requireAuth(request)
-    if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
-        return HttpResponse.json([
-        {
-            Id: 'm1',
-            AuthorId: '1001',
-            AuthorUsername: 'Frontend Dev',
-            ImageUrl: 'https://i.imgflip.com/4t0m5.jpg',
-            LikesCount: 1337,
-            commentsCount: 42,
-            IsLikedByCurrentUser: true,
 
-              // {
-        },
-        {
-            Id: 'm2',
-            AuthorUsername: 'React Enjoyer',
-            ImageUrl: 'https://i.imgflip.com/2wifvo.jpg',
-            LikesCount: 9001,
-            commentsCount: 256,
-            IsLikedByCurrentUser: true,
-        },
-        {
-            Id: 'm3',
-            AuthorUsername: 'CSS Survivor',
-            ImageUrl: 'https://i.imgflip.com/1ihzfe.jpg',
-            LikesCount: 666,
-            commentsCount: 13,
-            IsLikedByCurrentUser: true,
-        },
-        ])
-    })
+
+
+
+    //Comments
+    http.get('/posts/:postId/comments', ({ request, params }) => {
+  const auth = requireAuth(request)
+  if (!auth.ok) {
+    return HttpResponse.json(auth.body, { status: auth.status })
+  }
+
+  const postId = params.postId as string
+  const url = new URL(request.url)
+
+  const takeParam = url.searchParams.get('take')
+  const cursor = url.searchParams.get('cursor')
+  const take = takeParam ? Number(takeParam) : 20
+
+  const filteredComments = mockComments
+    .filter((comment) => comment.PostId === postId)
+    .sort((a, b) => b.CreatedAtUtc.localeCompare(a.CreatedAtUtc))
+
+  let startIndex = 0
+
+  if (cursor) {
+    const index = filteredComments.findIndex((comment) => comment.Id === cursor)
+    if (index >= 0) {
+      startIndex = index + 1
+    }
+  }
+
+  const items = filteredComments.slice(startIndex, startIndex + take)
+  const nextCursor =
+    startIndex + take < filteredComments.length
+      ? items[items.length - 1]?.Id ?? null
+      : null
+
+  return HttpResponse.json({
+    IsSuccess: true,
+    Data: {
+      Items: items,
+      NextCursor: nextCursor,
+    },
+    Errors: [],
+  })
+})
+
 ]
+
+
