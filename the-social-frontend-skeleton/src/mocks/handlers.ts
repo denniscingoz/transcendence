@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { db, requireAuth } from './db'
-import { mockPosts, mockComments, mockFeedPosts } from './posts'
+import { mockPosts, mockComments, mockFeedPosts, mockFeedComments } from './posts'
 
 export const handlers = [
   // Auth
@@ -129,6 +129,56 @@ http.get('/posts/:postId', ({ request, params }) => {
 }),
 
 
+http.post('/posts/:postId/comments', async ({ request, params }) => {
+  const auth = requireAuth(request)
+  if (!auth.ok) {
+    return HttpResponse.json(auth.body, { status: auth.status })
+  }
+
+  const postId = params.postId as string
+  const content = await request.json() as string
+
+  const post =
+    mockPosts.find((p) => p.Id === postId) ??
+    mockFeedPosts.find((p) => p.Id === postId)
+
+  if (!post) {
+    return HttpResponse.json(
+      {
+        IsSuccess: false,
+        Data: null,
+        Errors: ['Post not found.'],
+      },
+      { status: 404 }
+    )
+  }
+
+  const newComment: (typeof mockComments)[number] = {
+  Id: crypto.randomUUID(),
+  PostId: postId,
+  AuthorId: auth.user.Id,
+  CreatedAtUtc: new Date().toISOString(),
+  Content: content,
+  Username: auth.user.Username,
+  FullName: auth.user.FullName,
+  AuthorProfileImageUrl: auth.user.AvatarUrl ?? '',
+}
+
+  mockComments.unshift(newComment)
+
+  return HttpResponse.json(
+    {
+      IsSuccess: true,
+      Data: newComment,
+      Errors: [],
+    },
+    { status: 201 }
+  )
+}),
+
+
+
+
 
   http.patch('/profile/me', async ({ request }) => {
   const auth = requireAuth(request)
@@ -207,7 +257,7 @@ http.get('/posts/:postId', ({ request, params }) => {
   const cursor = url.searchParams.get('cursor')
   const take = takeParam ? Number(takeParam) : 20
 
-  const filteredComments = mockComments
+  const filteredComments = [...mockComments, ...mockFeedComments]
     .filter((comment) => comment.PostId === postId)
     .sort((a, b) => b.CreatedAtUtc.localeCompare(a.CreatedAtUtc))
 

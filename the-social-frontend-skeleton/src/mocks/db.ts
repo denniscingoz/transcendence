@@ -49,10 +49,36 @@ export const db: {
   chat: new Map(),
 }
 
-export function requireAuth(req: Request) {
+type AuthResult =
+  | {
+      ok: true
+      user: {
+        Id: string
+        Username: string
+        FullName: string
+        AvatarUrl?: string | null
+      }
+    }
+  | {
+      ok: false
+      status: number
+      body: { message: string }
+    }
+
+export function requireAuth(req: Request): AuthResult {
   const auth = req.headers.get('authorization')
+
   if (!auth?.startsWith('Bearer ')) {
     return { ok: false, status: 401, body: { message: 'Unauthorized' } }
   }
-  return { ok: true as const }
+
+  return {
+    ok: true,
+    user: {
+      Id: db.me.Id,
+      Username: db.me.Username,
+      FullName: db.me.FullName,
+      AvatarUrl: db.me.AvatarUrl,
+    },
+  }
 }

@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { mockPosts, mockComments, mockFeedComments, mockFeedPosts } from '../../mocks/posts'
 import { usePost } from '../../hooks/usePost'
-import { useComments } from '../../hooks/useComments'
+import { useComments, usePostComment } from '../../hooks/useComments'
+import { useState } from 'react'
 
 type PostDetailModalProps = {
   postId: string
@@ -17,6 +18,21 @@ export function PostDetailModal({
   const comments = commentsData?.Items ?? []
 
   // const comments = allComments.filter((comment) => comment.postId === postId)
+  const [content, setContent] = useState('')
+  const postCommentMutation = usePostComment(postId)
+
+  const handlePostComment = () => {
+    const trimmedContent = content.trim()
+
+    if (!trimmedContent) return
+
+    postCommentMutation.mutate(trimmedContent, {
+      onSuccess: () => {
+        setContent('')
+      },
+    })
+  }
+
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow
@@ -101,7 +117,7 @@ export function PostDetailModal({
           ))}
         </div>
 
-        <div className="flex gap-3 items-center">
+        {/* <div className="flex gap-3 items-center">
           <input
             type="text"
             placeholder="Write a comment..."
@@ -109,6 +125,30 @@ export function PostDetailModal({
           />
           <button className="bg-black text-white px-4 py-2 rounded-full">
             Post
+          </button>
+        </div> */}
+        <div className="flex gap-3 items-center">
+          <input
+            type="text"
+            placeholder="Write a comment..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handlePostComment()
+              }
+            }}
+            disabled={postCommentMutation.isPending}
+            className="flex-1 border border-gray-300 rounded-full px-4 py-2 outline-none"
+          />
+        
+          <button
+            type="button"
+            onClick={handlePostComment}
+            disabled={postCommentMutation.isPending || !content.trim()}
+            className="bg-black text-white px-4 py-2 rounded-full disabled:opacity-50"
+          >
+            {postCommentMutation.isPending ? 'Posting...' : 'Post'}
           </button>
         </div>
       </div>
