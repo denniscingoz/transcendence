@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Modal } from '../Modal'
+import { useTranslation } from 'react-i18next'
 
 export function SearchModal({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('')
-  
+  const { t } = useTranslation()
+
   useEffect(() => {
     const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -27,11 +29,11 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Modal title="SEARCH" onClose={onClose}>
+    <Modal title={t('searchpage.search')} onClose={onClose}>
       <div className="relative">
         <input
           className="input pr-12"
-          placeholder="Type in your search here"
+          placeholder={t('searchpage.typeinyoursearch')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -48,12 +50,12 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
       {query ? (
         <div className="mt-6 space-y-3">
           <p className="text-gray-500 text-center py-8">
-            No results found for "{query}"
+            {t('searchpage.noresults')} "{query}"
           </p>
         </div>
       ) : (
         <div className="mt-6 opacity-60 text-sm">
-          Search results will appear here.
+          {t('searchpage.searchresultshere')}
         </div>
       )}
     </Modal>

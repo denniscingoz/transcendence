@@ -2,26 +2,27 @@
   "nav": {
     "profile": "Perfil",
     "friends": "Amigos",
-    "chat": "Chat",
-    "logout": "Cerrar sesi\u00f3n"
+    "chat": "Chat"
   },
   "login": {
     "title": "Iniciar sesi\u00f3n",
     "email": "Correo",
     "password": "Contrase\u00f1a",
-    "submit": "Entrar"
+    "submit": "Entrar",
+    "or": "o"
   },
   "profile": {
-    "title": "Mi perfil",
-    "save": "Guardar",
-    "uploadAvatar": "Subir avatar"
+  "title": "Mi perfil",
+  "save": "Guardar",
+  "posts": "publicaciones",
+  "friends": "amigos",
+  "editprofile": "Editar perfil",
+  "uploadAvatar": "Subir foto de perfil"
   },
   "friends": {
-    "title": "Amigos",
-    "add": "Agregar amigo",
-    "remove": "Eliminar",
-    "online": "En l\u00ednea",
-    "offline": "Desconectado"
+  "friends": "Amigos",
+  "addFriend": "Agregar amigo",
+  "requested": "Solicitado"
   },
   "chat": {
     "title": "Chat",
@@ -31,5 +32,48 @@
   "common": {
     "loading": "Cargando...",
     "error": "Algo sali\u00f3 mal."
+  },
+  "settings": {
+  "logout": "Cerrar sesión",
+  "Delete": "Eliminar",
+  "Activate": "Activar",
+  "Settings": "Configuración",
+  "privacy": "Privacidad",
+  "account": "Cuenta",
+  "language": "Idioma",
+  "changelanguage": "Cambiar idioma.",
+  "deleteaccount": "Eliminar la cuenta.",
+  "logoutfromaccount": "Cerrar sesión de la cuenta.",
+  "twofaauth": "Autenticación de dos factores"
+  },
+  "editprofile": {
+  "editprofile": "Editar perfil",
+  "changephoto": "Cambiar foto",
+  "bio": "Biografía",
+  "fullname": "Nombre",
+  "username": "Nombre de usuario",
+  "savechanges": "Guardar cambios",
+  "discard": "Descartar",
+  "changepassword": "Cambiar contraseña",
+  "oldpassword": "Contraseña antigua",
+  "newpassword": "Nueva contraseña",
+  "saving": "Guardando…"
+  },
+  "postdetail": {
+  "close": "Cerrar",
+  "likes": "Me gusta",
+  "post": "Publicar",
+  "posting": "Publicando...",
+  "writeacomment": "Escribe un comentario...",
+  "loading": "Cargando...",
+  "postnotfound": "Publicación no encontrada.",
+  "commentnotfound": "Comentarios no encontrados."
+  },
+  "searchpage": {
+  "search": "Buscar",
+  "noresults": "No se encontraron resultados para ",
+  "typeinyoursearch": "Escribe tu búsqueda aquí",
+  "searchresultshere": "Los resultados de búsqueda aparecerán aquí.",
+  "close": "Cerrar"
   }
 }

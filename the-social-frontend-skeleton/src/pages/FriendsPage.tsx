@@ -70,7 +70,7 @@ export function FriendsPage() {
       <main className="mx-auto h-full max-w-2xl px-4 py-6">
         <div className="panel flex h-[85%] flex-col overflow-hidden">
           <div className="mb-8 flex items-start justify-between">
-            <h1 className="text-2xl font-semibold text-text">Friends</h1>
+            <h1 className="text-2xl font-semibold text-text">{t('friends.friends')}</h1>
 
             <button
               type="button"
@@ -114,11 +114,11 @@ export function FriendsPage() {
                         : 'bg-blue-500 text-white hover:bg-blue-600'
                     }`}
                   >
-                    {status === 'friends'
-                      ? 'Friends'
+                     {status === 'friends'
+                      ? t('friends.friends')
                       : status === 'requested'
-                      ? 'Requested'
-                      : 'Add Friend'}
+                      ? t('friends.requested')
+                      : t('friends.addFriend')} 
                   </button>
                 </div>
               )
