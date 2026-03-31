@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { mockPosts, mockComments, mockFeedComments, mockFeedPosts } from '../../mocks/posts'
 import { usePost } from '../../hooks/usePost'
 import { useComments, usePostComment } from '../../hooks/useComments'
@@ -13,6 +14,7 @@ export function PostDetailModal({
   postId,
   onClose,
 }: PostDetailModalProps) {
+  const { t } = useTranslation()
   const { data: post, isLoading: isPostLoading, error: postError } = usePost(postId)
   const { data: commentsData, isLoading: areCommentsLoading, error: commentsError } = useComments(postId)   
   const comments = commentsData?.Items ?? []
@@ -47,13 +49,13 @@ export function PostDetailModal({
     return null
   }
   
-  if (isPostLoading) return <div>Loading...</div>
+  if (isPostLoading) return <div>{t('postdetail.loading')}</div>
   
-  if (isPostLoading || !post) return <div>Post not found.</div>
+  if (isPostLoading || !post) return <div>{t('postdetail.postnotfound')}</div>
 
-  if (areCommentsLoading) return <div>Loading...</div>
+  if (areCommentsLoading) return <div>{t('postdetail.loading')}</div>
   
-  if (commentsError || !post) return <div>Comments not found.</div>
+  if (commentsError || !post) return <div>{t('postdetail.commentnotfound')}</div>
 
 
   return (
@@ -69,7 +71,7 @@ export function PostDetailModal({
           onClick={onClose}
           className="absolute top-4 right-4 text-sm text-gray-500 hover:text-black"
         >
-          Close
+          {t('postdetail.close')}
         </button>
 
         <div className="flex items-center gap-3">
@@ -91,7 +93,7 @@ export function PostDetailModal({
         />
 
         <p>{post.Content}</p>
-        <p>Likes: {post.LikesCount}</p>
+        <p>{t('postdetail.likes')}: {post.LikesCount}</p>
 
         <div className="space-y-4">
           {comments.map((comment) => (
@@ -130,7 +132,7 @@ export function PostDetailModal({
         <div className="flex gap-3 items-center">
           <input
             type="text"
-            placeholder="Write a comment..."
+            placeholder={t('postdetail.writeacomment')}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={(e) => {
@@ -148,7 +150,7 @@ export function PostDetailModal({
             disabled={postCommentMutation.isPending || !content.trim()}
             className="bg-black text-white px-4 py-2 rounded-full disabled:opacity-50"
           >
-            {postCommentMutation.isPending ? 'Posting...' : 'Post'}
+            {postCommentMutation.isPending ? t('postdetail.posting') : t('postdetail.post')}
           </button>
         </div>
       </div>

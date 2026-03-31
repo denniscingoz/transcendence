@@ -2,26 +2,27 @@
   "nav": {
     "profile": "Profil",
     "friends": "Amis",
-    "chat": "Chat",
-    "logout": "D\u00e9connexion"
+    "chat": "Chat"
   },
   "login": {
     "title": "Connexion",
     "email": "Email",
     "password": "Mot de passe",
-    "submit": "Se connecter"
+    "submit": "Se connecter",
+    "or": "ou"
   },
   "profile": {
-    "title": "Mon profil",
-    "save": "Enregistrer",
-    "uploadAvatar": "T\u00e9l\u00e9verser un avatar"
+  "title": "Mon profil",
+  "save": "Enregistrer",
+  "posts": "publications",
+  "friends": "amis",
+  "editprofile": "Modifier le profil",
+  "uploadAvatar": "Télécharger une photo de profil"
   },
-  "friends": {
-    "title": "Amis",
-    "add": "Ajouter un ami",
-    "remove": "Retirer",
-    "online": "En ligne",
-    "offline": "Hors ligne"
+ "friends": {
+  "friends": "Amis",
+  "addFriend": "Ajouter un ami",
+  "requested": "Demandé"
   },
   "chat": {
     "title": "Chat",
@@ -31,5 +32,48 @@
   "common": {
     "loading": "Chargement...",
     "error": "Une erreur est survenue."
-  }
+  },
+  "settings": {
+  "logout": "Déconnexion",
+  "Delete": "Supprimer",
+  "Activate": "Activer",
+  "Settings": "Paramètres",
+  "privacy": "Confidentialité",
+  "account": "Compte",
+  "language": "Langue",
+  "changelanguage": "Changer de langue.",
+  "deleteaccount": "Supprimer le compte.",
+  "logoutfromaccount": "Se déconnecter du compte.",
+  "twofaauth": "Authentification à deux facteurs"
+  },
+  "editprofile": {
+  "editprofile": "Modifier le profil",
+  "changephoto": "Changer la photo",
+  "bio": "Bio",
+  "fullname": "Nom",
+  "username": "Nom d'utilisateur",
+  "savechanges": "Enregistrer les modifications",
+  "discard": "Annuler",
+  "changepassword": "Changer le mot de passe",
+  "oldpassword": "Ancien mot de passe",
+  "newpassword": "Nouveau mot de passe",
+  "saving": "Enregistrement…"
+  },
+  "postdetail": {
+  "close": "Fermer",
+  "likes": "J’aime",
+  "post": "Publier",
+  "posting": "Publication en cours...",
+  "writeacomment": "Écrire un commentaire...",
+  "loading": "Chargement...",
+  "postnotfound": "Publication introuvable.",
+  "commentnotfound": "Commentaires introuvables."
+  },
+  "searchpage": {
+  "search": "Rechercher",
+  "noresults": "Aucun résultat trouvé pour ",
+  "typeinyoursearch": "Saisissez votre recherche ici",
+  "searchresultshere": "Les résultats de recherche apparaîtront ici.",
+  "close": "Fermer"
 }
+}  

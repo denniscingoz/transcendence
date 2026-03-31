@@ -20,6 +20,8 @@
 //   )
 // }
 
+import { useTranslation } from "react-i18next"
+
 export function Modal({
   title,
   onClose,
@@ -29,6 +31,8 @@ export function Modal({
   onClose: () => void
   children: React.ReactNode
 }) {
+
+  const { t } = useTranslation()
   return (
     <div
       onClick={onClose}
@@ -42,7 +46,7 @@ export function Modal({
           onClick={onClose}
           className="absolute top-4 right-4 text-sm text-gray-500 hover:text-black"
         >
-          Close
+          {t('searchpage.close')}
         </button>
 
         <h2 className="mb-4 text-lg font-semibold">{title}</h2>

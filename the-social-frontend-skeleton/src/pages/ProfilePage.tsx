@@ -105,14 +105,14 @@ export function ProfilePage() {
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
               <div className="text-xl font-bold text-gray-900">{data.PostsCount ?? 0}</div>
-              <div className="text-sm text-gray-500">posts</div>
+              <div className="text-sm text-gray-500">{t('profile.posts')}</div>
             </div>
             <div className="flex gap-3 mb-8">
                <Link
                 to="/settings"
                 className="btn-ghost min-w-[250px] h-[30px] flex items-center justify-center"
                 >
-                Settings
+                {t('settings.Settings')}
               </Link>
             </div>
           </div>
@@ -121,7 +121,7 @@ export function ProfilePage() {
             <div className="flex items-center gap-2">
               <div className="text-xl font-bold text-gray-900">{data.FriendsCount ?? 0}</div>
               <Link to="/friends" className="text-sm text-gray-500">
-                friends
+                {t('profile.friends')}
               </Link>
             </div>
             <div className="flex gap-3 mb-8">
@@ -129,7 +129,7 @@ export function ProfilePage() {
                 to="/edit-profile"
                 className="btn-ghost min-w-[250px] h-[30px] flex items-center justify-center"
                 >
-                Edit profile
+                {t('profile.editprofile')}
               </Link>
             </div>
           </div>

@@ -2,26 +2,27 @@
   "nav": {
     "profile": "Profile",
     "friends": "Friends",
-    "chat": "Chat",
-    "logout": "Logout"
+    "chat": "Chat"
   },
   "login": {
     "title": "Sign in",
     "email": "Email",
     "password": "Password",
-    "submit": "Login"
+    "submit": "Login",
+    "or": "or"
   },
   "profile": {
     "title": "My profile",
     "save": "Save",
+    "posts": "posts",
+    "friends": "friends",
+    "editprofile": "Edit Profile",
     "uploadAvatar": "Upload avatar"
   },
   "friends": {
-    "title": "Friends",
-    "add": "Add friend",
-    "remove": "Remove",
-    "online": "Online",
-    "offline": "Offline"
+    "friends": "Friends",
+    "addFriend": "Add Friend",
+    "requested": "Requested"
   },
   "chat": {
     "title": "Chat",
@@ -31,5 +32,54 @@
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong."
+  },
+  "settings":{
+    "logout": "Logout",
+    "Delete": "Delete",
+    "Activate": "Activate",
+    "Settings": "Settings",
+    "privacy": "Privacy",
+    "account": "Account",
+    "language": "Language",
+    "changelanguage": "Change Language.",
+    "deleteaccount": "Delete Account.",
+    "logoutfromaccount": "Log out from the account.",
+    "twofaauth": "2 factor authentication"
+  },
+  "editprofile": 
+  {
+    "editprofile":"Edit Profile",
+    "changephoto": "Change Photo",
+    "bio": "Bio",
+    "fullname": "Name",
+    "username": "Username",
+    "savechanges": "Save Changes",
+    "discard": "Discard",
+    
+    "changepassword": "Change Password",
+    "oldpassword": "Old Password",
+    "newpassword": "New Password"
+
+  },
+  "postdetail":
+  {
+    "close": "Close",
+    "likes": "Likes",
+    "post": "Post",
+    "posting": "Posting..",
+    "writeacomment": "Write a comment..." ,
+    "loading": "Loading...",
+    "postnotfound": "Post not found.",
+    "commentnotfound": "omments not found."
+
+  },
+  "searchpage":
+  {
+    "search": "Search",
+    "noresults": "No results found for ",
+    "typeinyoursearch": "Type in your search here",
+    "searchresultshere": "Search results will appear here.",
+    "close": "Close"
+
   }
 }

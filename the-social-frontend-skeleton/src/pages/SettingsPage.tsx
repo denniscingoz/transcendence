@@ -44,7 +44,7 @@ export function SettingsPage() {
         
        { /*settings header and close x*/}
         <div className="mb-8 flex items-start justify-between">
-          <h1 className="text-2xl font-semibold text-text">Settings</h1>
+          <h1 className="text-2xl font-semibold text-text">{t('settings.privacy')}</h1>
           <button
             type="button"
             onClick={handleClose}
@@ -59,27 +59,27 @@ export function SettingsPage() {
 
           { /*2FA Auth*/}
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-text">Privacy</h2>
+            <h2 className="text-lg font-semibold text-text">{t('settings.privacy')}</h2>
 
             <div className="flex items-center justify-between gap-4 bg-white rounded-xl border border-panel px-4 py-4">
-              <p className="text-sm text-text">2 factor authentication</p>
+              <p className="text-sm text-text">{t('settings.privacy')}</p>
 
               <button
                 type="button"
                 onClick={handleActivate2FA}
                 className="bg-[#198BFC] rounded-full px-4 py-2 text-sm font-medium text-white hover:opacity-80"
               >
-                Activate
+                {t('settings.Activate')}
               </button>
             </div>
           </section>
 
           { /*Log out*/}
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-text">Log out</h2>
+            <h2 className="text-lg font-semibold text-text">{t('settings.logout')}</h2>
 
             <div className="bg-white flex items-center justify-between gap-4 rounded-xl border border-panel px-4 py-4">
-              <p className="text-sm text-text">Log out from the account.</p>
+              <p className="text-sm text-text">{t('settings.logoutfromaccount')}</p>
 
               {isAuthenticated ? (
             <button
@@ -89,7 +89,7 @@ export function SettingsPage() {
                 navigate('/login')
               }}
             >
-              {t('nav.logout')}
+              {t('settings.logout')}
             </button>
           ) : (
             <NavItem to="/login" label="Login" />
@@ -101,27 +101,27 @@ export function SettingsPage() {
 
           { /*Delete Account*/}
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-text">Account</h2>
+            <h2 className="text-lg font-semibold text-text">{t('settings.account')}</h2>
 
             <div className="bg-white flex items-center justify-between gap-4 rounded-xl border border-panel px-4 py-4">
-              <p className="text-sm text-text">Delete Account.</p>
+              <p className="text-sm text-text">{t('settings.deleteaccount')}</p>
 
               <button
                 type="button"
                 onClick={handleDeleteAccount}
                 className="rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white hover:opacity-80"
               >
-                Delete
+                {t('settings.Delete')}
               </button>
             </div>
           </section>
                     
           { /*Languages*/}
           <section className="space-y-3">
-            <h2 className="text-lg font-semibold text-text">Account</h2>
+            <h2 className="text-lg font-semibold text-text">{t('settings.language')}</h2>
 
             <div className="bg-white flex items-center justify-between gap-4 rounded-xl border border-panel px-4 py-4">
-              <p className="text-sm text-text">Language.</p>
+              <p className="text-sm text-text">{t('settings.changelanguage')}.</p>
 
               <select
                           className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm"

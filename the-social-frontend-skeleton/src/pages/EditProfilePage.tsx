@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useMyProfile, useUpdateProfile, useChangePassword } from '../hooks/useProfile'
 import type { UpdateProfileDto, ChangePasswordDto } from '../types/api'
@@ -19,6 +20,7 @@ const DUMMY_PROFILE_FORM: EditProfileForm = {
 }
 
 export function EditProfilePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const {
     data: myProfile,
@@ -142,7 +144,7 @@ export function EditProfilePage() {
         >
         {/* {Close x and Edit header} */}
           <div className="mb-8 flex items-center justify-between">
-            <h1 className="text-2xl font-semibold text-text">Edit Profile</h1>
+            <h1 className="text-2xl font-semibold text-text">{t('editprofile.editprofile')}</h1>
             
             <button
               type="button"
@@ -167,14 +169,14 @@ export function EditProfilePage() {
                 type="button"
                 className="btn-ghost h-[40px] min-w-[140px] text-sm rounded-xl px-4"
               >
-                Change Photo
+                {t('editprofile.changephoto')}
               </button>
             </div>
 
           {/* {Bio} */}
             <div className="flex flex-col gap-2">
               <label htmlFor="bio" className="text-sm font-medium text-text">
-                Bio
+                {t('editprofile.bio')}
               </label>
               <textarea
                 id="bio"
@@ -190,7 +192,7 @@ export function EditProfilePage() {
           {/* {FullName} */}
             <div className="flex flex-col gap-2">
               <label htmlFor="fullName" className="text-sm font-medium text-text">
-                Name
+                {t('editprofile.fullname')}
               </label>
               <input
                 id="fullName"
@@ -206,7 +208,7 @@ export function EditProfilePage() {
           {/* {Username} */}
             <div className="flex flex-col gap-2">
               <label htmlFor="username" className="text-sm font-medium text-text">
-                Username
+                {t('editprofile.username')}
               </label>
               <input
                 id="username"
@@ -225,7 +227,7 @@ export function EditProfilePage() {
                 className="btn-ghost rounded-xl px-5 py-2 text-sm"
                 disabled={updateProfile.isPending}
               >
-                {updateProfile.isPending ? 'Saving...' : 'Save changes'}
+                {updateProfile.isPending ? t('editprofile.saving') : t('editprofile.savechanges')}
               </button>
 
               <button
@@ -233,7 +235,7 @@ export function EditProfilePage() {
                 onClick={handleDiscard}
                 className="btn-ghost rounded-xl px-5 py-2 text-sm font-medium"
               >
-                Discard
+                {t('editprofile.discard')}
               </button>
             </div>
           </div>
@@ -244,11 +246,11 @@ export function EditProfilePage() {
           className="panel rounded-2xl border border-panel p-6 shadow-sm"
         >
           <div className="flex flex-col gap-6">
-            <h2 className="text-xl font-semibold text-text">Change Password</h2>
+            <h2 className="text-xl font-semibold text-text"> {t('editprofile.changepassword')}</h2>
 
             <div className="flex flex-col gap-2">
               <label htmlFor="oldPassword" className="text-sm font-medium text-text">
-                Old Password
+                {t('editprofile.oldpassword')}
               </label>
               <input
                 id="oldPassword"
@@ -266,7 +268,7 @@ export function EditProfilePage() {
 
             <div className="flex flex-col gap-2">
               <label htmlFor="newPassword" className="text-sm font-medium text-text">
-                New Password
+                {t('editprofile.newpassword')}
               </label>
               <input
                 id="newPassword"
@@ -287,7 +289,7 @@ export function EditProfilePage() {
                 type="submit"
                 className="btn-ghost rounded-xl px-5 py-2 text-sm font-medium"
               >
-                Change password
+                {t('editprofile.changepassword')}
               </button>
 
               <button
@@ -295,7 +297,7 @@ export function EditProfilePage() {
                 onClick={handleDiscard}
                 className="btn-ghost rounded-xl px-5 py-2 text-sm font-medium"
               >
-                Discard
+                 {t('editprofile.discard')}
               </button>
             </div>
           </div>
