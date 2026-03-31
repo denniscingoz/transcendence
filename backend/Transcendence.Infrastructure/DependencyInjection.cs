@@ -58,7 +58,7 @@ public static class DependencyInjection
         services.AddScoped<IConversationRepository, ConversationRepository>();
                 services.AddScoped<IMessageRepository, MessageRepository>();
 
-
+       
 		return services;
 
 

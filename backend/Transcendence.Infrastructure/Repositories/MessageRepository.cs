@@ -1,6 +1,7 @@
 using Transcendence.Domain.Chat;
 using Transcendence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 public sealed class  MessageRepository : IMessageRepository
 {
@@ -32,13 +33,20 @@ public sealed class  MessageRepository : IMessageRepository
         .Take(limit)
         .ToListAsync();
     }
-        public async Task<Guid?> GetLastMessageId(Guid conversationId)
-        {
-                    return await _db.Messages.Where(m => m.ConversationId == conversationId)
-                .OrderByDescending(m => m.CreatedAt)
-                .Select(m => m.Id)
-                .FirstOrDefaultAsync();
-        }
+    public async Task<Guid?> GetLastMessageId(Guid conversationId)
+    {
+                return await _db.Messages.Where(m => m.ConversationId == conversationId)
+            .OrderByDescending(m => m.CreatedAt)
+            .Select(m => m.Id)
+            .FirstOrDefaultAsync();
+    }
+    public async Task<int> GetUnreadCount(Guid conversationId, Guid userId, DateTimeOffset LastRead)
+    {
+       return await _db.Messages.Where(m=> m.ConversationId == conversationId)
+                                .Where(m => m.CreatedAt > LastRead)
+                                .Where(m => m.SenderId != userId)
+                                .CountAsync();
+    }
 }
 
  

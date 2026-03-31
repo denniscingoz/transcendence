@@ -10,6 +10,8 @@ public sealed class Conversation
 
     public ConversationType Type {get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
+    public string? LastMessageText { get; private set; }
+    public DateTimeOffset? LastMessageAt { get; private set; }
     private Conversation() {} //EF
 
     public Conversation(ConversationType type, IEnumerable<Guid> participantsIds)
@@ -22,10 +24,12 @@ public sealed class Conversation
         {
             _participants.Add(new ConversationParticipant(Id, userId));
         }
- /* Conversation
-    └── Participants (ConversationParticipant) //
-*/
+
     }
     public bool HasParticipant(Guid userId) => _participants.Any(p => p.UserId == userId);
-
+    public void UpdateLastMessage(string content, DateTimeOffset createdAt)
+    {
+        LastMessageText = content;
+        LastMessageAt = createdAt;
+    }
 } 
