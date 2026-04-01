@@ -1,109 +1,159 @@
 import { useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import type { LoginRequest } from '../types/api'
+import type { LoginRequest, SignUpRequestDto } from '../types/api'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { TheSocialLogo } from '../components/Header'
+import api from '../api/axios'
+
+type AuthResponseDto = {
+  token: string
+}
 
 export function LoginPage() {
   const { t } = useTranslation()
   const { login } = useAuth()
   const nav = useNavigate()
   const location = useLocation() as any
-  const [apiError, setApiError] = useState<string | null>(null)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginRequest>({
+  const [loginApiError, setLoginApiError] = useState<string | null>(null)
+  const [signupApiError, setSignupApiError] = useState<string | null>(null)
+
+  const loginForm = useForm<LoginRequest>({
     defaultValues: { email: '', password: '' },
   })
 
-  const onSubmit = async (values: LoginRequest) => {
-    setApiError(null)
+  const signupForm = useForm<SignUpRequestDto>({
+    defaultValues: {
+      Email: '',
+      Password: '',
+      FullName: '',
+      Username: '',
+    },
+  })
+
+  const onLoginSubmit = async (values: LoginRequest) => {
+    setLoginApiError(null)
     try {
       await login(values)
       const to = location?.state?.from ?? '/profile'
       nav(to)
     } catch (e: any) {
-      setApiError(e?.response?.data?.message ?? 'Login failed')
+      setLoginApiError(e?.response?.data?.message ?? 'Login failed')
+    }
+  }
+
+  const onSignupSubmit = async (values: SignUpRequestDto) => {
+    setSignupApiError(null)
+    try {
+      const { data } = await api.post<AuthResponseDto>('/signup', values)
+
+      // if signup returns token and you want auto-login:
+      // save token here or call your auth context method
+
+      console.log(data)
+      nav('/profile')
+    } catch (e: any) {
+      setSignupApiError(e?.response?.data?.message ?? 'Signup failed')
     }
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
-        {/* Logo */}
         <h1 className="flex justify-center">
           <TheSocialLogo className="h-4 w-auto text-gray-900" />
         </h1>
 
-        {/* Login Card */}
         <div className="panel">
-          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-4" onSubmit={loginForm.handleSubmit(onLoginSubmit)}>
             <input
               className="input"
               placeholder="Username, or email"
-              {...register('email', { required: true })}
+              {...loginForm.register('email', { required: true })}
             />
             <input
               className="input"
               placeholder="Password"
               type="password"
-              {...register('password', { required: true })}
+              {...loginForm.register('password', { required: true })}
             />
 
-            {apiError && (
-              <div className="text-sm text-red-600 text-center">{apiError}</div>
+            {loginApiError && (
+              <div className="text-sm text-red-600 text-center">{loginApiError}</div>
             )}
 
             <div className="flex justify-center pt-2">
-              <button className="btn-primary w-64" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Logging in...' : 'Login'}
+              <button
+                className="btn-primary w-64"
+                type="submit"
+                disabled={loginForm.formState.isSubmitting}
+              >
+                {loginForm.formState.isSubmitting ? 'Logging in...' : 'Login'}
               </button>
             </div>
           </form>
         </div>
 
-        {/* Divider */}
         <div className="divider">OR</div>
 
-        {/* Signup Card */}
         <div className="panel space-y-4">
-          {/* Google Button */}
           <button
             type="button"
-            className="w-full flex items-center justify-center gap-3 bg-white rounded-full px-5 py-3.5 
-                       hover:bg-gray-50 transition-colors"
+            className="w-full flex items-center justify-center gap-3 bg-white rounded-full px-5 py-3.5 hover:bg-gray-50 transition-colors"
           >
             <GoogleIcon />
             <span className="font-medium text-gray-700">Continue with Google</span>
           </button>
 
-          {/* Divider */}
           <div className="divider">OR</div>
 
-          {/* Signup Form */}
-          <div className="space-y-4">
-            <input className="input" placeholder="Email" />
-            <input className="input" placeholder="Password" type="password" />
-            <input className="input" placeholder="Full name" />
-            <input className="input" placeholder="Username" />
+          <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
+            <input
+              className="input"
+              placeholder="Email"
+              {...signupForm.register('Email', { required: true })}
+            />
+
+            <input
+              className="input"
+              placeholder="Password"
+              type="password"
+              {...signupForm.register('Password', { required: true })}
+            />
+
+            <input
+              className="input"
+              placeholder="Full name"
+              {...signupForm.register('FullName', { required: true })}
+            />
+
+            <input
+              className="input"
+              placeholder="Username"
+              {...signupForm.register('Username', { required: true })}
+            />
+
+            {signupApiError && (
+              <div className="text-sm text-red-600 text-center">{signupApiError}</div>
+            )}
 
             <div className="flex justify-center pt-2">
-              <button type="button" className="btn-primary w-64">
-                Signup
+              <button
+                type="submit"
+                className="btn-primary w-64"
+                disabled={signupForm.formState.isSubmitting}
+              >
+                {signupForm.formState.isSubmitting ? 'Signing up...' : 'Signup'}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
   )
 }
-
 function GoogleIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24">
