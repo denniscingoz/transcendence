@@ -14,7 +14,6 @@ public static class ApiResponseExtensions
         return controller.Ok(ApiResponse<T>.Success(data));
     }
 
-
     public static ActionResult<ApiResponse<T>> FailResponse<T> (
         this ControllerBase controller, IReadOnlyList<string> errors)
     {

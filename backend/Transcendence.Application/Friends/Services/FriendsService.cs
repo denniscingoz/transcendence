@@ -7,6 +7,7 @@ using Transcendence.Application.Friends.Queries;
 using Transcendence.Domain.Exceptions;
 using Transcendence.Domain.Friends;
 using Transcendence.Domain.Users;
+using NotFoundException = Transcendence.Application.Common.Exceptions.NotFoundException;
 
 namespace Transcendence.Application.Friends.Services;
 

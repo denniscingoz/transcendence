@@ -1,116 +1,133 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAddFriend, useFriends, useRemoveFriend } from '../hooks/useFriends'
 import { useTranslation } from 'react-i18next'
-import { Header } from '../components/Header'
 import { BottomNav } from '../components/BottomNav'
+import { useNavigate } from 'react-router-dom'
 
-// Mock friends data
-const mockFriends = [
-  {
-    id: '1',
-    displayName: 'Dipprokash Sardar',
-    username: 'dipp_sardar',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    isFollowing: true,
-    isOnline: true,
-  },
-  {
-    id: '2',
-    displayName: 'Dipprokash Sardar',
-    username: 'dipp_sardar',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    isFollowing: true,
-    isOnline: false,
-  },
-  {
-    id: '3',
-    displayName: 'Dipprokash Sardar',
-    username: 'dipp_sardar',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    isFollowing: true,
-    isOnline: true,
-  },
-  {
-    id: '4',
-    displayName: 'Dipprokash Sardar',
-    username: 'dipp_sardar',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    isFollowing: true,
-    isOnline: false,
-  },
-  {
-    id: '5',
-    displayName: 'Dipprokash Sardar',
-    username: 'dipp_sardar',
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    isFollowing: true,
-    isOnline: true,
-  },
-]
+type FriendshipStatus = 'friends' | 'requested' | 'none'
 
 export function FriendsPage() {
   const { t } = useTranslation()
-  const { data: apiData, isLoading, error } = useFriends()
+  const { data: apIData, isLoading, error } = useFriends()
   const add = useAddFriend()
   const remove = useRemoveFriend()
+  const navigate = useNavigate()
 
-  // Use API data if available, otherwise mock
-  const friends = Array.isArray(apiData) ? apiData : mockFriends
+  const friends = apIData ?? []
 
-  const [followingState, setFollowingState] = useState<Record<string, boolean>>(
-    Object.fromEntries(friends.map((f) => [f.id, f.isFollowing ?? true]))
-  )
+  const [friendshipState, setFriendshipState] = useState<Record<string, FriendshipStatus>>({})
 
-  const toggleFollow = (id: string) => {
-    setFollowingState((prev) => ({ ...prev, [id]: !prev[id] }))
+  useEffect(() => {
+    if (!apIData) return
+
+    setFriendshipState((prev) => {
+      const next = { ...prev }
+
+      for (const friend of apIData) {
+        if (!(friend.Id in next)) {
+          next[friend.Id] = 'friends'
+        }
+      }
+
+      return next
+    })
+  }, [apIData])
+
+  function handleClose() {
+    navigate(-1)
+  }
+
+  const toggleFriendship = async (id: string) => {
+    const currentStatus = friendshipState[id] ?? 'friends'
+
+    if (currentStatus === 'friends') {
+      try {
+        await remove.mutateAsync(id)
+        setFriendshipState((prev) => ({ ...prev, [id]: 'none' }))
+      } catch (error) {
+        console.error('Failed to remove friend:', error)
+      }
+      return
+    }
+
+    if (currentStatus === 'none') {
+      try {
+        await add.mutateAsync(id)
+        setFriendshipState((prev) => ({ ...prev, [id]: 'requested' }))
+      } catch (error) {
+        console.error('Failed to send friend request:', error)
+      }
+      return
+    }
+
+    if (currentStatus === 'requested') {
+      return
+    }
   }
 
   return (
-    <div className="min-h-screen bg-white pb-24">
-      <Header />
+    <div className="h-[calc(100dvh-250px)] overflow-hidden bg-white">
+      <main className="mx-auto h-full max-w-2xl px-4 py-6">
+        <div className="panel flex h-[85%] flex-col overflow-hidden">
+          <div className="mb-8 flex items-start justify-between">
+            <h1 className="text-2xl font-semibold text-text">{t('friends.friends')}</h1>
 
-      <main className="max-w-2xl mx-auto px-4 py-6">
-        {/* Likes modal style list */}
-        <div className="panel">
-          <h2 className="text-xl font-bold tracking-wider mb-6">LIKES</h2>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="btn-ghost flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-text hover:bg-gray-100"
+              aria-label="Close settings"
+            >
+              ×
+            </button>
+          </div>
 
-          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-            {friends.map((friend) => (
-              <div
-                key={friend.id}
-                className="flex items-center gap-4 p-4 bg-gray-200 rounded-2xl"
-              >
-                {/* Avatar */}
-                <img
-                  src={friend.avatarUrl ?? 'https://placehold.co/80x80'}
-                  alt={friend.displayName}
-                  className="w-14 h-14 rounded-full object-cover border-2 border-red-200"
-                />
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
+            {friends.map((friend) => {
+              const status = friendshipState[friend.Id] ?? 'friends'
 
-                {/* Name and username */}
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-gray-900">{friend.displayName}</div>
-                  <div className="text-sm text-gray-500">@{friend.username}</div>
-                </div>
-
-                {/* Follow button */}
-                <button
-                  onClick={() => toggleFollow(friend.id)}
-                  className={`px-6 py-2 rounded-full font-medium transition-colors ${
-                    followingState[friend.id]
-                      ? 'bg-gray-300 text-gray-700 hover:bg-gray-400'
-                      : 'bg-blue-500 text-white hover:bg-blue-600'
-                  }`}
+              return (
+                <div
+                  key={friend.Id}
+                  className="flex items-center gap-4 rounded-2xl bg-gray-200 p-4"
                 >
-                  {followingState[friend.id] ? 'Following' : 'Follow'}
-                </button>
-              </div>
-            ))}
+                  <img
+                    src={friend.AvatarUrl ?? 'https://placehold.co/80x80'}
+                    alt={friend.FullName}
+                    className="h-14 w-14 rounded-full border-2 border-red-200 object-cover"
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-gray-900">{friend.FullName}</div>
+                    <div className="text-sm text-gray-500">@{friend.Username}</div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => toggleFriendship(friend.Id)}
+                    disabled={status === 'requested'}
+                    className={`rounded-full px-6 py-2 font-medium transition-colors ${
+                      status === 'friends'
+                        ? 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                        : status === 'requested'
+                        ? 'cursor-default bg-gray-200 text-yellow-800'
+                        : 'bg-blue-500 text-white hover:bg-blue-600'
+                    }`}
+                  >
+                     {status === 'friends'
+                      ? t('friends.friends')
+                      : status === 'requested'
+                      ? t('friends.requested')
+                      : t('friends.addFriend')} 
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </div>
       </main>
 
-      <BottomNav />
+      <BottomNav onSearchClick={() => {}} />
     </div>
   )
 }

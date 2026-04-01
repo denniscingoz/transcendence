@@ -4,16 +4,16 @@ type NavItem = 'home' | 'search' | 'messages' | 'profile'
 
 interface BottomNavProps {
   active?: NavItem
+  onSearchClick: () => void
 }
 
-export function BottomNav({ active }: BottomNavProps) {
+export function BottomNav({ active, onSearchClick }: BottomNavProps) {
   const location = useLocation()
-  
+
   const isActive = (item: NavItem) => {
     if (active) return active === item
     const path = location.pathname
     if (item === 'home') return path === '/' || path === '/feed'
-    if (item === 'search') return path === '/search'
     if (item === 'messages') return path === '/chat' || path === '/messages'
     if (item === 'profile') return path === '/profile'
     return false
@@ -25,15 +25,19 @@ export function BottomNav({ active }: BottomNavProps) {
         <NavLink to="/feed" active={isActive('home')}>
           <HomeIcon />
         </NavLink>
-        
-        <NavLink to="/search" active={isActive('search')}>
+
+        <button
+          type="button"
+          onClick={onSearchClick}
+          className="p-3 rounded-full transition-colors text-gray-400 hover:text-gray-600 hover:bg-gray-200"
+        >
           <SearchIcon />
-        </NavLink>
-        
+        </button>
+
         <NavLink to="/chat" active={isActive('messages')}>
           <MessagesIcon />
         </NavLink>
-        
+
         <NavLink to="/profile" active={isActive('profile')}>
           <ProfileIcon />
         </NavLink>
@@ -53,8 +57,8 @@ function NavLink({ to, active, children }: NavLinkProps) {
     <Link
       to={to}
       className={`p-3 rounded-full transition-colors ${
-        active 
-          ? 'text-gray-900' 
+        active
+          ? 'text-gray-900'
           : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200'
       }`}
     >

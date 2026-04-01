@@ -11,6 +11,8 @@ obj/
 # Rider / VS Code
 .idea/
 .vscode/
+.obsidian/
+.idea/
 
 *.log
 *.cache
@@ -36,7 +38,4 @@ build/
 
 *.swp
 *.bak
-
-MM_Notifications&Permissions_Resources.docx
-
-storage/
+*.md

@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 import type { LoginRequest } from '../types/api'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
+import { TheSocialLogo } from '../components/Header'
 
 export function LoginPage() {
   const { t } = useTranslation()
@@ -35,8 +36,8 @@ export function LoginPage() {
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
-        <h1 className="text-center text-2xl font-bold tracking-[0.3em] text-gray-900">
-          THE SOCIAL
+        <h1 className="flex justify-center">
+          <TheSocialLogo className="h-4 w-auto text-gray-900" />
         </h1>
 
         {/* Login Card */}

@@ -1,98 +1,131 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Transcendence.Api.Chat;
+
 using Transcendence.Api.Configurations;
+using Transcendence.Api.Realtime;
+
 using Transcendence.Application;
 using Transcendence.Application.Auth.DTOs;
-using Transcendence.Application.Friends.Interfaces;
-using Transcendence.Application.Friends.Services;
-using Transcendence.Application.Posts.Interfaces;
-using Transcendence.Infrastructure;
-using Transcendence.Infrastructure.Persistence;
-using Transcendence.Infrastructure.Repositories;
 
+using Transcendence.Infrastructure;
+using Transcendence.Api.Realtime.Services;
+using Transcendence.Application.Realtime.Contracts;
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpointsApiExplorer(); // scan endpoints for  OpenAPI
-builder.Services.AddSwaggerGen();
+// ================= SERVICES =================
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerDocumentation();
+
+// CORS
 builder.Services.AddCors(options =>
 {
-	options.AddPolicy("Frontend", policy =>
-		policy.WithOrigins("http://localhost:5173")
-			  .AllowAnyHeader()
-			  .AllowAnyMethod()
-	// Use AllowCredentials() only if we use cookies.
-	// .AllowCredentials() ???????????????
-	);
+    options.AddPolicy("DevCors", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
 
+// JWT
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var key = jwtSection["Key"]!;
 
-
 builder.Services
-	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-	.AddJwtBearer(options =>
-	{
-		options.TokenValidationParameters = new TokenValidationParameters
-		{
-			ValidateIssuerSigningKey = true,
-			IssuerSigningKey = new SymmetricSecurityKey(
-				Encoding.UTF8.GetBytes(key)),
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(key)),
 
-			ValidateIssuer = true,
-			ValidIssuer = jwtSection["Issuer"],
+            ValidateIssuer = true,
+            ValidIssuer = jwtSection["Issuer"],
 
-			ValidateAudience = true,
-			ValidAudience = jwtSection["Audience"],
+            ValidateAudience = true,
+            ValidAudience = jwtSection["Audience"],
 
-			ValidateLifetime = true,
-			ClockSkew = TimeSpan.Zero
-		};
-	});
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
 
+        // SignalR
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+    });
+        
+
+// Google auth
 builder.Services.Configure<GoogleAuthOptions>(
-	builder.Configuration.GetSection("GoogleAuth"));
+    builder.Configuration.GetSection("GoogleAuth"));
 
-
-builder.Services.AddSwaggerDocumentation();
+// Authorization
 builder.Services.AddAuthorization();
 
-builder.Services.AddSignalR();
+// SignalR
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+})
+.AddJsonProtocol(o =>
+{
+    o.PayloadSerializerOptions.PropertyNameCaseInsensitive = true;
+});
 
-builder.Services.AddApplication(); //my extention method
-
+// Layers
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddControllers();
-/*
-	If a class:
-	• has dependencies
-	• must live within a request
-	• is used through a constructor
 
-	it is registered in DI
-*/
+// Logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+// ================= APP =================
 
 var app = builder.Build();
+
+app.UseStaticFiles();
+
 app.UseRouting();
-app.UseCors("Frontend");
+app.UseCors("DevCors");
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Endpoints
 app.MapChatEndpoints();
 app.MapControllers();
+
 app.Run();
-
-
 /*
 1. builder = WebApplication.CreateBuilder()
 2. builder.Services.AddXxx()        ← DependencyInjection

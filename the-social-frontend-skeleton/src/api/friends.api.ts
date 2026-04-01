@@ -1,15 +1,20 @@
 import api from './axios'
-import type { FriendDto } from '../types/api'
+import type { ApiResponse, FriendDto } from '../types/api'
 
 export async function listFriends(): Promise<FriendDto[]> {
-  const { data } = await api.get<FriendDto[]>('/friends')
-  return data
+  const response = await api.get<ApiResponse<FriendDto[]>>('/friends/list')
+
+  if (!response.data.IsSuccess || !response.data.Data) {
+    throw new Error(response.data.Errors?.[0] ?? 'Failed to load friends.')
+  }
+
+  return response.data.Data
 }
 
-export async function addFriendById(friendId: string): Promise<void> {
-  await api.post('/friends', { friendId })
+export async function addFriendById(targetUserId: string): Promise<void> {
+  await api.post(`/friends/${targetUserId}`)
 }
 
-export async function removeFriendById(friendId: string): Promise<void> {
-  await api.delete(`/friends/${friendId}`)
+export async function removeFriendById(friendUserId: string): Promise<void> {
+  await api.delete(`/friends/${friendUserId}`)
 }
