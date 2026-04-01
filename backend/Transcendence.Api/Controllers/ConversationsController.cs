@@ -21,7 +21,7 @@ public class ConversationsController : ControllerBase
     {
         _chatService = chatService;
     }
-    [HttpGet("conversations")]
+    [HttpGet]
     public async Task<ActionResult<ApiResponse<IReadOnlyList<ConversationDto>>>> GetConversations()
         {
             var userId = User.GetUserId();

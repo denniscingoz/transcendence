@@ -62,13 +62,19 @@ public sealed class ConversationRepository : IConversationRepository
                         .Where(p => p.ConversationId == conversationId).ToListAsync();
        
     }
-        public async Task <ConversationParticipant>  GetParticipant(Guid userId, Guid conversationId)
+
+    public async Task <ConversationParticipant>  GetParticipant(Guid userId, Guid conversationId)
     {
         return await  _db.ConversationParticipants
                         .FirstAsync(p => p.ConversationId == conversationId &&
                              p.UserId == userId);
-       
     }
+
+    public async Task <IReadOnlyList<Conversation>> GetConversations(Guid userId)
+    {
+        return await _db.Conversations.Include(c => c.Participants).Where(c => c.Participants.Any(p => p.UserId == userId)).ToListAsync();
+    }
+
     //  public async Task <IReadOnlyList<Guid>>  GetUserInterlocutors(Guid userId)
     // {
     //         return await _db.ConversationParticipants

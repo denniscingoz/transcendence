@@ -1,5 +1,6 @@
 namespace Transcendence.Application.Realtime.Contracts;
 using Transcendence.Application.Chat.DTOs;
+using System.Collections.Generic;
 public interface INotificationService
 {
         Task NotifyNewMessage(
@@ -8,4 +9,4 @@ public interface INotificationService
             ChatMessageDto message
  
             );
-}
+} //class Transcendence.Application.Chat.DTOs.ChatMessageDto
