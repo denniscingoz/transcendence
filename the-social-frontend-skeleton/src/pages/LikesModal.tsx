@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 interface User {
-  id: string
-  displayName: string
+  Id: string
+  FullName: string
   username: string
-  avatarUrl?: string
-  isFollowing?: boolean
+  AvatarUrl?: string
+  AreWeFriends?: boolean
 }
 
 interface LikesModalProps {
@@ -17,7 +17,7 @@ interface LikesModalProps {
 
 export function LikesModal({ isOpen, onClose, users, onFollowToggle }: LikesModalProps) {
   const [followingState, setFollowingState] = useState<Record<string, boolean>>(
-    Object.fromEntries(users.map((u) => [u.id, u.isFollowing ?? false]))
+    Object.fromEntries(users.map((u) => [u.Id, u.AreWeFriends ?? false]))
   )
 
   if (!isOpen) return null
@@ -50,32 +50,32 @@ export function LikesModal({ isOpen, onClose, users, onFollowToggle }: LikesModa
         <div className="px-4 pb-6 space-y-3 max-h-[60vh] overflow-y-auto">
           {users.map((user) => (
             <div
-              key={user.id}
+              key={user.Id}
               className="flex items-center gap-4 p-4 bg-gray-200 rounded-2xl"
             >
               {/* Avatar */}
               <img
-                src={user.avatarUrl ?? 'https://placehold.co/80x80'}
-                alt={user.displayName}
+                src={user.AvatarUrl ?? 'https://placehold.co/80x80'}
+                alt={user.FullName}
                 className="w-12 h-12 rounded-full object-cover border-2 border-red-200"
               />
 
               {/* Name and username */}
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-gray-900">{user.displayName}</div>
+                <div className="font-semibold text-gray-900">{user.FullName}</div>
                 <div className="text-sm text-gray-500">{user.username}</div>
               </div>
 
               {/* Follow button */}
               <button
-                onClick={() => toggleFollow(user.id)}
+                onClick={() => toggleFollow(user.Id)}
                 className={`px-5 py-2 rounded-full font-medium text-sm transition-colors ${
-                  followingState[user.id]
+                  followingState[user.Id]
                     ? 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                     : 'bg-blue-500 text-white hover:bg-blue-600'
                 }`}
               >
-                {followingState[user.id] ? 'Following' : 'Follow'}
+                {followingState[user.Id] ? 'Following' : 'Follow'}
               </button>
             </div>
           ))}

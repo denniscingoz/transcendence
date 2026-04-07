@@ -168,7 +168,7 @@ export function ChatPage() {
         </main>
       </div>
 
-      <BottomNav active="messages" />
+      <BottomNav active="messages" onSearchClick={() => {}} />
     </div>
   )
 }

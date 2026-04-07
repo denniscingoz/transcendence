@@ -1,7 +1,13 @@
 import api from './axios'
 import type { MyProfileDto } from '../types/api'
 import type { UpdateProfileDto } from '../types/api'
-import type { ApiResponse, CursorPageDto, ProfilePostPreviewDto, ChangePasswordDto } from '../types/api'
+import type {
+  ApiResponse,
+  CursorPageDto,
+  ProfilePostPreviewDto,
+  ChangePasswordDto,
+  UploadFilesResultDto,
+} from '../types/api'
 
 export async function getMyProfile(): Promise<MyProfileDto> {
   const response = await api.get<ApiResponse<MyProfileDto>>('/profile/me')
@@ -37,13 +43,24 @@ export async function changePassword(payload: ChangePasswordDto): Promise<void> 
 }
 
 
-export async function uploadAvatar(file: File): Promise<MyProfileDto> {
+export async function uploadAvatar(file: File): Promise<string> {
   const form = new FormData()
-  form.append('file', file)
-  const { data } = await api.post<MyProfileDto>('/profile/me/avatar', form, {
+  form.append('File', file)
+  const response = await api.post<ApiResponse<UploadFilesResultDto>>('/files', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
-  return data
+
+  if (!response.data.IsSuccess || !response.data.Data) {
+    throw new Error(response.data.Errors[0] ?? 'Failed to upload file.')
+  }
+
+  const uploadedUrl = response.data.Data.Url
+
+  if (!uploadedUrl) {
+    throw new Error('Upload succeeded but no file URL was returned.')
+  }
+
+  return uploadedUrl
 }
 
 

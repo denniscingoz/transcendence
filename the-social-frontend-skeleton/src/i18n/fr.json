@@ -4,7 +4,7 @@
     "friends": "Amis",
     "chat": "Chat"
   },
-  "login": {
+  "Signin": {
     "title": "Connexion",
     "email": "Email",
     "password": "Mot de passe",

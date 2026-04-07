@@ -3,18 +3,17 @@ export type ApiError = {
   details?: Record<string, string[]>
 }
 
-export type LoginRequest = { email: string; password: string }
-export type LoginResponse = { token: string }
+export type SignInRequestDto = { email: string; password: string }
 
 export type ProfileDto = {
-  id: string
-  displayName: string
-  email: string
-  avatarUrl?: string | null
-  username?: string
-  bio?: string
-  postsCount?: number
-  friendsCount?: number
+  Id: string
+  FullName: string
+  Email: string
+  AvatarUrl?: string | null
+  Username?: string
+  Bio?: string
+  PostsCount?: number
+  FriendsCount?: number
 }
 
 export type FriendDto =
@@ -77,6 +76,11 @@ export type ApiResponse<T> = {
   IsSuccess: boolean
   Data: T | null
   Errors: string[]
+}
+
+export type UploadFilesResultDto = {
+  Url: string
+  FileId: string
 }
 
 export type MyProfileDto = 
@@ -191,3 +195,29 @@ export type AuthResponseDto =
 {
   token : string
 }
+
+export interface GoogleSignInRequestDto {
+  credential: string // JWT token from Google
+}
+
+export type OtherProfileDto = 
+{
+    // public Guid Id { get; init; }
+    // public string Username { get; init; } = default!;
+    // public string FullName { get; init; } = default!;
+    // public string? Bio { get; init; }
+    // public string? AvatarUrl { get; init; }
+    // public int PostsCount { get; init; }
+	// public int FriendsCount { get; init; }
+	// public bool AreWeFriends { get; init; }
+
+  Id: string
+  Username: string
+  FullName: string
+  Bio?: string | null
+  AvatarUrl?: string | null
+  PostCount: string
+  FriendsCount: string
+  AreWeFriends: string
+}
+

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { useMyProfile, useUpdateProfile, useChangePassword } from '../hooks/useProfile'
+import { useMyProfile, useUpdateProfile, useChangePassword, useUploadAvatar } from '../hooks/useProfile'
 import type { UpdateProfileDto, ChangePasswordDto } from '../types/api'
+import { useRef } from 'react'
 
 type EditProfileForm = {
   FullName: string
@@ -29,7 +30,9 @@ export function EditProfilePage() {
   } = useMyProfile()
   const updateProfile = useUpdateProfile()
   const changePassword = useChangePassword()
-
+  const uploadAvatar = useUploadAvatar()
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null)
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string>('')
 
   const [profileForm, setProfileForm] = useState<EditProfileForm>({
     FullName: '',
@@ -39,10 +42,32 @@ export function EditProfilePage() {
   })
   const [originalProfileForm, setOriginalProfileForm] = useState<EditProfileForm | null>(null)
 
+
   const [passwordForm, setPasswordForm] = useState<ChangePasswordDto>({
     CurrentPassword: '',
     NewPassword: '',
   })
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const handleChangePhotoClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // optional client-side validation
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.')
+      return
+    }
+
+    setSelectedAvatarFile(file)
+    const previewUrl = URL.createObjectURL(file)
+    setAvatarPreviewUrl(previewUrl)
+  }
 
   useEffect(() => {
     if (!myProfile) return
@@ -82,7 +107,12 @@ export function EditProfilePage() {
       payload.Bio = profileForm.Bio.length > 0 ? profileForm.Bio : null
     }
 
-    if (profileForm.AvatarUrl !== originalProfileForm.AvatarUrl) {
+    if (selectedAvatarFile) {
+      const uploadedAvatarUrl = await uploadAvatar.mutateAsync(selectedAvatarFile)
+      payload.AvatarUrl = uploadedAvatarUrl
+    }
+
+    if (!selectedAvatarFile && profileForm.AvatarUrl !== originalProfileForm.AvatarUrl) {
       payload.AvatarUrl = profileForm.AvatarUrl.length > 0 ? profileForm.AvatarUrl : null
     }
 
@@ -97,6 +127,14 @@ export function EditProfilePage() {
       Bio: updated.Bio ?? '',
       AvatarUrl: updated.AvatarUrl ?? '',
     })
+    setProfileForm({
+      FullName: updated.FullName,
+      Username: updated.Username,
+      Bio: updated.Bio ?? '',
+      AvatarUrl: updated.AvatarUrl ?? '',
+    })
+    setSelectedAvatarFile(null)
+    setAvatarPreviewUrl('')
   }
 
   async function handleChangePassword(e: React.FormEvent) {
@@ -160,17 +198,26 @@ export function EditProfilePage() {
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-4">
               <img
-                src={profileForm.AvatarUrl || '/avatar-placeholder.png'}
+                src={avatarPreviewUrl || profileForm.AvatarUrl || '/avatar-placeholder.png'}
                 alt="Profile avatar"
                 className="h-24 w-24 rounded-full object-cover ring-2 ring-panel"
               />
 
               <button
                 type="button"
+                onClick={handleChangePhotoClick}
                 className="btn-ghost h-[40px] min-w-[140px] text-sm rounded-xl px-4"
               >
                 {t('editprofile.changephoto')}
               </button>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
             </div>
 
           {/* {Bio} */}
@@ -225,7 +272,7 @@ export function EditProfilePage() {
               <button
                 type="submit"
                 className="btn-ghost rounded-xl px-5 py-2 text-sm"
-                disabled={updateProfile.isPending}
+                disabled={updateProfile.isPending || uploadAvatar.isPending}
               >
                 {updateProfile.isPending ? t('editprofile.saving') : t('editprofile.savechanges')}
               </button>

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using Transcendence.Application.Common.Exceptions;
 using Transcendence.Application.Friends.Interfaces;
+using Transcendence.Application.Posts.DTOs;
 using Transcendence.Application.Posts.Interfaces;
 using Transcendence.Application.Users.DTOs;
 using Transcendence.Application.Users.Interfaces;
@@ -168,6 +169,65 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 		user.SetPasswordHash(_passwordHasher.HashPassword(user, dto.NewPassword));
 		await _userRepository.SaveChangesAsync(ct);
 	}
+
+	//DELETE /profile/me
+	public async Task DeleteMeAsync(Guid userId, CancellationToken ct)
+	{
+		var user = await _userRepository.GetByIdAsync(userId, ct)
+			?? throw new NotFoundException("User not found.");
+
+		user.Delete();
+		await _userRepository.SaveChangesAsync(ct);
+	}
+
+
+	// GET /profile/search?username={username}&take=20&cursor={nextCursor}
+	public async Task<CursorPageDto<OtherProfileDto>> SearchProfilesAsync(
+	Guid currentUserId,
+	string query,
+	int take,
+	string? cursor,
+	CancellationToken ct)
+	{
+		query = query.Trim();
+
+		if (string.IsNullOrWhiteSpace(query))
+		{
+
+			return new CursorPageDto<OtherProfileDto>(
+				Array.Empty<OtherProfileDto>(),
+				null
+			);
+		}
+
+		take = Math.Clamp(take, 1, 20);
+
+		int offset = 0;
+		if (!string.IsNullOrWhiteSpace(cursor) && !int.TryParse(cursor, out offset))
+			throw new ArgumentException("Invalid cursor.");
+
+		var items = await _userRepository.SearchProfilesAsync(
+			currentUserId,
+			query,
+			take + 1,
+			offset,
+			ct);
+
+		string? nextCursor = null;
+
+		if (items.Count > take)
+		{
+			items.RemoveAt(items.Count - 1);
+			nextCursor = (offset + take).ToString();
+		}
+
+		return new CursorPageDto<OtherProfileDto>(
+			items,
+			nextCursor
+		);
+	}
+
+
 	private static string? BuildAvatarFileUrl(Guid? fileId)
 		=> fileId is Guid id ? $"/files/{id}" : null;
 

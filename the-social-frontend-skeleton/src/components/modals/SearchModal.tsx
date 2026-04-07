@@ -1,31 +1,97 @@
 import { useEffect, useState } from 'react'
 import { Modal } from '../Modal'
 import { useTranslation } from 'react-i18next'
+import { searchProfilesApi } from '../../api/search.api'
+import type { OtherProfileDto } from '../../types/api'
 
 export function SearchModal({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [results, setResults] = useState<OtherProfileDto[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   const { t } = useTranslation()
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query.trim())
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [query])
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-  
+
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose()
       }
     }
-  
+
     window.addEventListener('keydown', handleEsc)
-  
+
     return () => {
       document.body.style.overflow = originalOverflow
       window.removeEventListener('keydown', handleEsc)
     }
   }, [onClose])
-  
+
+  useEffect(() => {
+    let cancelled = false
+
+    const run = async () => {
+      if (!debouncedQuery) {
+        setResults([])
+        setError(null)
+        setIsLoading(false)
+        return
+      }
+
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const page = await searchProfilesApi({
+          query: debouncedQuery,
+          take: 20,
+          cursor: null,
+        })
+
+        if (!cancelled) {
+          setResults(page.Items)
+        }
+      }
+      
+      
+      catch (e: any) {
+        if (!cancelled) {
+          setResults([])
+          setError(e?.response?.data?.message ?? 'Search failed')
+        }
+      }
+      
+      finally {
+        if (!cancelled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void run()
+
+    return () => {
+      cancelled = true
+    }
+  }, [debouncedQuery])
+
   const clearSearch = () => {
     setQuery('')
+    setDebouncedQuery('')
+    setResults([])
+    setError(null)
   }
 
   return (
@@ -39,6 +105,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
         />
         {query && (
           <button
+            type="button"
             onClick={clearSearch}
             className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
           >
@@ -47,15 +114,35 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
         )}
       </div>
 
-      {query ? (
+      {!query ? (
+        <div className="mt-6 opacity-60 text-sm">
+          {t('searchpage.searchresultshere')}
+        </div>
+      ) : isLoading ? (
+        <div className="mt-6 text-sm text-gray-500">
+          {t('common.loading')}
+        </div>
+      ) : error ? (
+        <div className="mt-6 text-sm text-red-500">
+          {error}
+        </div>
+      ) : results.length > 0 ? (
+        <div className="mt-6 space-y-3">
+          {results.map((profile) => (
+            <div
+              key={profile.Id}
+              className="rounded-xl border border-gray-200 p-3"
+            >
+              <div className="font-medium">{profile.Username}</div>
+              <div className="text-sm text-gray-500">{profile.FullName}</div>
+            </div>
+          ))}
+        </div>
+      ) : (
         <div className="mt-6 space-y-3">
           <p className="text-gray-500 text-center py-8">
             {t('searchpage.noresults')} "{query}"
           </p>
-        </div>
-      ) : (
-        <div className="mt-6 opacity-60 text-sm">
-          {t('searchpage.searchresultshere')}
         </div>
       )}
     </Modal>
