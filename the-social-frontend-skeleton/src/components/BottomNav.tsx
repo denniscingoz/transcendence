@@ -4,7 +4,7 @@ type NavItem = 'home' | 'search' | 'messages' | 'profile'
 
 interface BottomNavProps {
   active?: NavItem
-  onSearchClick: () => void
+  onSearchClick?: () => void
 }
 
 export function BottomNav({ active, onSearchClick }: BottomNavProps) {

@@ -217,7 +217,7 @@ http.post('/posts/:postId/comments', async ({ request, params }) => {
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
 
     // We won’t store binary in-memory; just simulate a new URL
-    db.me = { ...db.me, avatarUrl: 'https://placehold.co/128x128?text=Avatar' }
+    db.me = { ...db.me, AvatarUrl: 'https://placehold.co/128x128?text=Avatar' }
     return HttpResponse.json(db.me)
   }),
 
@@ -264,7 +264,7 @@ http.post('/friends/:targetUserId', ({ params, request }) => {
   }
 
   return new HttpResponse(null, { status: 201 })
-}),,
+}),
 
 http.delete('/friends/:friendUserId', ({ params, request }) => {
   const auth = requireAuth(request)
@@ -280,7 +280,7 @@ http.delete('/friends/:friendUserId', ({ params, request }) => {
   }
 
   return new HttpResponse(null, { status: 204 })
-}),,
+}),
 
     //Comments
   http.get('/posts/:postId/comments', ({ request, params }) => {

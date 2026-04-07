@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432" #docker db can be reached on host:localhost and port:5432?
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -13,14 +15,18 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+      start_period: 10s # Optional: wait for 10 seconds before starting health checks to allow the database to initialize
 
   api:
     build:
       context: .
       dockerfile: backend/Transcendence.Api/Dockerfile
+    ports:
+    - "8080:8080" #only for development
     env_file: .env
     environment:
       ASPNETCORE_URLS: http://0.0.0.0:8080
+      ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
     depends_on:
       db:
