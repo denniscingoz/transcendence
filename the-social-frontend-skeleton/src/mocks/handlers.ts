@@ -1,12 +1,12 @@
 import { http, HttpResponse } from 'msw'
 import { db, requireAuth } from './db'
 import { mockPosts, mockComments, mockFeedPosts, mockFeedComments } from './posts'
-import { ChangePasswordDto } from '../types/api'
+import { ChangePasswordDto, SignUpRequestDto, GoogleSignInRequestDto, AuthResponseDto } from '../types/api'
 import { mockFriends } from './friends'
 
 export const handlers = [
   // Auth
-  http.post('/auth/login', async ({ request }) => {
+  http.post('/auth/signin', async ({ request }) => {
     const body = (await request.json()) as { email: string; password: string }
     if (!body.email || !body.password) {
       return HttpResponse.json(
@@ -17,7 +17,60 @@ export const handlers = [
     return HttpResponse.json({ token: db.token })
   }),
 
+http.post('/auth/signup', async ({ request }) => {
+  const body = (await request.json()) as SignUpRequestDto
+
+  if (!body.Email || !body.Password) {
+    return HttpResponse.json(
+      {
+        message: 'Validation failed',
+        details: {
+          email: !body.Email ? ['Required'] : [],
+          password: !body.Password ? ['Required'] : [],
+        },
+      },
+      { status: 400 }
+    )
+  }
+
+  return HttpResponse.json({ token: db.token })
+}),
+
+http.post('/auth/google', async ({ request }) => {
+  const body = (await request.json()) as GoogleSignInRequestDto
+
+  if (!body.credential) {
+    return HttpResponse.json(
+      {
+        message: 'Validation failed',
+        details: {
+          credential: ['Required'],
+        },
+      },
+      { status: 400 }
+    )
+  }
+
+  const response: AuthResponseDto = {
+    token: db.token,
+  }
+
+  return HttpResponse.json(response)
+}),
+
   // Profile
+
+  http.delete('/profile/me', ({ request }) => {
+  const auth = requireAuth(request)
+  if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
+
+  return HttpResponse.json({
+    IsSuccess: true,
+    Data: null,
+    Errors: [],
+  })
+}),
+
   http.get('/profile/me', ({ request }) => {
     const auth = requireAuth(request)
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
@@ -28,7 +81,6 @@ export const handlers = [
       Errors: [],
     })
   }),
-
 
   http.patch('/profile/password', async ({ request }) => {
   const auth = requireAuth(request)
@@ -52,7 +104,6 @@ export const handlers = [
   return new HttpResponse(null, { status: 204 })
 }),
   
-
 http.get('/posts/me', ({ request }) => {
     const auth = requireAuth(request)
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
@@ -212,15 +263,31 @@ http.post('/posts/:postId/comments', async ({ request, params }) => {
   })
 }),
 
+  http.post('/files', ({ request }) => {
+    const auth = requireAuth(request)
+    if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
+
+    return HttpResponse.json({
+      IsSuccess: true,
+      Data: {
+        Url: 'https://placehold.co/128x128?text=Uploaded',
+      },
+      Errors: [],
+    })
+  }),
+
   http.post('/profile/me/avatar', ({ request }) => {
     const auth = requireAuth(request)
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
 
     // We won’t store binary in-memory; just simulate a new URL
-    db.me = { ...db.me, avatarUrl: 'https://placehold.co/128x128?text=Avatar' }
+    db.me = { ...db.me, AvatarUrl: 'https://placehold.co/128x128?text=Avatar' }
     return HttpResponse.json(db.me)
   }),
 
+
+
+  
   // Friends
   http.get('/friends/list', ({ request }) => {
   const auth = requireAuth(request)
@@ -264,7 +331,7 @@ http.post('/friends/:targetUserId', ({ params, request }) => {
   }
 
   return new HttpResponse(null, { status: 201 })
-}),,
+}),
 
 http.delete('/friends/:friendUserId', ({ params, request }) => {
   const auth = requireAuth(request)
@@ -280,7 +347,7 @@ http.delete('/friends/:friendUserId', ({ params, request }) => {
   }
 
   return new HttpResponse(null, { status: 204 })
-}),,
+}),
 
     //Comments
   http.get('/posts/:postId/comments', ({ request, params }) => {

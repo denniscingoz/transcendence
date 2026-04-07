@@ -47,8 +47,12 @@ public sealed class AuthService : IAuthService
 		
 		var existingByEmail = await _userRepository.GetByEmailAsync(request.Email, ct);
 		if (existingByEmail != null)
-			throw new ArgumentException("Email is already in use.", nameof(request.Email));
+		{
+			if (existingByEmail.IsDeleted)
+				throw new ConflictException("This email cannot be used.");
 
+			throw new ArgumentException("Email is already in use.", nameof(request.Email));
+		}
 		var existingByUsername = await _userRepository.GetByUsernameAsync(request.Username, ct);
 		if (existingByUsername != null)
 			throw new ArgumentException("Username is already in use.", nameof(request.Username));
@@ -111,7 +115,10 @@ public sealed class AuthService : IAuthService
 
 		var user = await _userRepository.GetByEmailAsync(request.Email, ct)
 			?? throw new UnauthorizedAccessException("Invalid credentials.");
-			
+		
+		if (user.IsDeleted)
+			throw new UnauthorizedAccessException("Invalid credentials.");
+
 		if (string.IsNullOrWhiteSpace(user.PasswordHash))
 			throw new UnauthorizedAccessException("This account does not support password sign-in.");
 
@@ -174,6 +181,9 @@ public sealed class AuthService : IAuthService
 				ct);
 			await _authRepository.SaveChangesAsync(ct);
 		}
+
+		if (user.IsDeleted)
+			throw new UnauthorizedAccessException("Invalid credentials.");
 
 		var token = _jwtTokenGenerator.GenerateToken(user);
 		return new AuthResponseDto { Token = token };

@@ -37,12 +37,8 @@ export function useChangePassword() {
 
 
 export function useUploadAvatar() {
-  const qc = useQueryClient()
   return useMutation({
     mutationFn: (file: File) => uploadAvatar(file),
-    onSuccess: (data) => {
-      qc.setQueryData(['profile', 'me'], data)
-    },
   })
 }
 

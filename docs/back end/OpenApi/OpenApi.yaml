@@ -58,9 +58,10 @@ paths:
 #profile
 #+--#GET /profile/me
 #+--#GET /profile/{userId}
+#-- #GET /profile/search?username={username}&take=20&cursor={nextCursor}
 #+--#PATCH /profile/me
 #+--#PATCH /profile/password
-#+--#DELETE /me
+#+--#DELETE /profile/me
 
 #notifications
 #GET notifications/list

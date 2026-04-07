@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-
-using Transcendence.Application.Users.DTOs;
-using Transcendence.Application.Users.Services;
-using Transcendence.Application.Common.Responses;
 using Transcendence.Api.Common.Extensions;
+using Transcendence.Application.Common.Responses;
+using Transcendence.Application.Posts.DTOs;
+using Transcendence.Application.Users.DTOs;
 using Transcendence.Application.Users.Interfaces;
+using Transcendence.Application.Users.Services;
 
 namespace Transcendence.Api.Controllers;
 
@@ -59,6 +59,28 @@ public sealed class ProfileController : ControllerBase
         Guid userId = GetUserId(); //todo auth
         await _profileService.ChangePasswordAsync(userId, dto, ct);
         return NoContent(); // 204 No Content
+	}
+
+	// DELETE /profile/me
+	[HttpDelete("me")]
+	public async Task<ActionResult> DeleteMe(CancellationToken ct)
+	{
+		Guid userId = GetUserId(); //todo auth
+		await _profileService.DeleteMeAsync(userId, ct);
+		return NoContent(); // 204 No Content
+	}
+
+	// GET /profile/search?username={username}&take=20&cursor={nextCursor}
+	[HttpGet("search")]
+	public async Task<ActionResult<CursorPageDto<OtherProfileDto>>> SearchProfiles(
+	[FromQuery] string query,
+	[FromQuery] int take = 20,
+	[FromQuery] string? cursor = null,
+	CancellationToken ct = default)
+	{
+		Guid userId = GetUserId();
+		var page = await _profileService.SearchProfilesAsync(userId, query, take, cursor, ct);
+		return Ok(page);
 	}
 
 	private Guid GetUserId()
