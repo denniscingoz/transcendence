@@ -1,0 +1,195 @@
+import { useForm } from 'react-hook-form'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
+import type { SignInRequestDto, SignUpRequestDto, AuthResponseDto } from '../types/api'
+import { useTranslation } from 'react-i18next'
+import { useState } from 'react'
+import { TheSocialLogo } from '../components/Header'
+import api from '../api/axios'
+import { GoogleLogin } from '@react-oauth/google'
+import { googleSignInApi } from '../api/auth.api'
+
+
+export function AuthPage() {
+  const { t } = useTranslation()
+  const { signIn } = useAuth()
+  const { signup } = useAuth()
+  const { googleSignIn } = useAuth()
+  const nav = useNavigate()
+  const location = useLocation() as any
+
+  const [signInApiError, setSignInApiError] = useState<string | null>(null)
+  const [signupApiError, setSignupApiError] = useState<string | null>(null)
+  const [googleError, setGoogleError] = useState<string | null>(null)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+
+  const signInForm = useForm<SignInRequestDto>({
+    defaultValues: { email: '', password: '' },
+  })
+
+  const signupForm = useForm<SignUpRequestDto>({
+    defaultValues: {
+      Email: '',
+      Password: '',
+      FullName: '',
+      Username: '',
+    },
+  })
+
+  const onSignInSubmit = async (values: SignInRequestDto) => {
+    setSignInApiError(null)
+    try {
+      await signIn(values)
+      const to = location?.state?.from ?? '/feed'
+      nav(to)
+    } catch (e: any) {
+      setSignInApiError(e?.response?.data?.message ?? 'signIn failed')
+    }
+  }
+
+  const onSignupSubmit = async (values: SignUpRequestDto) => {
+    setSignupApiError(null)
+    try {
+       await signup(values)
+      const to = location?.state?.from ?? '/feed'
+      nav(to)
+    } catch (e: any) {
+      setSignupApiError(e?.response?.data?.message ?? 'Signup failed')
+    }
+  }
+
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+  setGoogleError(null)
+  setIsGoogleLoading(true)
+
+  try {
+    if (!credentialResponse.credential) {
+      throw new Error('Missing Google credential')
+    }
+
+    await googleSignIn({ credential: credentialResponse.credential })
+
+    const to = location?.state?.from ?? '/feed'
+    nav(to)
+  } catch (e: any) {
+    setGoogleError(e?.response?.data?.message ?? e?.message ?? 'Google sign-in failed')
+  } finally {
+    setIsGoogleLoading(false)
+  }
+}
+
+  const handleGoogleError = () => {
+    setGoogleError('Google sign-in failed. Please try again.')
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md space-y-6">
+        <h1 className="flex justify-center">
+          <TheSocialLogo className="h-4 w-auto text-gray-900" />
+        </h1>
+
+        {/* signIn */}
+        <div className="panel">
+          <form className="space-y-4" onSubmit={signInForm.handleSubmit(onSignInSubmit)}>
+            <input
+              className="input"
+              placeholder="Username, or email"
+              {...signInForm.register('email', { required: true })}
+            />
+            <input
+              className="input"
+              placeholder="Password"
+              type="password"
+              {...signInForm.register('password', { required: true })}
+            />
+
+            {signInApiError && (
+              <div className="text-sm text-red-600 text-center">{signInApiError}</div>
+            )}
+
+            <div className="flex justify-center pt-2">
+              <button
+                className="btn-primary w-64"
+                type="submit"
+                disabled={signInForm.formState.isSubmitting}
+              >
+                {signInForm.formState.isSubmitting ? 'Logging in...' : 'Sign in'}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* {Or text} */}
+        <div className="divider">OR</div>
+
+        {/* {Singup with Google and Local} */}
+        <div className="panel space-y-4">
+          
+          {/* Signup with Google */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              text="continue_with"
+              theme="outline"
+              shape="pill"
+              size="large"
+              logo_alignment="center"
+              width={400}
+            />
+          </div>
+
+          {googleError && (
+            <div className="text-sm text-red-600 text-center">{googleError}</div>
+          )}
+
+          {/* {Or text} */}
+          <div className="divider">OR</div>
+
+          {/* Local Signup */}
+          <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
+            <input
+              className="input"
+              placeholder="Email"
+              {...signupForm.register('Email', { required: true })}
+            />
+
+            <input
+              className="input"
+              placeholder="Password"
+              type="password"
+              {...signupForm.register('Password', { required: true })}
+            />
+
+            <input
+              className="input"
+              placeholder="Full name"
+              {...signupForm.register('FullName', { required: true })}
+            />
+
+            <input
+              className="input"
+              placeholder="Username"
+              {...signupForm.register('Username', { required: true })}
+            />
+
+            {signupApiError && (
+              <div className="text-sm text-red-600 text-center">{signupApiError}</div>
+            )}
+
+            <div className="flex justify-center pt-2">
+              <button
+                type="submit"
+                className="btn-primary w-64"
+                disabled={signupForm.formState.isSubmitting}
+              >
+                {signupForm.formState.isSubmitting ? 'Signing up...' : 'Sign up'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}

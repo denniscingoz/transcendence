@@ -11,6 +11,8 @@ public sealed class User
 	public Guid? AvatarFileId { get; private set; }
 	public DateTime CreatedAt { get; private set; }
 
+	public bool IsDeleted { get; private set; } = false;
+
 	public string? GoogleId { get; private set; }
 
 
@@ -143,5 +145,9 @@ public sealed class User
 		Bio = bio?.Trim();
 		if (Bio == "") Bio = null;
 	}
-	
+
+	public void Delete()
+	{
+		IsDeleted = true;
+	}
 }

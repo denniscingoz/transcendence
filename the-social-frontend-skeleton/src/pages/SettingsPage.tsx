@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { setLanguage } from '../i18n/i18n'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth/AuthContext'
-
+import {deleteAccountApi} from '../api/auth.api'
 
 function NavItem({ to, label }: { to: string; label: string }) {
   return (
@@ -30,12 +30,9 @@ export function SettingsPage() {
     console.log('Activate 2FA')
   }
 
-  function handleLogout() {
-    console.log('Log out')
-  }
-
-  function handleDeleteAccount() {
-    console.log('Delete account')
+  async function handleDeleteAccount() {
+    await deleteAccountApi()
+    logout()
   }
 
   return (
@@ -86,13 +83,13 @@ export function SettingsPage() {
               className="bg-gray-300 rounded-full px-4 py-2 text-sm font-medium hover:bg-gray-400"
               onClick={() => {
                 logout()
-                navigate('/login')
+                navigate('/signin')
               }}
             >
               {t('settings.logout')}
             </button>
           ) : (
-            <NavItem to="/login" label="Login" />
+            <NavItem to="/signin" label="Sign in" />
           )}
 
 

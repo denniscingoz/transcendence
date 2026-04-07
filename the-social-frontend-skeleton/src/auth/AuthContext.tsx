@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
-import type { LoginRequest } from '../types/api'
-import { login as loginApi } from '../api/auth.api'
+import type { SignInRequestDto, SignUpRequestDto, GoogleSignInRequestDto } from '../types/api'
+import { signInApi, signUpApi, googleSignInApi } from '../api/auth.api'
 
 type AuthState = {
   token: string | null
@@ -9,7 +9,9 @@ type AuthState = {
 type AuthContextValue = {
   token: string | null
   isAuthenticated: boolean
-  login: (req: LoginRequest) => Promise<void>
+  signIn: (req: SignInRequestDto) => Promise<void>
+  signup: (req: SignUpRequestDto) => Promise<void>
+  googleSignIn: (req: GoogleSignInRequestDto) => Promise<void>
   logout: () => void
   setToken: (token: string | null) => void
 }
@@ -27,7 +29,8 @@ function persistToken(token: string | null) {
   else localStorage.setItem(TOKEN_KEY, token)
 }
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode })
+{
   const [state, setState] = useState<AuthState>(() => ({ token: loadToken() }))
 
   const setToken = useCallback((token: string | null) => {
@@ -35,10 +38,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setState({ token })
   }, [])
 
-  const login = useCallback(async (req: LoginRequest) => {
+  const signIn = useCallback(async (req: SignInRequestDto) => {
     // Call backend (or MSW mock in dev) to obtain a JWT token.
-    const res = await loginApi(req)
+    const res = await signInApi(req)
     setToken(res.token)
+  }, [setToken])
+
+  const signup = useCallback(async (req: SignUpRequestDto) => {
+    // Call backend (or MSW mock in dev) to obtain a JWT token.
+    const res = await signUpApi(req)
+    setToken(res.token)
+  }, [setToken])
+
+  const googleSignIn = useCallback(async (req: GoogleSignInRequestDto) => {
+  const res = await googleSignInApi(req)
+  setToken(res.token)
   }, [setToken])
 
   const logout = useCallback(() => setToken(null), [setToken])
@@ -46,10 +60,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthContextValue>(() => ({
     token: state.token,
     isAuthenticated: Boolean(state.token),
-    login,
+    signIn,
+    signup,
+    googleSignIn,
     logout,
     setToken,
-  }), [state.token, login, logout, setToken])
+  }), [state.token, signIn, signup, googleSignIn, logout, setToken])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -1,24 +1,25 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { RequireAuth } from '../auth/RequireAuth'
 import { Layout } from '../components/Layout'
-import { LoginPage } from '../pages/LoginPage'
+import { AuthPage } from '../pages/AuthPage'
 import { ProfilePage } from '../pages/ProfilePage'
 import { FriendsPage } from '../pages/FriendsPage'
 import { ChatPage } from '../pages/ChatPage'
 import { FeedPage } from '../pages/FeedPage'
 import { EditProfilePage } from '../pages/EditProfilePage'
 import { SettingsPage } from '../pages/SettingsPage'
+// import { PostDetailPage} from '../pages/PostDetailPage'
 //import { SearchPage } from '../pages/SearchPage'
 
 export const router = createBrowserRouter([
   
-  { path: '/login', element: <LoginPage /> },
+  { path: '/signin', element: <AuthPage /> },
   
   {
     element: <Layout />,
     children: [
       { path: '/', element: <Navigate to="/feed" replace /> },
-      { path: '/login', element: <LoginPage /> },
+      { path: '/signin', element: <AuthPage /> },
       {
         element: <RequireAuth />,
         children: [

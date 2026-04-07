@@ -1,4 +1,6 @@
 using Transcendence.Domain.Users;
+using Transcendence.Application.Users.DTOs;
+
 namespace Transcendence.Application.Users.Interfaces;
 public interface IUserRepository
 {
@@ -8,6 +10,13 @@ public interface IUserRepository
 	Task<Guid?> GetUserIdByAvatarFileIdAsync(Guid fileId, CancellationToken ct);//dasha: can be null
 	Task AddAsync(User user, CancellationToken ct);
     Task SaveChangesAsync(CancellationToken ct);
+
+	Task<List<OtherProfileDto>> SearchProfilesAsync(
+		Guid currentUserId,
+		string query,
+		int take,
+		int offset,
+		CancellationToken ct);
 }
 /*
     Repository

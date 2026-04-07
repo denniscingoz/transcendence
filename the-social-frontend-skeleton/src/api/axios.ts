@@ -21,7 +21,7 @@ api.interceptors.response.use(
     // If token is invalid/expired, force a clean logout UX
     if (err?.response?.status === 401) {
       localStorage.removeItem('the-social.jwt')
-      // Optional: redirect to /login here
+      // Optional: redirect to /signin here
     }
     return Promise.reject(err)
   }

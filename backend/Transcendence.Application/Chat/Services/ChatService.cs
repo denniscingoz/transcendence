@@ -5,6 +5,7 @@ using Transcendence.Application.Chat.DTOs;
 using Transcendence.Domain.Chat;
 using Transcendence.Domain.Exceptions;
 using Transcendence.Domain.Users;
+using Transcendence.Application.Common.Responses;
 namespace Transcendence.Application.Chat.Services;
 
 public class ChatService : IChatService
@@ -79,8 +80,10 @@ public class ChatService : IChatService
             throw new ForbiddenException("User is not a participant");
 
         var message = new Message(conversationId, senderId, clientMessageId, content);
-
+        
+        
         await _messageRepository.AddAsync(message);
+        conversation.UpdateLastMessage(message.Content, message.CreatedAt);
         
         await _coversationRepository.SaveChangesAsync();
         return MapToDto(message, senderId,  readTime.ByMe, readTime.ByOthers);
@@ -157,10 +160,20 @@ public class ChatService : IChatService
             return await _messageRepository.GetLastMessageId(conversationId);
 
         }
-	public Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId)
-	{
-		throw new NotImplementedException("GetConversations is not implemented yet.");
-	}
+
+    public async Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId)
+    {
+        var conversations = await _coversationRepository.GetConversations(userId);
+
+        var dtos = conversations.OrderByDescending(c => c.LastMessageAt).Select( c => new ConversationDto
+        {
+            Id = c.Id,
+            TargetUserId = c.Participants.First(p => p.UserId != userId).UserId,
+            LastMessage = c.LastMessageText ?? ""
+        }).ToList();
+        return dtos;
+    }
+
 }
  
  /*

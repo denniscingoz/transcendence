@@ -1,5 +1,6 @@
 using Transcendence.Domain.Users;
 using Transcendence.Application.Users.Interfaces;
+using Transcendence.Application.Users.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Transcendence.Infrastructure.Persistence;
 namespace Transcendence.Infrastructure.Repositories;
@@ -32,7 +33,7 @@ public sealed class UserRepository : IUserRepository
 			.Select(x => (Guid?)x.Id)
 			.SingleOrDefaultAsync(ct);
     }
-	public async Task  AddAsync(User user, CancellationToken ct)
+	public async Task AddAsync(User user, CancellationToken ct)
 	{
 	   await _db.Users.AddAsync(user, ct);
 	}
@@ -41,5 +42,41 @@ public sealed class UserRepository : IUserRepository
 	{
 		await _db.SaveChangesAsync(ct);  // User - Aggregate Root
 	}
+
+	public async Task<List<OtherProfileDto>> SearchProfilesAsync(
+		Guid currentUserId,
+		string query,
+		int take,
+		int offset,
+		CancellationToken ct)
+	{
+		var normalizedQuery = query.Trim().ToLower();
+
+		return await _db.Users
+			.AsNoTracking()
+			.Where(x => !x.IsDeleted)
+			.Where(x => x.Id != currentUserId)
+			.Where(x => x.Username.ToLower().Contains(normalizedQuery) || x.FullName.ToLower().Contains(normalizedQuery))
+			.OrderBy(x => x.Username)
+			.ThenBy(x => x.Id)
+			.Skip(offset)
+			.Take(take)
+			.Select(x => new OtherProfileDto
+			{
+				Id = x.Id,
+				Username = x.Username,
+				FullName = x.FullName,
+				Bio = x.Bio,
+				AvatarUrl = x.AvatarFileId.HasValue ? "/files/" + x.AvatarFileId.Value : null,
+				PostsCount = _db.Posts.Count(p => p.AuthorId == x.Id),
+				FriendsCount = _db.Friendships.Count(f => f.User1Id == x.Id || f.User2Id == x.Id),
+				AreWeFriends = _db.Friendships.Any(f =>
+					(f.User1Id == currentUserId && f.User2Id == x.Id) ||
+					(f.User2Id == currentUserId && f.User1Id == x.Id))
+			})
+			.ToListAsync(ct);
+	}
+
+
 }
 

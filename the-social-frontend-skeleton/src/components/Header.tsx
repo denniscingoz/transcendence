@@ -63,13 +63,13 @@ export function Header({ showNotification = true }: HeaderProps) {
               className="btn-ghost"
               onClick={() => {
                 logout()
-                navigate('/login')
+                navigate('/signin')
               }}
             >
               {t('nav.logout')}
             </button>
           ) : (
-            <NavItem to="/login" label="Login" />
+            <NavItem to="/signin" label="Signin" />
           )} */}
         </div>
       </div>

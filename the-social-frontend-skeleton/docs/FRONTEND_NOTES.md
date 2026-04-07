@@ -15,7 +15,7 @@ with **REST for CRUD** and **SignalR for realtime**. (See provided diagram.)
 - Axios instance with JWT interceptor
 - TanStack Query for REST caching/mutations
 - SignalR connection utilities (chat + presence hubs)
-- Pages: Login, Profile, Friends, Chat (minimal but working patterns)
+- Pages: Signin, Profile, Friends, Chat (minimal but working patterns)
 - i18n with EN/FR/ES and a language switcher
 
 ## How to run
@@ -52,9 +52,9 @@ Use **SignalR** when:
 - Notifications / pushes
 
 ### 3) JWT handling (frontend)
-- Login gets token
+- Signin gets token
 - Token attached in Axios request interceptor
-- 401 response → clear token and force user to re-login
+- 401 response → clear token and force user to re-signin
 
 ### 4) Stable pattern for realtime updates
 - SignalR listener receives event
@@ -73,7 +73,7 @@ Then replace those names (the pattern stays the same).
 ## Backend features
 
 Confirm exact endpoints:
-- POST `/auth/login`
+- POST `/auth/signin`
 - GET/PUT `/profile/me`
 - POST `/profile/me/avatar`
 - GET `/friends`

@@ -4,11 +4,11 @@
     "friends": "Friends",
     "chat": "Chat"
   },
-  "login": {
+  "Signin": {
     "title": "Sign in",
     "email": "Email",
     "password": "Password",
-    "submit": "Login",
+    "submit": "Signin",
     "or": "or"
   },
   "profile": {
