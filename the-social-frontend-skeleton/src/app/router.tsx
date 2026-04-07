@@ -8,7 +8,6 @@ import { ChatPage } from '../pages/ChatPage'
 import { FeedPage } from '../pages/FeedPage'
 import { EditProfilePage } from '../pages/EditProfilePage'
 import { SettingsPage } from '../pages/SettingsPage'
-import { PostDetailPage} from '../pages/PostDetailPage'
 //import { SearchPage } from '../pages/SearchPage'
 
 export const router = createBrowserRouter([
@@ -29,8 +28,8 @@ export const router = createBrowserRouter([
           { path: '/chat', element: <ChatPage /> },
           { path: '/edit-profile', element: <EditProfilePage /> },
           { path: 'settings', element: <SettingsPage /> },
-          //{ path: '/posts/:postId', element: <PostDetailPage /> },
-          {/*{ path: '/search', element: <SearchPage /> },*/}
+          // { path: '/posts/:postId', element: <PostDetailPage /> },
+          // { path: '/search', element: <SearchPage /> },
         ],
       },
     ],

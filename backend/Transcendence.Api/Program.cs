@@ -11,6 +11,10 @@ using Transcendence.Application.Auth.DTOs;
 using Transcendence.Infrastructure;
 using Transcendence.Api.Realtime.Services;
 using Transcendence.Application.Realtime.Contracts;
+
+using Microsoft.EntityFrameworkCore;
+using Transcendence.Infrastructure.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ================= SERVICES =================
@@ -22,14 +26,14 @@ builder.Services.AddSwaggerDocumentation();
 // CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("DevCors", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
+	options.AddPolicy("DevCors", policy =>
+	{
+		policy
+			.WithOrigins("http://localhost:5173")
+			.AllowAnyHeader()
+			.AllowAnyMethod()
+			.AllowCredentials();
+	});
 });
 
 // JWT
@@ -37,48 +41,48 @@ var jwtSection = builder.Configuration.GetSection("Jwt");
 var key = jwtSection["Key"]!;
 
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(key)),
+	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+	.AddJwtBearer(options =>
+	{
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuerSigningKey = true,
+			IssuerSigningKey = new SymmetricSecurityKey(
+				Encoding.UTF8.GetBytes(key)),
 
-            ValidateIssuer = true,
-            ValidIssuer = jwtSection["Issuer"],
+			ValidateIssuer = true,
+			ValidIssuer = jwtSection["Issuer"],
 
-            ValidateAudience = true,
-            ValidAudience = jwtSection["Audience"],
+			ValidateAudience = true,
+			ValidAudience = jwtSection["Audience"],
 
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
+			ValidateLifetime = true,
+			ClockSkew = TimeSpan.Zero
+		};
 
-        // SignalR
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                var accessToken = context.Request.Query["access_token"];
-                var path = context.HttpContext.Request.Path;
+		// SignalR
+		options.Events = new JwtBearerEvents
+		{
+			OnMessageReceived = context =>
+			{
+				var accessToken = context.Request.Query["access_token"];
+				var path = context.HttpContext.Request.Path;
 
-                if (!string.IsNullOrEmpty(accessToken) &&
-                    path.StartsWithSegments("/hubs"))
-                {
-                    context.Token = accessToken;
-                }
+				if (!string.IsNullOrEmpty(accessToken) &&
+					path.StartsWithSegments("/hubs"))
+				{
+					context.Token = accessToken;
+				}
 
-                return Task.CompletedTask;
-            }
-        };
-    });
-        
+				return Task.CompletedTask;
+			}
+		};
+	});
+		
 
 // Google auth
 builder.Services.Configure<GoogleAuthOptions>(
-    builder.Configuration.GetSection("GoogleAuth"));
+	builder.Configuration.GetSection("GoogleAuth"));
 
 // Authorization
 builder.Services.AddAuthorization();
@@ -86,11 +90,11 @@ builder.Services.AddAuthorization();
 // SignalR
 builder.Services.AddSignalR(options =>
 {
-    options.EnableDetailedErrors = true;
+	options.EnableDetailedErrors = true;
 })
 .AddJsonProtocol(o =>
 {
-    o.PayloadSerializerOptions.PropertyNameCaseInsensitive = true;
+	o.PayloadSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
 // Layers
@@ -107,6 +111,27 @@ builder.Logging.AddConsole();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+	var logger = scope.ServiceProvider
+		.GetRequiredService<ILoggerFactory>()
+		.CreateLogger("DatabaseMigration");
+
+	try
+	{
+		var dbContext = scope.ServiceProvider.GetRequiredService<TranscendenceDbContext>();
+
+		logger.LogInformation("Applying database migrations...");
+		dbContext.Database.Migrate();
+		logger.LogInformation("Database migrations applied successfully.");
+	}
+	catch (Exception ex)
+	{
+		logger.LogError(ex, "An error occurred while applying database migrations.");
+		throw;
+	}
+}
+
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -114,8 +139,8 @@ app.UseCors("DevCors");
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
 app.UseAuthentication();
