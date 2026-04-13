@@ -9,66 +9,27 @@ import { CursorPageDto, ProfilePostPreviewDto } from '../types/api'
 import { useEffect} from 'react'
 import { getMyProfilePostPreviews } from '../api/profile.api'
 import { EditProfilePage } from './EditProfilePage'
+import { useNavigate } from 'react-router-dom'
+import { ProtectedPostThumb } from '../components/ui/ProtectedPostThumb'
 
-// Mock profile data
-const mockProfile = {
-
-  //   Id: string
-  // Username: string
-  // FullName: string
-	// Email: string
-	// Bio: string | null
-  // AvatarUrl: string | null 
-  // PostsCount: number
-  // FriendsCount: number
-  Id: '1',
-  FullName: 'celina',
-  Username: 'Ma_woman',
-  Bio: "Welcome to my profile!!\nI am a photographer with a passion to nature. Hope you like it!!",
-  AvatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop',
-  PostsCount: 100,
-  FriendsCount: 720,
-  Email: 'user@example.com',
-}
 
 export function ProfilePage() {
   const { t } = useTranslation()
   const { data: apiData, isLoading, error } = useMyProfile()
   const update = useUpdateProfile()
   const upload = useUploadAvatar()
-
-// const [profilePostsPageFromApi, setProfilePostsPageFromApi] =
-  // useState<CursorPageDto<ProfilePostPreviewDto> | null>(null)
-
-    const {
-  data: profilePostsPageFromApi,
-  isLoading: isPostsLoading,
-  error: postsError,
-} = useMyProfilePostPreviews(20, null)
-
-
-// I need to change it to hook and consider the cursor for scrolling  and take!!!!
-// const { data: profilePostsPageFromApi, isLoading, error } = useMyProfilePostPreviews()
-// useEffect(() => {
-//   async function loadProfilePosts() {
-//     try {
-//       const data = await getMyProfilePostPreviews()
-//       setProfilePostsPageFromApi(data)
-//     } catch (error) {
-//       console.error(error)
-//     }
-//   }
-
-//   loadProfilePosts()
-// }, [])
-
-  const posts = profilePostsPageFromApi?.Items ?? mockPosts
-
+  const navigate = useNavigate()
+  const {
+    data: profilePostsPageFromApi,
+    isLoading: isPostsLoading,
+    error: postsError,
+  } = useMyProfilePostPreviews(20, null)
+  const posts = profilePostsPageFromApi?.items //?? mockPosts
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   // Use API data if available, otherwise mock
-  const data = apiData ?? mockProfile
+  const data = apiData //?? mockProfile
 
   const previewUrl = useMemo(
     () => (selectedFile ? URL.createObjectURL(selectedFile) : null),
@@ -83,8 +44,11 @@ export function ProfilePage() {
           {/* Avatar with ring */}
           <div className="relative">
             <img
-              src={previewUrl ?? data.AvatarUrl ?? 'https://placehold.co/200x200'}
-              alt={data.FullName}
+              src={
+                    previewUrl ??
+                    (data?.avatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${data.avatarUrl}` : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg')
+                  }
+              alt={data?.fullName ?? 'Profile Avatar Failed to Load'}
               className="w-32 h-32 rounded-full object-cover ring-2 ring-gray-300 ring-offset-4"
             />
           </div>
@@ -92,19 +56,19 @@ export function ProfilePage() {
           {/* Profile info */}
           <div className="flex-1 space-y-4">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{data.FullName}</h2>
-              <p className="text-gray-500">@{data.Username ?? 'username'}</p>
+              <h2 className="text-xl font-bold text-gray-900">{data?.fullName || 'Full Name'}</h2>
+              <p className="text-gray-500">@{data?.username ?? 'username'}</p>
             </div>
 
-            {data.Bio && (
-              <p className="text-gray-700 whitespace-pre-line max-w-md">{data.Bio}</p>
+            {data?.bio && (
+              <p className="text-gray-700 whitespace-pre-line max-w-md">{data?.bio}</p>
             )}
           </div>
 
           {/* Stats and action buttons */}
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
-              <div className="text-xl font-bold text-gray-900">{data.PostsCount ?? 0}</div>
+              <div className="text-xl font-bold text-gray-900">{data?.postsCount ?? -1}</div>
               <div className="text-sm text-gray-500">{t('profile.posts')}</div>
             </div>
             <div className="flex gap-3 mb-8">
@@ -119,7 +83,7 @@ export function ProfilePage() {
 
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
-              <div className="text-xl font-bold text-gray-900">{data.FriendsCount ?? 0}</div>
+              <div className="text-xl font-bold text-gray-900">{data?.friendsCount ?? -1}</div>
               <Link to="/friends" className="text-sm text-gray-500">
                 {t('profile.friends')}
               </Link>
@@ -135,29 +99,26 @@ export function ProfilePage() {
           </div>
         </div>
 
-        {/* Posts grid */}
+        {/* Posts grid and Create*/}
         <div className="grid grid-cols-2 gap-4">
-          <div className="aspect-square bg-gray-300 rounded-2xl flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors">
+          {/* {the Post Create} */}
+          <button 
+                type="button"
+                onClick={() => navigate('/post-create')}
+                className="aspect-square bg-gray-300 rounded-2xl flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors">
             <PlusIcon className="w-16 h-16 text-white" />
-          </div>
+          </button>
 
-          {posts.map((post) => (
-            <div
-              key={post.Id}
-              onClick={() => setSelectedPostId(post.Id)}
-              className="aspect-square rounded-2xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
-            >
-              {post.ImageUrl ? (
-                <img
-                  src={post.ImageUrl}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gray-200" />
-              )}
-            </div>
-          ))}
+            {/* {the Posts Grid} */}
+          {posts?.map((post) => (
+              <div
+                key={post.id}
+                onClick={() => setSelectedPostId(post.id)}
+                className="aspect-square rounded-2xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+              >
+                <ProtectedPostThumb fileUrl={post.imageUrl} />
+              </div>
+            ))}
         </div>
 
         {selectedPostId && (

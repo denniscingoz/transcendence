@@ -53,7 +53,7 @@ public class PostsService : IPostsService
 		//var comments = await _postRepository.GetCommentsAsync(postId, ct);//not used
 
 		string? BuildAvatarFileUrl(Guid? fileId)
-			=> fileId is Guid id ? $"/files/{id}" : null;
+			=> fileId is Guid id ? $"/files/avatar/{id}" : null;
 		string BuildImageFileUrl(Guid fileId) => $"/files/{fileId}";
 
 

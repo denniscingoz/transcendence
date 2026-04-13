@@ -10,17 +10,13 @@ export async function searchProfilesApi(request: {
   cursor: string | null
 }): Promise<CursorPageDto<OtherProfileDto>> {
 
-	const { data } = await api.get<ApiResponse<CursorPageDto<OtherProfileDto>>>('/profile/search', {
+	const { data } = await api.get<CursorPageDto<OtherProfileDto>>('/profile/search', {
     params: {
       query: request.query,
       take: request.take,
       cursor: request.cursor,
     },
   })
-  
-  if (!data.IsSuccess || !data.Data) {
-    throw new Error('Failed to search profiles')
-  }
 
-  return data.Data
+  return data
 }

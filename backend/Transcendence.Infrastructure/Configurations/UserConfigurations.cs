@@ -43,6 +43,8 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 		builder.Property(x => x.Role)
 			.IsRequired()
 			.HasMaxLength(50);
+		builder.HasIndex(x => x.AvatarFileId)
+			.IsUnique();		
 		builder.HasOne<FilesAsset>()
 			.WithMany()
 			.HasForeignKey(x => x.AvatarFileId)

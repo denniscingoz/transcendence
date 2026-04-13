@@ -67,7 +67,7 @@ public sealed class UserRepository : IUserRepository
 				Username = x.Username,
 				FullName = x.FullName,
 				Bio = x.Bio,
-				AvatarUrl = x.AvatarFileId.HasValue ? "/files/" + x.AvatarFileId.Value : null,
+				AvatarUrl = x.AvatarFileId.HasValue ? "/files/avatar/" + x.AvatarFileId.Value : null,
 				PostsCount = _db.Posts.Count(p => p.AuthorId == x.Id),
 				FriendsCount = _db.Friendships.Count(f => f.User1Id == x.Id || f.User2Id == x.Id),
 				AreWeFriends = _db.Friendships.Any(f =>

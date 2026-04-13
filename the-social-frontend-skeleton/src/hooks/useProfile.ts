@@ -22,11 +22,11 @@ export function useUpdateProfile() {
 export function useChangePassword() {
   return useMutation<void, Error, ChangePasswordDto>({
     mutationFn: (payload: ChangePasswordDto) => {
-      if (!payload.CurrentPassword.trim()) {
+      if (!payload.currentPassword.trim()) {
         throw new Error('Current password is required.')
       }
 
-      if (!payload.NewPassword.trim()) {
+      if (!payload.newPassword.trim()) {
         throw new Error('New password is required.')
       }
 

@@ -11,9 +11,9 @@ export async function getFeed(
     },
   })
 
-  if (!response.data.IsSuccess || !response.data.Data) {
-    throw new Error(response.data.Errors?.[0] ?? 'Failed to load feed.')
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors?.[0] ?? 'Failed to load feed.')
   }
 
-  return response.data.Data
+  return response.data.data
 }

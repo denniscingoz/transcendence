@@ -38,7 +38,7 @@ public sealed class FriendsQuery : IFriendsQuery
                 Id = u.Id,
                 Username = u.Username,
                 FullName = u.FullName,
-                AvatarUrl = u.AvatarFileId.HasValue ? $"/files/{u.AvatarFileId.Value}" : null
+                AvatarUrl = u.AvatarFileId.HasValue ? $"/files/avatar/{u.AvatarFileId.Value}" : null
             })
             .ToList();
 

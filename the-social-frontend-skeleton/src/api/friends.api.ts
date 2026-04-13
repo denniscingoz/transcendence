@@ -4,11 +4,11 @@ import type { ApiResponse, FriendDto } from '../types/api'
 export async function listFriends(): Promise<FriendDto[]> {
   const response = await api.get<ApiResponse<FriendDto[]>>('/friends/list')
 
-  if (!response.data.IsSuccess || !response.data.Data) {
-    throw new Error(response.data.Errors?.[0] ?? 'Failed to load friends.')
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors?.[0] ?? 'Failed to load friends.')
   }
 
-  return response.data.Data
+  return response.data.data
 }
 
 export async function addFriendById(targetUserId: string): Promise<void> {

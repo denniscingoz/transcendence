@@ -121,7 +121,7 @@ public sealed class User
 		Role = v;
 	}
 	
-	private void SetGoogleId(string value)
+	public void SetGoogleId(string value)
 	{
 		var v = value.Trim();
 		if (v.Length == 0)
