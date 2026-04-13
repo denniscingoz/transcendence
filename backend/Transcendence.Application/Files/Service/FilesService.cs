@@ -53,7 +53,7 @@ public sealed class FilesService : IFilesService
 		string storageKeyOrPath;
 		await using (var input = file.OpenReadStream())
 		{
-			storageKeyOrPath = await _filesStorage.SaveAsync(fileId, input, ct);
+			storageKeyOrPath = await _filesStorage.SaveAsync(fileId, input, contentType, ct);
 		}
 		// Persist metadata (DB)i
 		var asset = new FilesAsset(
@@ -134,6 +134,28 @@ public sealed class FilesService : IFilesService
 		// 4) Return stream + content type for controller to return File(...)
 		return new FileGetResult(stream, asset.ContentType);
 	}
+
+	//GET /files/avatar/{fileId}
+	public async Task<FileGetResult> GetAvatarFileAsync(Guid fileId, CancellationToken ct)
+	{
+				Console.WriteLine("Trying to file the file");
+		var asset = await _fileRepository.GetByIdAsync(fileId, ct)
+			?? throw new NotFoundException("File not found.");
+				Console.WriteLine("Found the file");
+				Console.WriteLine("Trying to find the owner");
+			Console.WriteLine($"File id{fileId}");
+		Guid? avatarOwnerId = await _userRepository.GetUserIdByAvatarFileIdAsync(fileId, ct);
+		if (avatarOwnerId is null)
+			throw new NotFoundException("File is not used as an avatar.");
+				Console.WriteLine("Found the owner");
+
+				Console.WriteLine("Trying to open");
+		var stream = await _filesStorage.OpenReadAsync(asset.StoragePath, ct);
+				Console.WriteLine("Opened");
+		Console.WriteLine($"Getting avatar with asset.ContentType: {asset.ContentType}");
+		return new FileGetResult(stream, asset.ContentType);
+	}
+
 
 	// DELETE /files/{fileId}
 	public async Task DeleteFileAsync(Guid requesterId, Guid fileId, CancellationToken ct)

@@ -75,5 +75,15 @@
   "typeinyoursearch": "Saisissez votre recherche ici",
   "searchresultshere": "Les résultats de recherche apparaîtront ici.",
   "close": "Fermer"
-}
+  },
+  "createpost": {
+  "createpost": "Créer une publication",
+  "dropyourmedia": "Déposez vos fichiers ici",
+  "selectfromcomputer": "Sélectionner depuis l’ordinateur",
+  "writecaption": "Écrivez une légende ici :",
+  "acceptedfiletypes": "Types de fichiers acceptés(max. 10Mb) :",
+  "imagetypes": ".jpg, .jpeg, .png, .webp",
+  "videotypes": ".mp4, .webm, .mov",
+  "share": "Partager"
+  }
 }  

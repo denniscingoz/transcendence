@@ -29,10 +29,10 @@ export function AuthPage() {
 
   const signupForm = useForm<SignUpRequestDto>({
     defaultValues: {
-      Email: '',
-      Password: '',
-      FullName: '',
-      Username: '',
+      email: '',
+      password: '',
+      fullName: '',
+      username: '',
     },
   })
 
@@ -40,7 +40,7 @@ export function AuthPage() {
     setSignInApiError(null)
     try {
       await signIn(values)
-      const to = location?.state?.from ?? '/feed'
+      const to ='/feed'
       nav(to)
     } catch (e: any) {
       setSignInApiError(e?.response?.data?.message ?? 'signIn failed')
@@ -51,7 +51,7 @@ export function AuthPage() {
     setSignupApiError(null)
     try {
        await signup(values)
-      const to = location?.state?.from ?? '/feed'
+      const to ='/feed'
       nav(to)
     } catch (e: any) {
       setSignupApiError(e?.response?.data?.message ?? 'Signup failed')
@@ -67,9 +67,9 @@ export function AuthPage() {
       throw new Error('Missing Google credential')
     }
 
-    await googleSignIn({ credential: credentialResponse.credential })
+    await googleSignIn({ idToken: credentialResponse.credential })
 
-    const to = location?.state?.from ?? '/feed'
+    const to ='/feed'
     nav(to)
   } catch (e: any) {
     setGoogleError(e?.response?.data?.message ?? e?.message ?? 'Google sign-in failed')
@@ -152,26 +152,26 @@ export function AuthPage() {
             <input
               className="input"
               placeholder="Email"
-              {...signupForm.register('Email', { required: true })}
+              {...signupForm.register('email', { required: true })}
             />
 
             <input
               className="input"
               placeholder="Password"
               type="password"
-              {...signupForm.register('Password', { required: true })}
+              {...signupForm.register('password', { required: true })}
             />
 
             <input
               className="input"
               placeholder="Full name"
-              {...signupForm.register('FullName', { required: true })}
+              {...signupForm.register('fullName', { required: true })}
             />
 
             <input
               className="input"
               placeholder="Username"
-              {...signupForm.register('Username', { required: true })}
+              {...signupForm.register('username', { required: true })}
             />
 
             {signupApiError && (

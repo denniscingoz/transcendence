@@ -20,13 +20,13 @@ export const handlers = [
 http.post('/auth/signup', async ({ request }) => {
   const body = (await request.json()) as SignUpRequestDto
 
-  if (!body.Email || !body.Password) {
+  if (!body.email || !body.password) {
     return HttpResponse.json(
       {
         message: 'Validation failed',
         details: {
-          email: !body.Email ? ['Required'] : [],
-          password: !body.Password ? ['Required'] : [],
+          email: !body.email ? ['Required'] : [],
+          password: !body.password ? ['Required'] : [],
         },
       },
       { status: 400 }
@@ -39,12 +39,12 @@ http.post('/auth/signup', async ({ request }) => {
 http.post('/auth/google', async ({ request }) => {
   const body = (await request.json()) as GoogleSignInRequestDto
 
-  if (!body.credential) {
+  if (!body.idToken) {
     return HttpResponse.json(
       {
         message: 'Validation failed',
         details: {
-          credential: ['Required'],
+          idToken: ['Required'],
         },
       },
       { status: 400 }
@@ -90,7 +90,7 @@ http.post('/auth/google', async ({ request }) => {
 
   const body = await request.json() as ChangePasswordDto
 
-  if (!body.CurrentPassword || !body.NewPassword) {
+  if (!body.currentPassword || !body.newPassword) {
     return HttpResponse.json(
       {
         IsSuccess: false,

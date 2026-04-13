@@ -5,7 +5,8 @@
 :root {
   --gray-card: #d1d5db;
   --gray-light: #e5e7eb;
-  --blue-primary: #3b82f6;
+  --gray-dark: #71767d;
+  --blue-primary: #989ca1;
   --blue-hover: #2563eb;
 }
 
@@ -23,6 +24,13 @@ body {
   @apply bg-white rounded-3xl shadow-sm;
 }
 
+.card-gray
+{
+  @apply  bg-gray-200 font-medium rounded-2xl;
+        color: var(--gray-dark);
+        text-align: center;
+        white-space: pre-line;
+}
 /* Panel (gray background cards) */
 .panel {
   @apply bg-gray-300 rounded-3xl p-6;

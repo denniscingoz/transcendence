@@ -1,74 +1,100 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Transcendence.Application.Files.Interface;
 
 namespace Transcendence.Infrastructure.Storage;
+
 public class FilesStorage : IFilesStorage
 {
-	private readonly string _rootPath;
-	
-	public FilesStorage()
+    private readonly string _rootPath;
+
+    public FilesStorage()
+    {
+        _rootPath =
+            Environment.GetEnvironmentVariable("STORAGE_ROOT_PATH")
+            ?? Path.Combine(AppContext.BaseDirectory, "storage");
+
+        Directory.CreateDirectory(_rootPath);
+    }
+
+    public async Task<string> SaveAsync(Guid fileId, Stream content, string contentType, CancellationToken ct)
 	{
-		_rootPath = Path.Combine(Directory.GetCurrentDirectory(), "storage");
+	    ct.ThrowIfCancellationRequested();
+
+	    Directory.CreateDirectory(_rootPath);
+
+	    var extension = contentType switch
+	    {
+	        "image/jpeg" => ".jpg",
+	        "image/png" => ".png",
+	        "image/webp" => ".webp",
+	        // "image/gif" => ".gif",
+	        _ => throw new InvalidOperationException("Unsupported file content type.")
+	    };
+
+	    var fileName = $"{fileId:N}{extension}";
+	    var relativePath = fileName;
+	    var fullPath = GetSafeFullPath(relativePath);
+
+	    await using var output = new FileStream(
+	        fullPath,
+	        FileMode.Create,
+	        FileAccess.Write,
+	        FileShare.None,
+	        bufferSize: 81920,
+	        useAsync: true);
+
+	    await content.CopyToAsync(output, ct);
+
+	    return relativePath.Replace('\\', '/');
 	}
-	
-	public async Task<string> SaveAsync(Guid fileId, Stream content, CancellationToken ct)
-	{ 
-		// save file to storage and return storageKeyOrPath
-		throw new NotImplementedException();
-		// var uploadsDir = Path.Combine(_rootPath, "uploads");
-		// Directory.CreateDirectory(uploadsDir);
 
-		// var relativePath = Path.Combine("uploads", fileId.ToString());
-		// var fullPath = Path.Combine(_rootPath, relativePath);
+    public Task<Stream> OpenReadAsync(string storageKeyOrPath, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
 
-		// await using var output = new FileStream(
-		//     fullPath,
-		//     FileMode.Create,
-		//     FileAccess.Write,
-		//     FileShare.None,
-		//     bufferSize: 81920,
-		//     useAsync: true);
+        var fullPath = GetSafeFullPath(storageKeyOrPath);
 
-		// await content.CopyToAsync(output, ct);
+        if (!File.Exists(fullPath))
+            throw new FileNotFoundException("Stored file was not found.", fullPath);
 
-		// return relativePath.Replace('\\', '/');
-	}
-	public async Task<Stream> OpenReadAsync(string storageKeyOrPath, CancellationToken ct)
-	{ 
-		// open file from storage and return stream
-		throw new NotImplementedException();
-		// ct.ThrowIfCancellationRequested();
+        Stream stream = new FileStream(
+            fullPath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read,
+            bufferSize: 81920,
+            useAsync: true);
 
-		// var fullPath = Path.Combine(_rootPath, storageKeyOrPath);
+        return Task.FromResult(stream);
+    }
 
-		// if (!File.Exists(fullPath))
-		//     throw new FileNotFoundException("Stored file was not found.", fullPath);
+    public Task DeleteAsync(string storageKeyOrPath, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
 
-		// Stream stream = new FileStream(
-		//     fullPath,
-		//     FileMode.Open,
-		//     FileAccess.Read,
-		//     FileShare.Read,
-		//     bufferSize: 81920,
-		//     useAsync: true);
+        var fullPath = GetSafeFullPath(storageKeyOrPath);
 
-		// return Task.FromResult(stream);
-	}
-	public async Task DeleteAsync(string storageKeyOrPath, CancellationToken ct)
-	{ 
-		// delete file from storage
-		throw new NotImplementedException();
-		// ct.ThrowIfCancellationRequested();
+        if (File.Exists(fullPath))
+            File.Delete(fullPath);
 
-		// var fullPath = Path.Combine(_rootPath, storageKeyOrPath);
+        return Task.CompletedTask;
+    }
 
-		// if (File.Exists(fullPath))
-		//     File.Delete(fullPath);
+    private string GetSafeFullPath(string relativePath)
+    {
+        if (string.IsNullOrWhiteSpace(relativePath))
+            throw new ArgumentException("Storage path is required.", nameof(relativePath));
 
-		// return Task.CompletedTask;
-	}
+        var normalizedRelativePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
+        var fullPath = Path.GetFullPath(Path.Combine(_rootPath, normalizedRelativePath));
+        var rootFullPath = Path.GetFullPath(_rootPath);
+
+        if (!fullPath.StartsWith(rootFullPath, StringComparison.Ordinal))
+            throw new InvalidOperationException("Invalid storage path.");
+
+        return fullPath;
+    }
 }

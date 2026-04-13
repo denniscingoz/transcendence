@@ -229,6 +229,6 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 
 
 	private static string? BuildAvatarFileUrl(Guid? fileId)
-		=> fileId is Guid id ? $"/files/{id}" : null;
+		=> fileId is Guid id ? $"/files/avatar/{id}" : null;
 
 }

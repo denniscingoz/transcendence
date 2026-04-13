@@ -70,7 +70,7 @@
     "writeacomment": "Write a comment..." ,
     "loading": "Loading...",
     "postnotfound": "Post not found.",
-    "commentnotfound": "omments not found."
+    "commentnotfound": "Comments not found."
 
   },
   "searchpage":
@@ -81,5 +81,16 @@
     "searchresultshere": "Search results will appear here.",
     "close": "Close"
 
+  },
+  "createpost":
+  {
+    "createpost": "Create a post",
+    "dropyourmedia": "Drop your media here",
+    "selectfromcomputer": "Select from computer",
+    "writecaption": "Write a caption here:",
+    "acceptedfiletypes": "Accepted file types(max. 10Mb):",
+    "imagetypes": ".jpg, .jpeg, .png, .webp",
+    "videotypes": ".mp4, .webm, .mov",
+    "share": "Share"
   }
 }

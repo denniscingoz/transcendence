@@ -4,6 +4,7 @@ import { PostDetailModal } from '../components/modals/PostDetailModal'
 import { useFeed } from '../hooks/useFeed'
 import { mockFeedPosts } from '../mocks/posts'
 import type { PostDto } from '../types/api'
+import { ProtectedPostThumb } from '../components/ui/ProtectedPostThumb'
 
 export function FeedPage() {
   const { data, isLoading, error } = useFeed()
@@ -12,19 +13,19 @@ export function FeedPage() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
 
   useEffect(() => {
-    setPostsFeed(data?.Items ?? mockFeedPosts)
+    setPostsFeed(data?.items ?? []) // ?? mockFeedPosts)
   }, [data])
 
   const toggleLike = (postId: string) => {
     setPostsFeed((prev) =>
       prev.map((post) =>
-        post.Id === postId
+        post.id === postId
           ? {
               ...post,
-              IsLikedByCurrentUser: !post.IsLikedByCurrentUser,
-              LikesCount: post.IsLikedByCurrentUser
-                ? post.LikesCount - 1
-                : post.LikesCount + 1,
+              isLikedByCurrentUser: !post.isLikedByCurrentUser,
+              likesCount: post.isLikedByCurrentUser
+                ? post.likesCount - 1
+                : post.likesCount + 1,
             }
           : post
       )
@@ -56,43 +57,41 @@ export function FeedPage() {
           <div className="text-center py-12 text-gray-500">Loading...</div>
         ) : (
           posts.map((post) => (
-            <article key={post.Id} className="space-y-4">
+            <article key={post.id} className="space-y-4">
               <div className="flex items-center gap-3">
                 <img
                   className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
-                  src={post.AuthorAvatarUrl || 'https://placehold.co/80x80'}
-                  alt={post.AuthorUsername}
+                  src={post.authorAvatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${post.authorAvatarUrl}` : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'}
+                  alt={post.authorUsername}
                 />
                 <div>
                   <div className="font-semibold text-gray-900">
-                    {post.AuthorUsername}
+                    {post.authorUsername}
                   </div>
                 </div>
               </div>
 
-              <img
-                className="w-full aspect-[4/3] object-cover rounded-2xl"
-                src={post.ImageUrl}
-                alt=""
-              />
 
+               <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden">
+                 <ProtectedPostThumb fileUrl={post.imageUrl} />
+              </div>
               <div className="flex items-center gap-6">
                 <button
-                  onClick={() => toggleLike(post.Id)}
+                  onClick={() => toggleLike(post.id)}
                   className="flex items-center gap-2 group"
                 >
-                  {post.IsLikedByCurrentUser ? (
+                  {post.isLikedByCurrentUser ? (
                     <HeartFilledIcon className="w-7 h-7 text-red-500" />
                   ) : (
                     <HeartIcon className="w-7 h-7 text-gray-700 group-hover:text-red-500 transition-colors" />
                   )}
                   <span className="text-sm text-gray-600">
-                    {formatCount(post.LikesCount)}
+                    {formatCount(post.likesCount)}
                   </span>
                 </button>
 
                 <button
-                  onClick={() => setSelectedPostId(post.Id)}
+                  onClick={() => setSelectedPostId(post.id)}
                   className="flex items-center gap-2 group"
                 >
                   <CommentIcon className="w-7 h-7 text-gray-700 group-hover:text-gray-900 transition-colors" />
