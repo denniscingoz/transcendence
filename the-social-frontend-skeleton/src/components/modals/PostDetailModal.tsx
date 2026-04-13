@@ -4,6 +4,7 @@ import { mockPosts, mockComments, mockFeedComments, mockFeedPosts } from '../../
 import { usePost } from '../../hooks/usePost'
 import { useComments, usePostComment } from '../../hooks/useComments'
 import { useState } from 'react'
+import { ProtectedPostThumb } from '../ui/ProtectedPostThumb'
 
 type PostDetailModalProps = {
   postId: string
@@ -17,7 +18,7 @@ export function PostDetailModal({
   const { t } = useTranslation()
   const { data: post, isLoading: isPostLoading, error: postError } = usePost(postId)
   const { data: commentsData, isLoading: areCommentsLoading, error: commentsError } = useComments(postId)   
-  const comments = commentsData?.Items ?? []
+  const comments = commentsData?.items ?? []
 
   // const comments = allComments.filter((comment) => comment.postId === postId)
   const [content, setContent] = useState('')
@@ -76,31 +77,28 @@ export function PostDetailModal({
 
         <div className="flex items-center gap-3">
           <img
-            src={post.AuthorAvatarUrl || 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'}
+            src={post?.authorAvatarUrl ?  `${import.meta.env.VITE_API_BASE_URL}${post.authorAvatarUrl}` : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'}
             alt=""
             className="w-12 h-12 rounded-full object-cover"
           />
           <div>
-            <div className="font-semibold">{post.AuthorFullName}</div>
-            <div className="text-sm text-gray-500">@{post.AuthorUsername}</div>
+            <div className="font-semibold">{post.authorFullName}</div>
+            <div className="text-sm text-gray-500">@{post.authorUsername}</div>
           </div>
         </div>
+        <div className="w-full rounded-2xl object-cover">
+        <ProtectedPostThumb fileUrl={post.imageUrl} />
+        </div>
 
-        <img
-          src={post.ImageUrl}
-          alt=""
-          className="w-full rounded-2xl object-cover"
-        />
-
-        <p>{post.Content}</p>
-        <p>{t('postdetail.likes')}: {post.LikesCount}</p>
+        <p>{post.content}</p>
+        <p>{t('postdetail.likes')}: {post.likesCount}</p>
 
         <div className="space-y-4">
           {comments.map((comment) => (
-            <div key={comment.Id} className="flex gap-3 items-start">
+            <div key={comment.id} className="flex gap-3 items-start">
               <img
                 src={
-                  comment.AuthorProfileImageUrl ||
+                  comment.authorProfileImageUrl ||
                   'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
                 }
                 alt=""
@@ -108,12 +106,12 @@ export function PostDetailModal({
               />
               <div>
                 <div className="flex gap-2 items-center">
-                  <span className="font-semibold">{comment.FullName}</span>
+                  <span className="font-semibold">{comment.fullName}</span>
                   <span className="text-sm text-gray-500">
-                    @{comment.Username}
+                    @{comment.username}
                   </span>
                 </div>
-                <p>{comment.Content}</p>
+                <p>{comment.content}</p>
               </div>
             </div>
           ))}

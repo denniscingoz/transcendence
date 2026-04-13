@@ -6,18 +6,18 @@ import type { UpdateProfileDto, ChangePasswordDto } from '../types/api'
 import { useRef } from 'react'
 
 type EditProfileForm = {
-  FullName: string
-  Username: string
-  Bio: string
+  fullName: string
+  username: string
+  bio: string
   AvatarUrl: string
 }
 
 const DUMMY_PROFILE_FORM: EditProfileForm = {
-  FullName: 'Micha',
-  Username: 'michauser',
-  Bio: 'Bio details for Micha',
+  fullName: '...',
+  username: '...',
+  bio: '....',
   AvatarUrl:
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop',
+    'https://placehold.co/200x200',
 }
 
 export function EditProfilePage() {
@@ -35,17 +35,17 @@ export function EditProfilePage() {
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string>('')
 
   const [profileForm, setProfileForm] = useState<EditProfileForm>({
-    FullName: '',
-    Username: '',
-    Bio: '',
+    fullName: '',
+    username: '',
+    bio: '',
     AvatarUrl: '',
   })
   const [originalProfileForm, setOriginalProfileForm] = useState<EditProfileForm | null>(null)
 
 
   const [passwordForm, setPasswordForm] = useState<ChangePasswordDto>({
-    CurrentPassword: '',
-    NewPassword: '',
+    currentPassword: '',
+    newPassword: '',
   })
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -73,10 +73,10 @@ export function EditProfilePage() {
     if (!myProfile) return
 
     const mappedProfile: EditProfileForm = {
-      FullName: myProfile.FullName || DUMMY_PROFILE_FORM.FullName,
-      Username: myProfile.Username || DUMMY_PROFILE_FORM.Username,
-      Bio: myProfile.Bio ?? DUMMY_PROFILE_FORM.Bio,
-      AvatarUrl: myProfile.AvatarUrl ?? DUMMY_PROFILE_FORM.AvatarUrl,
+      fullName: myProfile.fullName || DUMMY_PROFILE_FORM.fullName,
+      username: myProfile.username || DUMMY_PROFILE_FORM.username,
+      bio: myProfile.bio ?? DUMMY_PROFILE_FORM.bio,
+      AvatarUrl: myProfile.avatarUrl ?? '',
     }
 
     setProfileForm(mappedProfile)
@@ -95,25 +95,25 @@ export function EditProfilePage() {
 
     const payload: Partial<UpdateProfileDto> = {}
 
-    if (profileForm.FullName !== originalProfileForm.FullName) {
-      payload.FullName = profileForm.FullName
+    if (profileForm.fullName !== originalProfileForm.fullName) {
+      payload.fullName = profileForm.fullName
     }
 
-    if (profileForm.Username !== originalProfileForm.Username) {
-      payload.Username = profileForm.Username
+    if (profileForm.username !== originalProfileForm.username) {
+      payload.username = profileForm.username
     }
 
-    if (profileForm.Bio !== originalProfileForm.Bio) {
-      payload.Bio = profileForm.Bio.length > 0 ? profileForm.Bio : null
+    if (profileForm.bio !== originalProfileForm.bio) {
+      payload.bio = profileForm.bio.length > 0 ? profileForm.bio : null
     }
 
     if (selectedAvatarFile) {
       const uploadedAvatarUrl = await uploadAvatar.mutateAsync(selectedAvatarFile)
-      payload.AvatarUrl = uploadedAvatarUrl
+      payload.avatarUrl = uploadedAvatarUrl
     }
 
     if (!selectedAvatarFile && profileForm.AvatarUrl !== originalProfileForm.AvatarUrl) {
-      payload.AvatarUrl = profileForm.AvatarUrl.length > 0 ? profileForm.AvatarUrl : null
+      payload.avatarUrl = profileForm.AvatarUrl.length > 0 ? profileForm.AvatarUrl : null
     }
 
     if (Object.keys(payload).length === 0) {
@@ -122,16 +122,16 @@ export function EditProfilePage() {
 
     const updated = await updateProfile.mutateAsync(payload)
     setOriginalProfileForm({
-      FullName: updated.FullName,
-      Username: updated.Username,
-      Bio: updated.Bio ?? '',
-      AvatarUrl: updated.AvatarUrl ?? '',
+      fullName: updated.fullName,
+      username: updated.username,
+      bio: updated.bio ?? '',
+      AvatarUrl: updated.avatarUrl ?? '',
     })
     setProfileForm({
-      FullName: updated.FullName,
-      Username: updated.Username,
-      Bio: updated.Bio ?? '',
-      AvatarUrl: updated.AvatarUrl ?? '',
+      fullName: updated.fullName,
+      username: updated.username,
+      bio: updated.bio ?? '',
+      AvatarUrl: updated.avatarUrl ?? '',
     })
     setSelectedAvatarFile(null)
     setAvatarPreviewUrl('')
@@ -140,19 +140,19 @@ export function EditProfilePage() {
   async function handleChangePassword(e: React.FormEvent) {
   e.preventDefault()
 
-      if (!passwordForm.CurrentPassword || !passwordForm.NewPassword) {
+      if (!passwordForm.currentPassword || !passwordForm.newPassword) {
         return
       }
     
     
       await changePassword.mutateAsync({
-        CurrentPassword: passwordForm.CurrentPassword,
-        NewPassword: passwordForm.NewPassword,
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
       })
     
       setPasswordForm({
-        CurrentPassword: '',
-        NewPassword: '',
+        currentPassword: '',
+        newPassword: '',
       })
   }
 
@@ -198,7 +198,8 @@ export function EditProfilePage() {
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-4">
               <img
-                src={avatarPreviewUrl || profileForm.AvatarUrl || '/avatar-placeholder.png'}
+                src={avatarPreviewUrl || 
+                  (profileForm.AvatarUrl  ? `${import.meta.env.VITE_API_BASE_URL}${profileForm.AvatarUrl }`: 'https://placehold.co/200x200')}
                 alt="Profile avatar"
                 className="h-24 w-24 rounded-full object-cover ring-2 ring-panel"
               />
@@ -227,9 +228,9 @@ export function EditProfilePage() {
               </label>
               <textarea
                 id="bio"
-                value={profileForm.Bio}
+                value={profileForm.bio}
                 onChange={(e) =>
-                  setProfileForm((prev) => ({ ...prev, Bio: e.target.value }))
+                  setProfileForm((prev) => ({ ...prev, bio: e.target.value }))
                 }
                 rows={4}
                 className="w-full rounded-xl border border-panel px-4 py-3 outline-none focus:border-black"
@@ -244,9 +245,9 @@ export function EditProfilePage() {
               <input
                 id="fullName"
                 type="text"
-                value={profileForm.FullName}
+                value={profileForm.fullName}
                 onChange={(e) =>
-                  setProfileForm((prev) => ({ ...prev, FullName: e.target.value }))
+                  setProfileForm((prev) => ({ ...prev, fullName: e.target.value }))
                 }
                 className="h-11 w-full rounded-xl border border-panel px-4 outline-none focus:border-black"
               />
@@ -260,9 +261,9 @@ export function EditProfilePage() {
               <input
                 id="username"
                 type="text"
-                value={profileForm.Username}
+                value={profileForm.username}
                 onChange={(e) =>
-                  setProfileForm((prev) => ({ ...prev, Username: e.target.value }))
+                  setProfileForm((prev) => ({ ...prev, username: e.target.value }))
                 }
                 className="h-11 w-full rounded-xl border border-panel px-4 outline-none focus:border-black"
               />
@@ -302,11 +303,11 @@ export function EditProfilePage() {
               <input
                 id="oldPassword"
                 type="password"
-                value={passwordForm.CurrentPassword}
+                value={passwordForm.currentPassword}
                 onChange={(e) =>
                   setPasswordForm((prev) => ({
                     ...prev,
-                    CurrentPassword: e.target.value,
+                    currentPassword: e.target.value,
                   }))
                 }
                 className="h-11 w-full rounded-xl border border-panel px-4 outline-none focus:border-black"
@@ -320,11 +321,11 @@ export function EditProfilePage() {
               <input
                 id="newPassword"
                 type="password"
-                value={passwordForm.NewPassword}
+                value={passwordForm.newPassword}
                 onChange={(e) =>
                   setPasswordForm((prev) => ({
                     ...prev,
-                    NewPassword: e.target.value,
+                    newPassword: e.target.value,
                   }))
                 }
                 className="h-11 w-full rounded-xl border border-panel px-4 outline-none focus:border-black"

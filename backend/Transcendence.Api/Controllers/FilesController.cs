@@ -50,6 +50,18 @@ public sealed class FilesController : ControllerBase
 		return File(result.Stream, result.ContentType, enableRangeProcessing: true);
 	}
 
+
+
+	// GET /files/avatar/{fileId}
+	[AllowAnonymous]
+	[HttpGet("avatar/{fileId:guid}")]
+	public async Task<IActionResult> GetAvatar(Guid fileId, CancellationToken ct)
+	{
+		var result = await _filesService.GetAvatarFileAsync(fileId, ct);
+
+		return File(result.Stream, result.ContentType, enableRangeProcessing: true);
+	}
+
 	//DELETE /files/{id}
 	[HttpDelete("{fileId:guid}")]
 	public async Task<IActionResult> DeleteFile(Guid fileId, CancellationToken ct)

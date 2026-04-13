@@ -16,11 +16,11 @@ export async function getComments(
     }
   )
 
-  if (!response.data.IsSuccess || !response.data.Data) {
-    throw new Error(response.data.Errors?.[0] ?? 'Failed to load comments.')
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors?.[0] ?? 'Failed to load comments.')
   }
 
-  return response.data.Data
+  return response.data.data
 }
 
 
@@ -39,11 +39,11 @@ export async function postComment(
     }
   )
 
-  if (!response.data.IsSuccess || !response.data.Data) {
-    throw new Error(response.data.Errors?.[0] ?? 'Failed to post comment.')
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors?.[0] ?? 'Failed to post comment.')
   }
 
-  return response.data.Data
+  return response.data.data
 }
 
 export async function deleteComment(

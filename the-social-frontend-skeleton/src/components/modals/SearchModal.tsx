@@ -61,7 +61,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
         })
 
         if (!cancelled) {
-          setResults(page.Items)
+          setResults(page.items)
         }
       }
       
@@ -130,11 +130,26 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
         <div className="mt-6 space-y-3">
           {results.map((profile) => (
             <div
-              key={profile.Id}
+              key={profile.id}
               className="rounded-xl border border-gray-200 p-3"
             >
-              <div className="font-medium">{profile.Username}</div>
-              <div className="text-sm text-gray-500">{profile.FullName}</div>
+              <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-4">
+              <img
+                src={profile.avatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${profile.avatarUrl }` : 'https://placehold.co/200x200'}
+                alt="Profile avatar"
+                className="h-24 w-24 rounded-full object-cover ring-2 ring-panel"
+              />
+              
+              <div className="min-w-0 flex-1">
+              <div className="font-medium">{profile.username}</div>
+              <div className="text-sm text-gray-500">{profile.fullName}</div>
+              </div>
+
+              </div>
+              </div>
+
+
             </div>
           ))}
         </div>
