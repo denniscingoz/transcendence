@@ -1,0 +1,141 @@
+Project Transcendence {
+  database_type: "PostgreSQL"
+  Note: "Generated from EF Core ModelSnapshot. Default schema: app"
+}
+
+Table app.users {
+  Id uuid [pk]
+  AvatarFileId uuid [null]
+  Bio varchar(500) [null]
+  CreatedAt timestamptz [not null]
+  Email varchar(255) [not null, unique]
+  FullName varchar(100) [not null]
+  GoogleId varchar(255) [null, unique]
+  IsDeleted boolean [not null]
+  PasswordHash varchar(255) [null]
+  Role varchar(50) [not null]
+  Username varchar(50) [not null, unique]
+
+  Indexes {
+    AvatarFileId [unique]
+  }
+
+  Note: "Check: PasswordHash IS NOT NULL OR GoogleId IS NOT NULL"
+}
+
+Table app.files {
+  Id uuid [pk]
+  ContentType varchar(100) [not null]
+  OwnerId uuid [not null]
+  SizeBytes bigint [not null]
+  StoragePath varchar(500) [not null, unique]
+  UploadedAtUtc timestamptz [not null]
+}
+
+Table app.posts {
+  Id uuid [pk]
+  AuthorId uuid [not null]
+  Content varchar(1000) [null]
+  CreatedAtUtc timestamptz [not null]
+  ImageFileId uuid [not null]
+  UpdatedAtUtc timestamptz [null]
+}
+
+Table app.comments {
+  Id uuid [pk]
+  AuthorId uuid [not null]
+  Content varchar(1000) [not null]
+  CreatedAtUtc timestamptz [not null]
+  PostId uuid [not null]
+  UpdatedAtUtc timestamptz [null]
+}
+
+Table app.likes {
+  Id uuid [pk]
+  AuthorId uuid [not null]
+  CreatedAtUtc timestamptz [not null]
+  PostId uuid [not null]
+
+  Indexes {
+    (PostId, AuthorId) [unique]
+  }
+}
+
+Table app.Conversations {
+  Id uuid [pk]
+  CreatedAt timestamptz [not null]
+  LastMessageAt timestamptz [null]
+  LastMessageText text [null]
+  Type int [not null]
+}
+
+Table app.ConversationParticipants {
+  ConversationId uuid [pk]
+  UserId uuid [pk]
+  JoinedAt timestamptz [not null]
+  LastReadAt timestamptz [not null]
+}
+
+Table app.Messages {
+  Id uuid [pk]
+  ClientMessageId uuid [not null]
+  Content varchar(4000) [not null]
+  ConversationId uuid [not null]
+  CreatedAt timestamptz [not null]
+  SenderId uuid [not null]
+
+  Indexes {
+    ConversationId
+    (SenderId, ClientMessageId) [unique]
+  }
+
+  Note: "SenderId exists, but no FK to users is present in the snapshot"
+}
+
+Table app.Friendships {
+  User1Id uuid [pk]
+  User2Id uuid [pk]
+  CreatedAt timestamptz [not null]
+
+  Note: "Check: User1Id < User2Id"
+}
+
+Table app.FriendshipRequests {
+  Id uuid [pk]
+  CreatedAt timestamptz [not null]
+  RequesterId uuid [not null]
+  TargetUserId uuid [not null]
+  User1Id uuid [not null]
+  User2Id uuid [not null]
+
+  Indexes {
+    RequesterId
+    TargetUserId
+    (User1Id, User2Id) [unique]
+  }
+
+  Note: "Check: RequesterId <> TargetUserId"
+}
+
+Ref: app.files.OwnerId > app.users.Id [delete: cascade]
+
+Ref: app.posts.AuthorId > app.users.Id [delete: cascade]
+Ref: app.posts.ImageFileId > app.files.Id [delete: restrict]
+
+Ref: app.comments.AuthorId > app.users.Id [delete: cascade]
+Ref: app.comments.PostId > app.posts.Id [delete: cascade]
+
+Ref: app.likes.AuthorId > app.users.Id [delete: cascade]
+Ref: app.likes.PostId > app.posts.Id [delete: cascade]
+
+Ref: app.ConversationParticipants.ConversationId > app.Conversations.Id [delete: cascade]
+
+Ref: app.Messages.ConversationId > app.Conversations.Id [delete: cascade]
+
+Ref: app.Friendships.User1Id > app.users.Id [delete: cascade]
+Ref: app.Friendships.User2Id > app.users.Id [delete: cascade]
+
+Ref: app.FriendshipRequests.RequesterId > app.users.Id [delete: cascade]
+Ref: app.FriendshipRequests.TargetUserId > app.users.Id [delete: cascade]
+
+Ref: app.users.AvatarFileId > app.files.Id [delete: set null]
