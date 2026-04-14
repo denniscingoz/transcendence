@@ -10,6 +10,7 @@ import {
   joinConversation,
   leaveConversation,
   markAsRead,
+  markAsDelivered,
   sendMessage,
   startConnection,
   type ChatMessageDto,
@@ -27,6 +28,7 @@ type NotificationDto = {
   payload: ChatMessageDto
   createdAt: string
 }
+
 function playSystemBeep() {
   try {
     const audioContext = new AudioContext()
@@ -59,10 +61,10 @@ function publishUnreadCount(nextConversations: ConversationDto[]) {
 
   window.dispatchEvent(new CustomEvent('chat-unread-changed', { detail: unreadCount }))
 }
-
 export function ChatPage() {
   const { user } = useAuth()
   const currentUserId = user?.id ?? null
+  const messagesRef = useRef<ChatMessageDto[]>([])
 
   console.log('CHAT user', user)
   console.log('CHAT currentUserId', currentUserId)
@@ -103,47 +105,51 @@ export function ChatPage() {
       }
     }
 
-  async function loadConversationMessages(conversationId: string) {
-    if (!currentUserId) return
+async function loadConversationMessages(conversationId: string) {
+  if (!currentUserId) return
 
-    setLoadingMessages(true)
-    setError(null)
+  setLoadingMessages(true)
+  setError(null)
 
-    try {
-      const data = await getMessages(currentUserId, conversationId)
-      setMessages(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load messages')
-    } finally {
-      setLoadingMessages(false)
-    }
+  try {
+    const data = await getMessages(currentUserId, conversationId)
+    setMessages(data)
+    setDeliveredMessageIds([])
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to load messages')
+  } finally {
+    setLoadingMessages(false)
   }
+}
 
-  async function openConversation(conversationId: string) {
-    try {
-      if (!connectionRef.current) {
-        throw new Error('Chat connection is not initialized')
-      }
+async function openConversation(conversationId: string) {
+  try {
+    if (!connectionRef.current) {
+      throw new Error('Chat connection is not initialized')
+    }
 
-      if (
-        activeConversationIdRef.current &&
-        activeConversationIdRef.current !== conversationId
-      ) {
-        await leaveConversation(connectionRef.current, activeConversationIdRef.current)
-      }
+    if (
+      activeConversationIdRef.current &&
+      activeConversationIdRef.current !== conversationId
+    ) {
+      await leaveConversation(connectionRef.current, activeConversationIdRef.current)
+    }
 
-      await joinConversation(connectionRef.current, conversationId)
+    await joinConversation(connectionRef.current, conversationId)
 
-      activeConversationIdRef.current = conversationId
-      setActiveConversationId(conversationId)
+    activeConversationIdRef.current = conversationId
+    setActiveConversationId(conversationId)
 
-      await loadConversationMessages(conversationId)
+    await loadConversationMessages(conversationId)
+
+    if (!document.hidden) {
       await markAsRead(connectionRef.current, conversationId)
       await loadConversations()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to open conversation')
     }
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to open conversation')
   }
+}
 
 async function handleCreateDirectConversation() {
   if (!currentUserId) return
@@ -193,6 +199,19 @@ connection.on('MessageReceived', (message: ChatMessageDto) => {
   const isActive = message.conversationId === activeConversationIdRef.current
   const isMine = message.senderId === currentUserId
 
+  if (isMine) {
+    return
+  }
+
+  if (connectionRef.current) {
+    void markAsDelivered(
+      connectionRef.current,
+      message.messageId,
+      message.conversationId,
+      message.senderId
+    ).catch(err => console.error('Failed to mark as delivered', err))
+  }
+
   if (isActive) {
     setMessages(prev => {
       const exists = prev.some(item => item.messageId === message.messageId)
@@ -201,7 +220,7 @@ connection.on('MessageReceived', (message: ChatMessageDto) => {
     })
   }
 
-  if (isActive && !document.hidden && !isMine && connectionRef.current) {
+  if (isActive && !document.hidden && connectionRef.current) {
     void markAsRead(connectionRef.current, message.conversationId)
       .then(() => loadConversations())
       .catch(err => console.error('Failed to mark as read after receiving message', err))
@@ -210,19 +229,36 @@ connection.on('MessageReceived', (message: ChatMessageDto) => {
   }
 })
 
-    connection.on('MessageAck', (ack: MessageAckDto) => {
-      console.log('MessageAck', ack)
-    })
 
-  connection.on('MessageDelivered', (payload: MessageDeliveredDto) => {
-    console.log('MessageDelivered', payload)
+connection.on('MessageAck', (ack: MessageAckDto) => {
+  console.log('MessageAck', ack)
 
-    setDeliveredMessageIds(prev => {
-      if (prev.includes(payload.messageId)) return prev
-      return [...prev, payload.messageId]
-    })
+  setMessages(prev =>
+    prev.map(message =>
+      message.clientMessageId === ack.clientMessageId
+        ? {
+            ...message,
+            messageId: ack.messageId,
+            createdAt: ack.createdAt,
+          }
+        : message
+    )
+  )
+})
+connection.on('MessageDelivered', (payload: MessageDeliveredDto) => {
+  console.log('MessageDelivered', payload)
+
+  const isMyMessage = messagesRef.current.some(
+    item => item.messageId === payload.messageId && item.senderId === currentUserId
+  )
+
+  if (!isMyMessage) return
+
+  setDeliveredMessageIds(prev => {
+    if (prev.includes(payload.messageId)) return prev
+    return [...prev, payload.messageId]
   })
-
+})
   connection.on('ConversationsChanged', () => {
     void loadConversations()
   })
@@ -243,21 +279,19 @@ connection.on('MessageReceived', (message: ChatMessageDto) => {
     void loadConversations()
   })
 
+connection.on('MessageRead', (payload: MessageReadDto) => {
+  console.log('MessageRead', payload)
 
-    connection.on('MessageRead', (payload: MessageReadDto) => {
-      console.log('MessageRead', payload)
-
-      if (payload.conversationId === activeConversationIdRef.current) {
-        setMessages(prev =>
-          prev.map(item =>
-            item.messageId === payload.messageId
-              ? { ...item, isReadByOthers: true }
-              : item
-          )
-        )
-      }
-    })
-
+  if (payload.conversationId === activeConversationIdRef.current) {
+    setMessages(prev =>
+      prev.map(item =>
+        item.messageId === payload.messageId && item.senderId === currentUserId
+          ? { ...item, isReadByOthers: true }
+          : item
+      )
+    )
+  }
+})
     connection.on('OnlineUsersSnapshot', (users: string[]) => {
       console.log('OnlineUsersSnapshot', users)
       setOnlineUserIds(users)
@@ -302,28 +336,49 @@ connection.on('MessageReceived', (message: ChatMessageDto) => {
     console.log('SignalR started')
   }
 
-  async function handleSend() {
-    if (!connectionRef.current) return
-    if (!activeConversationId) return
-    if (!text.trim()) return
+async function handleSend() {
+  if (!connectionRef.current) return
+  if (!activeConversationId) return
+  if (!text.trim()) return
+  if (!currentUserId) return
 
-    setSending(true)
-    setError(null)
+  setSending(true)
+  setError(null)
 
-    try {
-      await sendMessage(connectionRef.current, {
-        conversationId: activeConversationId,
-        clientMessageId: crypto.randomUUID(),
-        content: text.trim(),
-      })
+  const trimmedText = text.trim()
+  const clientMessageId = crypto.randomUUID()
 
-      setText('')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send message')
-    } finally {
-      setSending(false)
-    }
+  const optimisticMessage: ChatMessageDto = {
+    messageId: clientMessageId,
+    clientMessageId,
+    conversationId: activeConversationId,
+    senderId: currentUserId,
+    content: trimmedText,
+    createdAt: new Date().toISOString(),
+    isReadByUser: false,
+    isReadByOthers: false,
   }
+
+  setMessages(prev => [...prev, optimisticMessage])
+  setText('')
+
+  try {
+    await sendMessage(connectionRef.current, {
+      conversationId: activeConversationId,
+      clientMessageId,
+      content: trimmedText,
+    })
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to send message')
+
+    setMessages(prev =>
+      prev.filter(message => message.clientMessageId !== clientMessageId)
+    )
+  } finally {
+    setSending(false)
+  }
+}
+
   async function syncActiveConversationReadState() {
     if (!connectionRef.current) return
     if (!activeConversationIdRef.current) return
@@ -345,6 +400,11 @@ connection.on('MessageReceived', (message: ChatMessageDto) => {
       console.error('Failed to sync read state', err)
     }
   }
+
+  useEffect(() => {
+  messagesRef.current = messages
+}, [messages])
+
   useEffect(() => {
     function handleVisibilityChange() {
       if (!document.hidden) {
@@ -375,12 +435,13 @@ connection.on('MessageReceived', (message: ChatMessageDto) => {
         await setupSignalR()
         if (!isMounted) return
 
-        const list = await loadConversations()
-        if (!isMounted) return
+      const list = await loadConversations()
+      if (!isMounted) return
 
-        if (list.length > 0) {
-          await openConversation(list[0].id)
-        }
+      if (list.length > 0) {
+        setActiveConversationId(list[0].id)
+        activeConversationIdRef.current = list[0].id
+      }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to initialize chat')
       }
@@ -536,13 +597,15 @@ connection.on('MessageReceived', (message: ChatMessageDto) => {
                       {new Date(message.createdAt).toLocaleString()}
                     </div>
 
-                    <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
-                      {message.isReadByOthers
-                        ? 'Read'
-                        : deliveredMessageIds.includes(message.messageId)
-                          ? 'Delivered'
-                          : 'Sent'}
-                    </div>
+{isMine && (
+  <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
+    {message.isReadByOthers
+      ? 'Read'
+      : deliveredMessageIds.includes(message.messageId)
+        ? 'Delivered'
+        : 'Sent'}
+  </div>
+)}
                   </div>
                 </div>
               )

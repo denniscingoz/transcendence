@@ -2,6 +2,7 @@ import * as signalR from '@microsoft/signalr'
 
 export type ChatMessageDto = {
   messageId: string
+  clientMessageId?: string
   conversationId: string
   senderId: string
   isReadByUser: boolean
@@ -160,4 +161,17 @@ export async function markAsRead(
   }
 
   await connection.invoke('MarkAsRead', conversationId)
+}
+
+export async function markAsDelivered(
+  connection: signalR.HubConnection,
+  messageId: string,
+  conversationId: string,
+  senderId: string
+) {
+  if (connection.state !== signalR.HubConnectionState.Connected) {
+    return
+  }
+
+  await connection.invoke('DeliveredMessage', messageId, conversationId, senderId)
 }

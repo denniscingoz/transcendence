@@ -23,13 +23,7 @@ export type FriendDto =
   FullName: string
   AvatarUrl?: string | null
 }
-
-export type ChatMessageDto = {
-  id: string
-  fromUserId: string
-  content: string
-  sentAt: string
-}
+ 
 
 
 export type PostDto = 
