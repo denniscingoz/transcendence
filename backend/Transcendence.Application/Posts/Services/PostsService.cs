@@ -9,6 +9,7 @@ using Transcendence.Application.Posts.DTOs;
 using Transcendence.Application.Posts.Interfaces;
 
 using Transcendence.Application.Users.Interfaces;
+using System.Diagnostics.Eventing.Reader;
 
 
 namespace Transcendence.Application.Posts.Services;
@@ -56,6 +57,13 @@ public class PostsService : IPostsService
 			=> fileId is Guid id ? $"/files/avatar/{id}" : null;
 		string BuildImageFileUrl(Guid fileId) => $"/files/{fileId}";
 
+		var likeOfTheUser = await _postRepository.GetLikeAsync(postId, currentUserId, ct);
+		bool isLikedByCurrentUser = false;
+		if (likeOfTheUser != null && likeOfTheUser.AuthorId == currentUserId)	
+		{
+			// If the user is the author, we can be sure they liked it (since they see it), so we can skip the DB check
+			isLikedByCurrentUser = true;
+		}
 
 		return new PostDto
 		{
@@ -64,6 +72,7 @@ public class PostsService : IPostsService
 			CreatedAtUtc = post.CreatedAtUtc,
 			Content = post.Content,
 			ImageUrl = BuildImageFileUrl(post.ImageFileId),
+			IsLikedByCurrentUser = isLikedByCurrentUser,
 			LikesCount = likesCount,
 			AuthorUsername = author.Username,
 			AuthorFullName = author.FullName,

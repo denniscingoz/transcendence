@@ -3,6 +3,7 @@ import { Modal } from '../Modal'
 import { useTranslation } from 'react-i18next'
 import { searchProfilesApi } from '../../api/search.api'
 import type { OtherProfileDto } from '../../types/api'
+import { useNavigate } from 'react-router-dom'
 
 export function SearchModal({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('')
@@ -10,6 +11,7 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
   const [results, setResults] = useState<OtherProfileDto[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   const { t } = useTranslation()
 
@@ -130,9 +132,13 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
         <div className="mt-6 space-y-3">
           {results.map((profile) => (
             <div
-              key={profile.id}
-              className="rounded-xl border border-gray-200 p-3"
-            >
+           onClick={() => {
+             navigate(`/profile/${profile.id}`)
+             onClose()
+            }}
+            key={profile.id}
+            className="cursor-pointer rounded-xl border border-gray-200 p-3 transition-colors hover:bg-gray-50"
+          >
               <div className="flex flex-col gap-6">
               <div className="flex items-center gap-4">
               <img

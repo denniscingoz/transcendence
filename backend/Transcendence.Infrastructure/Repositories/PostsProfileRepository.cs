@@ -67,7 +67,7 @@ public sealed class PostsProfileRepository : IPostsProfileRepository
 				Content = c.Content,
 				Username = u.Username,
 				FullName = u.FullName,
-				AuthorProfileImageUrl = u.AvatarFileId != null ? "/files/" + u.AvatarFileId : ""
+				AuthorProfileImageUrl = u.AvatarFileId != null ? "/files/avatar/" + u.AvatarFileId : ""
 			};
 
 		query = ApplyCommentCursor(query, cursor);

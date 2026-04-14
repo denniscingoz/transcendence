@@ -19,10 +19,12 @@
   "editprofile": "Modifier le profil",
   "uploadAvatar": "Télécharger une photo de profil"
   },
- "friends": {
+  "friends": {
   "friends": "Amis",
   "addFriend": "Ajouter un ami",
-  "requested": "Demandé"
+  "requested": "Demandé",
+  "accept": "Accepter la demande",
+  "decline": "Refuser la demande"
   },
   "chat": {
     "title": "Chat",

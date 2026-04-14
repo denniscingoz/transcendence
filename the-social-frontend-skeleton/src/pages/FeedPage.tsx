@@ -5,6 +5,9 @@ import { useFeed } from '../hooks/useFeed'
 import { mockFeedPosts } from '../mocks/posts'
 import type { PostDto } from '../types/api'
 import { ProtectedPostThumb } from '../components/ui/ProtectedPostThumb'
+import { useNavigate } from 'react-router-dom'
+import api from '../api/axios'
+
 
 export function FeedPage() {
   const { data, isLoading, error } = useFeed()
@@ -12,25 +15,48 @@ export function FeedPage() {
   const [postsFeed, setPostsFeed] = useState<PostDto[]>([])
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
 
+  const navigate = useNavigate()
+
   useEffect(() => {
     setPostsFeed(data?.items ?? []) // ?? mockFeedPosts)
   }, [data])
 
-  const toggleLike = (postId: string) => {
-    setPostsFeed((prev) =>
-      prev.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              isLikedByCurrentUser: !post.isLikedByCurrentUser,
-              likesCount: post.isLikedByCurrentUser
-                ? post.likesCount - 1
-                : post.likesCount + 1,
-            }
-          : post
-      )
+  const updateLikeState = (postId: string) => {
+  setPostsFeed((prev) =>
+    prev.map((post) =>
+      post.id === postId
+        ? {
+            ...post,
+            isLikedByCurrentUser: !post.isLikedByCurrentUser,
+            likesCount: post.isLikedByCurrentUser
+              ? post.likesCount - 1
+              : post.likesCount + 1,
+          }
+        : post
     )
+  )
+}
+
+const toggleLike = async (postId: string) => {
+  const post = postsFeed.find((p) => p.id === postId)
+  if (!post) return
+
+  const wasLiked = post.isLikedByCurrentUser
+
+  updateLikeState(postId)
+
+  try {
+    if (wasLiked) {
+      await api.delete(`/posts/${postId}/likes`)
+    } else {
+      await api.post(`/posts/${postId}/likes`)
+    }
+  } catch (error) {
+    updateLikeState(postId) // rollback by toggling back
+    console.error('Failed to toggle like', error)
   }
+}
+
 
   const posts = postsFeed
 
@@ -58,23 +84,29 @@ export function FeedPage() {
         ) : (
           posts.map((post) => (
             <article key={post.id} className="space-y-4">
-              <div className="flex items-center gap-3">
+              <button onClick={() => navigate(`/profile/${post.authorId}`)} className="flex items-center gap-3">
                 <img
                   className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
                   src={post.authorAvatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${post.authorAvatarUrl}` : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'}
                   alt={post.authorUsername}
                 />
+                
                 <div>
+                  
                   <div className="font-semibold text-gray-900">
                     {post.authorUsername}
                   </div>
+
                 </div>
-              </div>
+
+
+              </button>
 
 
                <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden">
                  <ProtectedPostThumb fileUrl={post.imageUrl} />
               </div>
+              
               <div className="flex items-center gap-6">
                 <button
                   onClick={() => toggleLike(post.id)}

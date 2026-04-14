@@ -200,6 +200,9 @@ export interface GoogleSignInRequestDto {
   idToken: string // JWT token from Google
 }
 
+
+export type FriendshipStatus = 'friends' | 'outgoingRequest' | 'incomingRequest' | 'none'
+
 export type OtherProfileDto = 
 {
     // public Guid Id { get; init; }
@@ -218,7 +221,7 @@ export type OtherProfileDto =
   avatarUrl?: string | null
   postsCount: number
   friendsCount: number
-  areWeFriends: boolean
+  friendShipStatus: FriendshipStatus
 }
 
 export type CreatePostDto = 

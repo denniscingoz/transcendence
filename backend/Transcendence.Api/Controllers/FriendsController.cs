@@ -58,20 +58,20 @@ public sealed class FriendsController : ControllerBase
 	}
 
 	//POST /friends/requests/{requestId}/accept
-	[HttpPost("requests/{requestId:guid}/accept")]
-	public async Task<IActionResult> AcceptFriendshipRequest(Guid requestId, CancellationToken ct)
+	[HttpPost("requests/{targetUserId:guid}/accept")]
+	public async Task<IActionResult> AcceptFriendshipRequest(Guid targetUserId, CancellationToken ct)
 	{
 		Guid currentUserId = GetUserId();
-		await _friendsService.AcceptFriendshipRequestAsync(requestId, currentUserId, ct);
+		await _friendsService.AcceptFriendshipRequestAsync(targetUserId, currentUserId, ct);
 		return NoContent(); // 204
 	}
 
 	//POST /friends/requests/{requestId}/decline
-	[HttpPost("requests/{requestId:guid}/decline")]
-	public async Task<IActionResult> DeclineFriendshipRequest(Guid requestId, CancellationToken ct)
+	[HttpPost("requests/{targetUserId:guid}/decline")]
+	public async Task<IActionResult> DeclineFriendshipRequest(Guid targetUserId, CancellationToken ct)
 	{
 		Guid currentUserId = GetUserId();
-		await _friendsService.DeclineFriendshipRequestAsync(requestId, currentUserId, ct);
+		await _friendsService.DeclineFriendshipRequestAsync(targetUserId, currentUserId, ct);
 		return NoContent(); // 204
 	}
 

@@ -9,6 +9,6 @@ public sealed class OtherProfileDto
     public string? AvatarUrl { get; init; }
     public int PostsCount { get; init; }
 	public int FriendsCount { get; init; }
-	public bool AreWeFriends { get; init; }
+    public string? FriendShipStatus { get; init; } = default!; // "'friends' | 'outgoingRequest' | 'incomingRequest' | 'none'"
 }
 

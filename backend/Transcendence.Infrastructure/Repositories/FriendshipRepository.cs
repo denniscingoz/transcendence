@@ -18,6 +18,33 @@ public sealed class FriendshipRepository : IFriendshipRepository
 		return _db.Friendships.AnyAsync(x => x.User1Id == u1 && x.User2Id == u2, ct);
 	}
 
+	public async Task<string> GetFriendshipStatusAsync(Guid currentUserId, Guid otherUserId, CancellationToken ct)
+	{
+		if (await _db.Friendships.AnyAsync(
+			x => (x.User1Id == currentUserId && x.User2Id == otherUserId) ||
+				 (x.User1Id == otherUserId && x.User2Id == currentUserId),
+			ct))
+		{
+			return "friends";
+		}
+
+		if (await _db.FriendshipRequests.AnyAsync(
+			x => x.RequesterId == currentUserId && x.TargetUserId == otherUserId,
+			ct))
+		{
+			return "outgoingRequest";
+		}
+
+		if (await _db.FriendshipRequests.AnyAsync(
+			x => x.RequesterId == otherUserId && x.TargetUserId == currentUserId,
+			ct))
+		{
+			return "incomingRequest";
+		}
+
+		return "none";
+	}
+
 	public async Task AddAsync(Friendship friendship, CancellationToken ct)
 	{
 		await _db.Friendships.AddAsync(friendship, ct);

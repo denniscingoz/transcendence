@@ -1,12 +1,13 @@
 import api from './axios'
 import type { MyProfileDto } from '../types/api'
-import type { UpdateProfileDto } from '../types/api'
+import type { UpdateProfileDto, } from '../types/api'
 import type {
   ApiResponse,
   CursorPageDto,
   ProfilePostPreviewDto,
   ChangePasswordDto,
   UploadFilesResultDto,
+  OtherProfileDto
 } from '../types/api'
 
 export async function getMyProfile(): Promise<MyProfileDto> {
@@ -14,6 +15,17 @@ export async function getMyProfile(): Promise<MyProfileDto> {
 
   if (!response.data.isSuccess || !response.data.data) {
     throw new Error(response.data.errors[0] ?? 'Failed to load profile.')
+  }
+
+  return response.data.data
+}
+
+
+export async function getOtherProfile(userId: string) {
+  const response = await api.get<ApiResponse<OtherProfileDto>>(`/profile/${userId}`)
+
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors?.[0] ?? 'Failed to load profile.')
   }
 
   return response.data.data
@@ -81,6 +93,30 @@ export async function getMyProfilePostPreviews(
 
   if (!response.data.isSuccess || !response.data.data) {
     throw new Error(response.data.errors[0] ?? 'Failed to load profile posts.')
+  }
+
+  return response.data.data
+}
+
+
+
+export async function getOtherProfilePostPreviews(
+  userId: string,
+  take = 20,
+  cursor?: string | null
+): Promise<CursorPageDto<ProfilePostPreviewDto>> {
+  const response = await api.get<ApiResponse<CursorPageDto<ProfilePostPreviewDto>>>(
+    `/posts/by-userId/${userId}`,
+    {
+      params: {
+        take,
+        cursor,
+      },
+    }
+  )
+
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors?.[0] ?? 'Failed to load profile posts.')
   }
 
   return response.data.data

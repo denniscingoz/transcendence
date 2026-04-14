@@ -13,6 +13,7 @@ export async function listFriends(): Promise<FriendDto[]> {
 
 export async function addFriendById(targetUserId: string): Promise<void> {
   await api.post(`/friends/${targetUserId}`)
+  console.log('USER AT ')
 }
 
 export async function removeFriendById(friendUserId: string): Promise<void> {

@@ -22,7 +22,9 @@
   "friends": {
   "friends": "Amigos",
   "addFriend": "Agregar amigo",
-  "requested": "Solicitado"
+  "requested": "Solicitado",
+  "accept": "Aceptar solicitud",
+  "decline": "Rechazar solicitud"
   },
   "chat": {
     "title": "Chat",
