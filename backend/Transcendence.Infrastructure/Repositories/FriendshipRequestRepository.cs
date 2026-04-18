@@ -38,12 +38,16 @@ public sealed class FriendshipRequestRepository : IFriendshipRequestRepository
 		if (entity is null) return;
 		_db.FriendshipRequests.Remove(entity);
 	}
-	
-	public Task<FriendshipRequest?> GetAsync(Guid requestId, CancellationToken ct)
+
+	public Task<FriendshipRequest?> GetAsync(Guid targetUserId, Guid currentUserId, CancellationToken ct)
 	{
-		return _db.FriendshipRequests.FirstOrDefaultAsync(x => x.Id == requestId, ct);
+		return _db.FriendshipRequests.FirstOrDefaultAsync(
+			x =>
+				(x.RequesterId == currentUserId && x.TargetUserId == targetUserId) ||
+				(x.RequesterId == targetUserId && x.TargetUserId == currentUserId),
+			ct);
 	}
-	
+
 	public async Task SaveChangesAsync(CancellationToken ct)
 	{
 		await _db.SaveChangesAsync(ct);

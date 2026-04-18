@@ -6,22 +6,22 @@ export type ApiError = {
 export type SignInRequestDto = { email: string; password: string }
 
 export type ProfileDto = {
-  Id: string
-  FullName: string
-  Email: string
-  AvatarUrl?: string | null
-  Username?: string
-  Bio?: string
-  PostsCount?: number
-  FriendsCount?: number
+  id: string
+  fullName: string
+  email: string
+  avatarUrl?: string | null
+  username?: string
+  bio?: string
+  postsCount?: number
+  friendsCount?: number
 }
 
 export type FriendDto =
 {
-  Id: string
-  Username?: string
-  FullName: string
-  AvatarUrl?: string | null
+  id: string
+  username?: string
+  fullName: string
+  avatarUrl?: string | null
 }
  
 
@@ -38,22 +38,22 @@ export type PostDto =
 	// public string? AuthorUsername { get; set; }
 	// public string? AuthorFullName { get; set; }
 	// public string? AuthorAvatarUrl { get; set; }
-  Id: string
-	AuthorId : string
-	CreatedAtUtc : string
-	Content : string
-	ImageUrl : string
-	IsLikedByCurrentUser : boolean
-	LikesCount : number
-	AuthorUsername : string
-	AuthorFullName : string
-	AuthorAvatarUrl : string | null
+  id: string
+	authorId : string
+	createdAtUtc : string
+	content : string
+	imageUrl : string
+	isLikedByCurrentUser : boolean
+	likesCount : number
+	authorUsername : string
+	authorFullName : string
+	authorAvatarUrl : string | null
 }
 
 export type CursorPageDto<T> = 
 {
-  Items: T[]
-  NextCursor: string | null
+  items: T[]
+  nextCursor: string | null
 }
 
 export type ProfilePostPreviewDto = {
@@ -61,20 +61,20 @@ export type ProfilePostPreviewDto = {
   // public Guid AuthorId { get; set; }
   // public string? ImageUrl { get; set; }
 
-  Id: string
-  AuthorId: string
-  ImageUrl: string | null
+  id: string
+  authorId: string
+  imageUrl: string | null
 }
 
 export type ApiResponse<T> = {
-  IsSuccess: boolean
-  Data: T | null
-  Errors: string[]
+  isSuccess: boolean
+  data: T | null
+  errors: string[]
 }
 
 export type UploadFilesResultDto = {
-  Url: string
-  FileId: string
+  url: string
+  fileId: string
 }
 
 export type MyProfileDto = 
@@ -88,14 +88,14 @@ export type MyProfileDto =
     // public int PostsCount { get; init; }
     // public int FriendsCount { get; init; }
 
-  Id: string
-  Username: string
-  FullName: string
-	Email: string
-	Bio: string | null
-  AvatarUrl: string | null 
-  PostsCount: number
-  FriendsCount: number
+  id: string
+  username: string
+  fullName: string
+	email: string
+	bio: string | null
+  avatarUrl: string | null 
+  postsCount: number
+  friendsCount: number
 
 }
 
@@ -113,11 +113,11 @@ export type UpdateProfileDto =
 // 
 // public string? Password { get; init; } // Nullable = optional update
 
-  Username?: string | null
-  FullName?: string | null
-  Bio?: string | null
-  AvatarUrl?: string | null
-  Password?: string | null
+  username?: string | null
+  fullName?: string | null
+  bio?: string | null
+  avatarUrl?: string | null
+  password?: string | null
 }
 
 export type ChangePasswordDto = 
@@ -129,8 +129,8 @@ export type ChangePasswordDto =
 	// [StringLength(100, MinimumLength = 8)]
 	// public string NewPassword { get; init; } = default!;
 
-  CurrentPassword: string
-  NewPassword: string
+  currentPassword: string
+  newPassword: string
 
 }
 
@@ -147,15 +147,15 @@ export type CommentPreviewDto =
 	// public string FullName { get; set; } = default!;
 	// public string AuthorProfileImageUrl { get; set; } = default!;
 
-  Id: string
-  PostId: string
-  AuthorId: string
-  CreatedAtUtc: string
-  Content: string
+  id: string
+  postId: string
+  authorId: string
+  createdAtUtc: string
+  content: string
 
-  Username: string
-  FullName: string
-  AuthorProfileImageUrl: string | null
+  username: string
+  fullName: string
+  authorProfileImageUrl: string | null
 
 }
 
@@ -178,10 +178,10 @@ export type SignUpRequestDto =
 	// [Required]
 	// [MaxLength(50)]
 	// public string Username { get; set; } = string.Empty;
-  Email: string
-  Password: string
-  FullName: string
-  Username: string
+  email: string
+  password: string
+  fullName: string
+  username: string
 
 }
 
@@ -195,8 +195,11 @@ export type AuthResponseDto = {
   user: AuthUserDto
 }
 export interface GoogleSignInRequestDto {
-  credential: string // JWT token from Google
+  idToken: string // JWT token from Google
 }
+
+
+export type FriendshipStatus = 'friends' | 'outgoingRequest' | 'incomingRequest' | 'none'
 
 export type OtherProfileDto = 
 {
@@ -209,13 +212,20 @@ export type OtherProfileDto =
 	// public int FriendsCount { get; init; }
 	// public bool AreWeFriends { get; init; }
 
-  Id: string
-  Username: string
-  FullName: string
-  Bio?: string | null
-  AvatarUrl?: string | null
-  PostCount: string
-  FriendsCount: string
-  AreWeFriends: string
+  id: string
+  username: string
+  fullName: string
+  bio?: string | null
+  avatarUrl?: string | null
+  postsCount: number
+  friendsCount: number
+  friendShipStatus: FriendshipStatus
 }
 
+export type CreatePostDto = 
+{
+	// public string? Content { get; init; }
+	// public Guid ImageFileId { get; init; }
+  content?: string | null
+  imageFileId: string
+}

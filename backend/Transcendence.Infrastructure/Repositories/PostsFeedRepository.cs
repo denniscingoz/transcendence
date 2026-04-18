@@ -18,16 +18,19 @@ public sealed class PostsFeedRepository : IPostsFeedRepository
 		string? cursor,
 		CancellationToken ct)
 	{
-		var friendIds = _db.Friendships
+		var friendIds = await _db.Friendships
 			.Where(f => f.User1Id == currentUserId || f.User2Id == currentUserId)
-			.Select(f => f.User1Id == currentUserId ? f.User2Id : f.User1Id);
+			.Select(f => f.User1Id == currentUserId ? f.User2Id : f.User1Id)
+			.ToListAsync(ct);
 
-		var visibleAuthorIds = friendIds.Append(currentUserId);
-
+		if (friendIds.Count == 0)
+			return new CursorPageDto<FeedPostRowDto>(new List<FeedPostRowDto>(), null);
+		//var visibleAuthorIds = friendIds.Append(currentUserId);
+		
 		var query =
 			from p in _db.Posts
 			join u in _db.Users on p.AuthorId equals u.Id
-			where visibleAuthorIds.Contains(p.AuthorId)
+			where friendIds.Contains(p.AuthorId)
 			orderby p.CreatedAtUtc descending, p.Id descending
 			select new FeedPostRowDto
 			{
@@ -40,7 +43,7 @@ public sealed class PostsFeedRepository : IPostsFeedRepository
 				LikesCount = _db.Likes.Count(l => l.PostId == p.Id),
 				AuthorFullName = u.FullName,
 				AuthorUsername = u.Username,
-				AuthorAvatarUrl = u.AvatarFileId != null ? "/files/" + u.AvatarFileId : null
+				AuthorAvatarUrl = u.AvatarFileId != null ? "/files/avatar/" + u.AvatarFileId : null
 			};
 
 		query = ApplyCursor(query, cursor);

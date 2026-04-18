@@ -18,17 +18,19 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 	private readonly IFriendshipRepository _friendsRepository;
 	private readonly IPostsRepository _postRepository;
 	private readonly IPasswordHasher<User> _passwordHasher;
-	
+	private readonly IFriendshipRequestRepository _friendshipRequestRepository;
 
 	public ProfileService(IFriendshipRepository friendsRepository, 
 						IUserRepository userRepository,
 						IPostsRepository postRepository,
-						IPasswordHasher<User> passwordHasher)
+						IPasswordHasher<User> passwordHasher,
+						IFriendshipRequestRepository friendshipRequestRepository)
 	{
 		_friendsRepository = friendsRepository;
 		_userRepository = userRepository;
 		_postRepository = postRepository;
 		_passwordHasher = passwordHasher;
+		_friendshipRequestRepository = friendshipRequestRepository;	
 	}
 
 
@@ -131,8 +133,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 		var user = await _userRepository.GetByIdAsync(targetUserId, ct)
 			?? throw new NotFoundException("User not found.");
 
-		bool areWeFriends =
-			await _friendsRepository.IsFriendAsync(viewerUserId, targetUserId, ct);
+		string friendShipStatus = await _friendsRepository.GetFriendshipStatusAsync(viewerUserId, targetUserId, ct);
 
 		return new OtherProfileDto
 		{
@@ -143,7 +144,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			AvatarUrl = BuildAvatarFileUrl(user.AvatarFileId),
 			PostsCount = await _postRepository.CountByUserIdAsync(targetUserId, ct), //TODO
 			FriendsCount = await _friendsRepository.CountFriendsAsync(targetUserId, ct),
-			AreWeFriends = areWeFriends
+			FriendShipStatus = friendShipStatus
 		};
 	}
 
@@ -229,6 +230,6 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 
 
 	private static string? BuildAvatarFileUrl(Guid? fileId)
-		=> fileId is Guid id ? $"/files/{id}" : null;
+		=> fileId is Guid id ? $"/files/avatar/{id}" : null;
 
 }

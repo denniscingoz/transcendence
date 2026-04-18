@@ -24,8 +24,8 @@ export function FriendsPage() {
       const next = { ...prev }
 
       for (const friend of apIData) {
-        if (!(friend.Id in next)) {
-          next[friend.Id] = 'friends'
+        if (!(friend.id in next)) {
+          next[friend.id] = 'friends'
         }
       }
 
@@ -84,27 +84,27 @@ export function FriendsPage() {
 
           <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
             {friends.map((friend) => {
-              const status = friendshipState[friend.Id] ?? 'friends'
+              const status = friendshipState[friend.id] ?? 'friends'
 
               return (
                 <div
-                  key={friend.Id}
+                  key={friend.id}
                   className="flex items-center gap-4 rounded-2xl bg-gray-200 p-4"
                 >
                   <img
-                    src={friend.AvatarUrl ?? 'https://placehold.co/80x80'}
-                    alt={friend.FullName}
+                    src={friend?.avatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${friend.avatarUrl}` :'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'}
+                    alt={friend.fullName}
                     className="h-14 w-14 rounded-full border-2 border-red-200 object-cover"
                   />
 
                   <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-gray-900">{friend.FullName}</div>
-                    <div className="text-sm text-gray-500">@{friend.Username}</div>
+                    <div className="font-semibold text-gray-900">{friend.fullName}</div>
+                    <div className="text-sm text-gray-500">@{friend.username}</div>
                   </div>
 
                   <button
                     type="button"
-                    onClick={() => toggleFriendship(friend.Id)}
+                    onClick={() => toggleFriendship(friend.id)}
                     disabled={status === 'requested'}
                     className={`rounded-full px-6 py-2 font-medium transition-colors ${
                       status === 'friends'

@@ -32,8 +32,8 @@ paths:
 #+--#POST /friends/{targetUserId}
 #+--#DELETE /friends/{friendUserId}
 #+--#GET /friends/requests
-#+--#POST /friends/requests/{requestId}/accept
-#+--#POST /friends/requests/{requestId}/decline
+#+--#POST /friends/requests/{targetUserId}/accept
+#+--#POST /friends/requests/{targetUserId}/decline
 
 #posts
 #+-#GET /posts/{postId}

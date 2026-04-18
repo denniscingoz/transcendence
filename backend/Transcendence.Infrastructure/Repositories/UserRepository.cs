@@ -67,12 +67,21 @@ public sealed class UserRepository : IUserRepository
 				Username = x.Username,
 				FullName = x.FullName,
 				Bio = x.Bio,
-				AvatarUrl = x.AvatarFileId.HasValue ? "/files/" + x.AvatarFileId.Value : null,
+				AvatarUrl = x.AvatarFileId.HasValue ? "/files/avatar/" + x.AvatarFileId.Value : null,
 				PostsCount = _db.Posts.Count(p => p.AuthorId == x.Id),
 				FriendsCount = _db.Friendships.Count(f => f.User1Id == x.Id || f.User2Id == x.Id),
-				AreWeFriends = _db.Friendships.Any(f =>
-					(f.User1Id == currentUserId && f.User2Id == x.Id) ||
-					(f.User2Id == currentUserId && f.User1Id == x.Id))
+				FriendShipStatus =
+						_db.Friendships.Any(f =>
+							(f.User1Id == currentUserId && f.User2Id == x.Id) ||
+							(f.User2Id == currentUserId && f.User1Id == x.Id))
+							? "friends"
+							: _db.FriendshipRequests.Any(fr =>
+								fr.RequesterId == currentUserId && fr.TargetUserId == x.Id)
+								? "outgoingRequest"
+								: _db.FriendshipRequests.Any(fr =>
+									fr.RequesterId == x.Id && fr.TargetUserId == currentUserId)
+									? "incomingRequest"
+									: "none"
 			})
 			.ToListAsync(ct);
 	}

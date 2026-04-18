@@ -55,7 +55,7 @@ export function LikesModal({ isOpen, onClose, users, onFollowToggle }: LikesModa
             >
               {/* Avatar */}
               <img
-                src={user.AvatarUrl ?? 'https://placehold.co/80x80'}
+                src={user.AvatarUrl ?? 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'}
                 alt={user.FullName}
                 className="w-12 h-12 rounded-full object-cover border-2 border-red-200"
               />

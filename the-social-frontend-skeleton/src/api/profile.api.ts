@@ -1,22 +1,34 @@
 import api from './axios'
 import type { MyProfileDto } from '../types/api'
-import type { UpdateProfileDto } from '../types/api'
+import type { UpdateProfileDto, } from '../types/api'
 import type {
   ApiResponse,
   CursorPageDto,
   ProfilePostPreviewDto,
   ChangePasswordDto,
   UploadFilesResultDto,
+  OtherProfileDto
 } from '../types/api'
 
 export async function getMyProfile(): Promise<MyProfileDto> {
   const response = await api.get<ApiResponse<MyProfileDto>>('/profile/me')
 
-  if (!response.data.IsSuccess || !response.data.Data) {
-    throw new Error(response.data.Errors[0] ?? 'Failed to load profile.')
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors[0] ?? 'Failed to load profile.')
   }
 
-  return response.data.Data
+  return response.data.data
+}
+
+
+export async function getOtherProfile(userId: string) {
+  const response = await api.get<ApiResponse<OtherProfileDto>>(`/profile/${userId}`)
+
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors?.[0] ?? 'Failed to load profile.')
+  }
+
+  return response.data.data
 }
 
 export async function updateMyProfile(payload: Partial<UpdateProfileDto>): Promise<MyProfileDto> {
@@ -24,11 +36,11 @@ export async function updateMyProfile(payload: Partial<UpdateProfileDto>): Promi
   console.log('here')
   const response = await api.patch<ApiResponse<MyProfileDto>>('/profile/me', payload)
   console.log('updateMyProfile response:', response.data)
-  if (!response.data.IsSuccess || !response.data.Data) {
-    throw new Error(response.data.Errors[0] ?? 'Failed to update profile.')
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors[0] ?? 'Failed to update profile.')
   }
 
-  return response.data.Data
+  return response.data.data
 }
 
 //changePassword
@@ -50,11 +62,12 @@ export async function uploadAvatar(file: File): Promise<string> {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
 
-  if (!response.data.IsSuccess || !response.data.Data) {
-    throw new Error(response.data.Errors[0] ?? 'Failed to upload file.')
+  console.log("response: ", response.data.data)
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors[0] ?? 'Failed to upload file.')
   }
 
-  const uploadedUrl = response.data.Data.Url
+  const uploadedUrl = response.data.data.fileId
 
   if (!uploadedUrl) {
     throw new Error('Upload succeeded but no file URL was returned.')
@@ -78,9 +91,33 @@ export async function getMyProfilePostPreviews(
     }
   )
 
-  if (!response.data.IsSuccess || !response.data.Data) {
-    throw new Error(response.data.Errors[0] ?? 'Failed to load profile posts.')
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors[0] ?? 'Failed to load profile posts.')
   }
 
-  return response.data.Data
+  return response.data.data
+}
+
+
+
+export async function getOtherProfilePostPreviews(
+  userId: string,
+  take = 20,
+  cursor?: string | null
+): Promise<CursorPageDto<ProfilePostPreviewDto>> {
+  const response = await api.get<ApiResponse<CursorPageDto<ProfilePostPreviewDto>>>(
+    `/posts/by-userId/${userId}`,
+    {
+      params: {
+        take,
+        cursor,
+      },
+    }
+  )
+
+  if (!response.data.isSuccess || !response.data.data) {
+    throw new Error(response.data.errors?.[0] ?? 'Failed to load profile posts.')
+  }
+
+  return response.data.data
 }

@@ -68,7 +68,10 @@ public sealed class PostsController : ControllerBase
 	{
 		Guid currentUserId = GetUserId();
 		var commentPreview = await _postsService.AddCommentAsync(postId, currentUserId, content, ct);
-		return StatusCode(StatusCodes.Status201Created, this.OkResponse(commentPreview));
+		return StatusCode(
+				StatusCodes.Status201Created,
+				ApiResponse<CommentPreviewDto>.Success(commentPreview)
+		);
 	}
 
 	// DELETE /posts/{postId}/comments/{commentId}

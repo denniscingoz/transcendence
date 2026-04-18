@@ -22,7 +22,9 @@
   "friends": {
   "friends": "Amigos",
   "addFriend": "Agregar amigo",
-  "requested": "Solicitado"
+  "requested": "Solicitado",
+  "accept": "Aceptar solicitud",
+  "decline": "Rechazar solicitud"
   },
   "chat": {
     "title": "Chat",
@@ -75,5 +77,15 @@
   "typeinyoursearch": "Escribe tu búsqueda aquí",
   "searchresultshere": "Los resultados de búsqueda aparecerán aquí.",
   "close": "Cerrar"
+  },
+  "createpost": {
+  "createpost": "Crear una publicación",
+  "dropyourmedia": "Suelta tus archivos aquí",
+  "selectfromcomputer": "Seleccionar desde el ordenador",
+  "writecaption": "Escribe un pie de foto aquí:",
+  "acceptedfiletypes": "Tipos de archivo aceptados(max. 10Mb):",
+  "imagetypes": ".jpg, .jpeg, .png, .webp",
+  "videotypes": ".mp4, .webm, .mov",
+  "share": "Compartir"
   }
 }

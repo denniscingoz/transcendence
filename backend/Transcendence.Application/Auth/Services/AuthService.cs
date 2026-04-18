@@ -172,6 +172,16 @@ public sealed class AuthService : IAuthService
 
 		var user = await _authRepository.GetByGoogleIdAsync(googlePayload.Subject, ct);
 
+		if (user == null)
+		{ 
+			user = await _userRepository.GetByEmailAsync(googlePayload.Email, ct);
+			if (user != null && user.IsDeleted == false)
+			{
+				user.SetGoogleId(googlePayload.Subject);
+				await _userRepository.SaveChangesAsync(ct);
+			}
+		}
+
 		if (user is null)
 		{
 			var emailPrefix = googlePayload.Email.Split('@')[0];

@@ -51,10 +51,10 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 		return requestId;
 	}
 
-	// POST friends/requests/{requestId}/accept
-	public async Task AcceptFriendshipRequestAsync(Guid requestId, Guid currentUserId, CancellationToken ct)
+	// POST friends/requests/{targetUserId}/accept
+	public async Task AcceptFriendshipRequestAsync(Guid targetUserId, Guid currentUserId, CancellationToken ct)
 	{
-		var request = await _friendshipRequestRepository.GetAsync(requestId, ct)
+		var request = await _friendshipRequestRepository.GetAsync(targetUserId, currentUserId, ct)
 			?? throw new NotFoundException("Friend request not found.");
 		
 		if (request.TargetUserId != currentUserId)
@@ -62,24 +62,24 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 
 		if (await _friendshipRepository.IsFriendAsync(request.RequesterId, request.TargetUserId, ct))
 		{
-			await _friendshipRequestRepository.RemoveAsync(requestId, ct); // cleanup
+			await _friendshipRequestRepository.RemoveAsync(request.Id, ct); // cleanup
 			return;
 		}
 
 		var friendship = new Friendship(request.RequesterId, request.TargetUserId, DateTime.UtcNow);
 		await _friendshipRepository.AddAsync(friendship, ct);
-		await _friendshipRequestRepository.RemoveAsync(requestId, ct);
+		await _friendshipRequestRepository.RemoveAsync(request.Id, ct);
 		await _friendshipRepository.SaveChangesAsync(ct);// Save both changes in one transaction.
 	}
 
-	// DELETE friends/requests/{requestId}
-	public async Task DeclineFriendshipRequestAsync(Guid requestId, Guid currentUserId, CancellationToken ct)
+	// DELETE friends/requests/{targetUserId}
+	public async Task DeclineFriendshipRequestAsync(Guid targetUserId, Guid currentUserId, CancellationToken ct)
 	{
-		var request = await _friendshipRequestRepository.GetAsync(requestId, ct)
+		var request = await _friendshipRequestRepository.GetAsync(targetUserId, currentUserId, ct)
 			?? throw new NotFoundException("Friend request not found.");
 		if (request.TargetUserId != currentUserId)
 			throw new NotAllowedToFriendException("You cannot decline this friend request.");
-		await _friendshipRequestRepository.RemoveAsync(requestId, ct);
+		await _friendshipRequestRepository.RemoveAsync(request.Id, ct);
 		await _friendshipRequestRepository.SaveChangesAsync(ct);
 	}
 

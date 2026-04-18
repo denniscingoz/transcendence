@@ -37,8 +37,7 @@ export function usePostComment(postId: string) {
       return postComment(postId, content)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['comments', postId] })
-      queryClient.invalidateQueries({ queryKey: ['post', postId] })
+       queryClient.invalidateQueries({ queryKey: ['posts', postId, 'comments'] })
     },
   })
 }
