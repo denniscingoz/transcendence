@@ -27,7 +27,8 @@ public sealed class PostsProfileRepository : IPostsProfileRepository
 				Id = p.Id,
 				AuthorId = p.AuthorId,
 				CreatedAtUtc = p.CreatedAtUtc,
-				ImageUrl = "/files/" + p.ImageFileId
+				ImageUrl = "/files/" + p.ImageFileId,
+				ImageFileId = p.ImageFileId
 			});
 
 		query = ApplyProfilePostCursor(query, cursor);

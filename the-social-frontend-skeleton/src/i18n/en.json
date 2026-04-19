@@ -94,5 +94,9 @@
     "imagetypes": ".jpg, .jpeg, .png, .webp",
     "videotypes": ".mp4, .webm, .mov",
     "share": "Share"
+  },
+  "feed":
+  {
+    "nothingtoshow": "Nothing to show"
   }
 }
