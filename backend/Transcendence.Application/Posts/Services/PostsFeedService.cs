@@ -1,4 +1,6 @@
-﻿using Transcendence.Application.Friends.Interfaces;
+﻿using Transcendence.Application.Common.Exceptions;
+using Transcendence.Application.Files.Interface;
+using Transcendence.Application.Friends.Interfaces;
 using Transcendence.Application.Posts.DTOs;
 using Transcendence.Application.Posts.Interfaces;
 using Transcendence.Application.Users.Interfaces;
@@ -11,16 +13,19 @@ internal class PostsFeedService : IPostsFeedService
 	private readonly IUserRepository _userRepository;
 	private readonly IPostsRepository _postRepository;
 	private readonly IFriendshipRepository _friendshipRepository;
+	private readonly IFilesRepository _filesRepository;
 	public PostsFeedService(
 		IPostsFeedRepository postsFeedRepository,
 		IUserRepository userRepository,
 		IPostsRepository postRepository,
-		IFriendshipRepository friendshipRepository)
+		IFriendshipRepository friendshipRepository,
+		IFilesRepository filesRepository)
 	{
 		_postsFeedRepository = postsFeedRepository;
 		_userRepository = userRepository;
 		_postRepository = postRepository;
 		_friendshipRepository = friendshipRepository;
+		_filesRepository = filesRepository;
 	}
 
 	public async Task<CursorPageDto<PostDto>> GetFeedAsync(
@@ -42,13 +47,25 @@ internal class PostsFeedService : IPostsFeedService
 			AuthorId = p.AuthorId,
 			CreatedAtUtc = p.CreatedAtUtc,
 			Content = p.Content,
-			ImageUrl = p.ImageUrl,
+			ImageFileId = p.ImageFileId,
+			ImageUrl = "/files/" + p.ImageFileId,
 			IsLikedByCurrentUser = p.IsLikedByCurrentUser,
 			LikesCount = p.LikesCount,
 			AuthorFullName = p.AuthorFullName,
 			AuthorUsername = p.AuthorUsername,
 			AuthorAvatarUrl = p.AuthorAvatarUrl
 		}).ToList();
+
+		foreach (var post in items)
+		{
+			if (post.ImageFileId != Guid.Empty)
+			{
+				var file = await _filesRepository.GetByIdAsync(post.ImageFileId, ct)
+					?? throw new NotFoundException("Image file not found.");
+
+				post.ContentType = file.ContentType;
+			}
+		}
 
 		return new CursorPageDto<PostDto>(items, page.NextCursor);
 	}

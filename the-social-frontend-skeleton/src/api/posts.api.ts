@@ -18,6 +18,7 @@ export async function sharePost(data: Partial<CreatePostDto>) {
 }
 
 export async function uploadPostFile(file: File) {
+  console.log("It is coming all the way to uploadPostFile Api")
   const formData = new FormData()
   formData.append('file', file)
 

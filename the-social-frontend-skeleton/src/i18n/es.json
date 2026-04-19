@@ -87,5 +87,9 @@
   "imagetypes": ".jpg, .jpeg, .png, .webp",
   "videotypes": ".mp4, .webm, .mov",
   "share": "Compartir"
+  },
+  "feed":  {
+
+    "nothingtoshow": "Nada que mostrar"
   }
 }

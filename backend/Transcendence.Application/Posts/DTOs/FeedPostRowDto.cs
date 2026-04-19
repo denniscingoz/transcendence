@@ -5,7 +5,7 @@ public sealed class FeedPostRowDto
 	public Guid AuthorId { get; set; }
 	public DateTime CreatedAtUtc { get; set; }
 	public string? Content { get; set; }
-	public string? ImageUrl { get; set; }
+	public Guid ImageFileId { get; set; }
 	public bool IsLikedByCurrentUser { get; set; }
 	public int LikesCount { get; set; }
 	public string AuthorFullName { get; set; } = default!;

@@ -8,5 +8,7 @@ public sealed class ProfilePostPreviewDto
 	public Guid AuthorId { get; set; }
 	
 	public DateTime CreatedAtUtc { get; set; }//dasha: a stable sorting field needed
+	public Guid ImageFileId { get; set; }
 	public string? ImageUrl { get; set; }
+	public string? ContentType { get; set; }
 }

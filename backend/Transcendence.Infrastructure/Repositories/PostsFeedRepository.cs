@@ -38,7 +38,7 @@ public sealed class PostsFeedRepository : IPostsFeedRepository
 				AuthorId = p.AuthorId,
 				CreatedAtUtc = p.CreatedAtUtc,
 				Content = p.Content,
-				ImageUrl = "/files/" + p.ImageFileId,
+				ImageFileId = p.ImageFileId,
 				IsLikedByCurrentUser = _db.Likes.Any(l => l.PostId == p.Id && l.AuthorId == currentUserId),
 				LikesCount = _db.Likes.Count(l => l.PostId == p.Id),
 				AuthorFullName = u.FullName,
