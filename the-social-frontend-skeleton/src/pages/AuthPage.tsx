@@ -37,15 +37,18 @@ export function AuthPage() {
   })
 
   const onSignInSubmit = async (values: SignInRequestDto) => {
-    setSignInApiError(null)
-    try {
-      await signIn(values)
-      const to ='/feed'
-      nav(to)
-    } catch (e: any) {
-      setSignInApiError(e?.response?.data?.message ?? 'signIn failed')
-    }
+  setSignInApiError(null)
+  try {
+    await signIn(values)
+    nav('/feed')
+  } catch (e: any) {
+    const errors = e?.response?.data?.errors as Record<string, string[]> | undefined
+    const firstError = errors ? Object.values(errors)[0]?.[0] : null
+
+    setSignInApiError(firstError ?? e?.response?.data?.detail ?? 'Sign in failed')
   }
+}
+
 
   const onSignupSubmit = async (values: SignUpRequestDto) => {
     setSignupApiError(null)
@@ -54,7 +57,10 @@ export function AuthPage() {
       const to ='/feed'
       nav(to)
     } catch (e: any) {
-      setSignupApiError(e?.response?.data?.message ?? 'Signup failed')
+      const errors = e?.response?.data?.errors as Record<string, string[]> | undefined
+      const firstError = errors ? Object.values(errors)[0]?.[0] : null
+
+      setSignupApiError(firstError ?? e?.response?.data?.title ?? 'Signup failed')
     }
   }
 
@@ -92,17 +98,39 @@ export function AuthPage() {
         {/* signIn */}
         <div className="panel">
           <form className="space-y-4" onSubmit={signInForm.handleSubmit(onSignInSubmit)}>
-            <input
-              className="input"
-              placeholder="Username, or email"
-              {...signInForm.register('email', { required: true })}
-            />
-            <input
-              className="input"
-              placeholder="Password"
-              type="password"
-              {...signInForm.register('password', { required: true })}
-            />
+            
+            <div>
+              <input
+                className="input"
+                placeholder="Email"
+                {...signInForm.register('email', { required: 'Email is required' })}
+                />
+              <div className="flex justify-center">
+                  {signInForm.formState.errors.email && (
+                   <p className="text-sm text-red-600 mt-1">
+                     {signInForm.formState.errors.email.message}
+                   </p>
+                 )}
+              </div>
+            
+            </div> 
+            
+            <div>
+              <input
+                className="input"
+                placeholder="Password"
+                type="password"
+                {...signInForm.register('password', { required: 'Password is required' })}
+                />
+              <div className="flex justify-center">
+                  {signInForm.formState.errors.password && (
+                   <p className="text-sm text-red-600 mt-1">
+                     {signInForm.formState.errors.password.message}
+                   </p>
+                 )}
+              </div>
+
+            </div>
 
             {signInApiError && (
               <div className="text-sm text-red-600 text-center">{signInApiError}</div>
@@ -149,31 +177,75 @@ export function AuthPage() {
 
           {/* Local Signup */}
           <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
-            <input
-              className="input"
-              placeholder="Email"
-              {...signupForm.register('email', { required: true })}
-            />
+           
+          <div>
+              <input
+                className="input"
+                placeholder="Email"
+                {...signupForm.register('email', { required: 'Email is required' })}
+              />
 
-            <input
-              className="input"
-              placeholder="Password"
-              type="password"
-              {...signupForm.register('password', { required: true })}
-            />
+              <div className="flex justify-center">
+              {signupForm.formState.errors.email && (
+                <p className="text-sm text-red-600 mt-1">
+                  {signupForm.formState.errors.email.message}
+                </p>
+              )}
+              </div>
 
+
+          </div>
+
+            <div>
+              <input
+                className="input"
+                placeholder="Password"
+                type="password"
+                {...signupForm.register('password', { required: 'Password is required' })}
+
+               />
+               <div className="flex justify-center">
+                  {signupForm.formState.errors.password && (
+                   <p className="text-sm text-red-600 mt-1">
+                     {signupForm.formState.errors.password.message}
+                   </p>
+                 )}
+              </div>
+
+            </div>
+
+            <div>
             <input
               className="input"
               placeholder="Full name"
-              {...signupForm.register('fullName', { required: true })}
+              {...signupForm.register('fullName', { required: 'Full name is required' })}
             />
+              <div className="flex justify-center">
+                {signupForm.formState.errors.fullName && (
+                  <p className="text-sm text-red-600 mt-1">
+                    {signupForm.formState.errors.fullName.message}
+                  </p>
+                )}
+              </div>
+            </div>
 
-            <input
-              className="input"
-              placeholder="Username"
-              {...signupForm.register('username', { required: true })}
-            />
+            <div>
+              <input
+                className="input"
+                placeholder="Username"
+                {...signupForm.register('username', { required: 'Username is required' })}
+                
+              />
 
+                <div className="flex justify-center"> 
+                  {signupForm.formState.errors.username && (
+                    <p className="text-sm text-red-600 mt-1">
+                      {signupForm.formState.errors.username.message}
+                    </p>
+                  )}
+                </div>
+
+            </div>
             {signupApiError && (
               <div className="text-sm text-red-600 text-center">{signupApiError}</div>
             )}

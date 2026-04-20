@@ -1,4 +1,5 @@
 import api from './axios'
+import axios from 'axios'
 import type { MyProfileDto } from '../types/api'
 import type { UpdateProfileDto, } from '../types/api'
 import type {
@@ -32,10 +33,7 @@ export async function getOtherProfile(userId: string) {
 }
 
 export async function updateMyProfile(payload: Partial<UpdateProfileDto>): Promise<MyProfileDto> {
-  console.log('updateMyProfile payload:', payload)
-  console.log('here')
   const response = await api.patch<ApiResponse<MyProfileDto>>('/profile/me', payload)
-  console.log('updateMyProfile response:', response.data)
   if (!response.data.isSuccess || !response.data.data) {
     throw new Error(response.data.errors[0] ?? 'Failed to update profile.')
   }
@@ -45,13 +43,7 @@ export async function updateMyProfile(payload: Partial<UpdateProfileDto>): Promi
 
 //changePassword
 export async function changePassword(payload: ChangePasswordDto): Promise<void> {
-  console.log('Change password call:')
-
-  try {
-    await api.patch('/profile/password', payload)
-  } catch (error) {
-    throw new Error('Failed to change password.')
-  }
+  await api.patch('/profile/password', payload)
 }
 
 

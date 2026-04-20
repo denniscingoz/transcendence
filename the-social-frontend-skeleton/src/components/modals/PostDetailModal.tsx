@@ -4,7 +4,7 @@ import { mockPosts, mockComments, mockFeedComments, mockFeedPosts } from '../../
 import { usePost } from '../../hooks/usePost'
 import { useComments, usePostComment } from '../../hooks/useComments'
 import { useState } from 'react'
-import { ProtectedPostThumb } from '../ui/ProtectedPostThumb'
+import { ProtectedPostThumbContent } from '../ui/ProtectedPostThumb'
 import { PostDto } from '../../types/api'
 import api from '../../api/axios'
 import { useQueryClient } from '@tanstack/react-query'
@@ -122,7 +122,7 @@ export function PostDetailModal({
           </div>
         </div>
         <div className="w-full rounded-2xl object-cover">
-        <ProtectedPostThumb fileUrl={displayPost.imageUrl} />
+        <ProtectedPostThumbContent fileUrl={displayPost.imageUrl} contentType={displayPost.contentType} />
         </div>
 
         <p>{displayPost.content}</p>

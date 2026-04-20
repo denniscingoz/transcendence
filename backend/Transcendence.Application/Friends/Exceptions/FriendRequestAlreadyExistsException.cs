@@ -1,5 +1,7 @@
-﻿namespace Transcendence.Application.Friends.Exceptions;
-public sealed class FriendshipRequestAlreadyExistsException : Exception
+﻿using Transcendence.Application.Common.Exceptions;
+
+namespace Transcendence.Application.Friends.Exceptions;
+public sealed class FriendshipRequestAlreadyExistsException : ConflictException
 {
-	public FriendshipRequestAlreadyExistsException() : base("Users are already friends.") { }
+	public FriendshipRequestAlreadyExistsException() : base("Friendship request already exists.") { }
 }

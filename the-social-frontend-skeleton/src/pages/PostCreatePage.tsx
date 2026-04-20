@@ -6,6 +6,7 @@ import { BottomNav } from '../components/BottomNav'
 import { useNavigate } from 'react-router-dom'
 import { useRef } from 'react'
 import { useSharePost, useUploadPostFile } from '../hooks/usePost'
+import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 
 
 type CreatePostForm = {
@@ -20,6 +21,7 @@ export function PostCreatePage() {
 	const [postPreviewUrl, setPostPreviewUrl] = useState<string>('')
  
 	const postFileInputRef = useRef<HTMLInputElement | null>(null)
+	const [saveError, setSaveError] = useState<string | null>(null)
 
 	const [postForm, setPostForm] = useState<CreatePostForm>({
 		caption: '',
@@ -53,14 +55,21 @@ export function PostCreatePage() {
 	    return
 	  }
 	
-	  const payload: Partial<CreatePostDto> = {}
-	
+	const payload: Partial<CreatePostDto> = {}
+	setSaveError(null)
+	try{
 	  const uploadedFileId = await uploadPostFile.mutateAsync(selectedPostFile)
 	  payload.imageFileId = uploadedFileId
-	
-	  if (postForm.caption?.trim().length > 0) {
-	    payload.content = postForm.caption.trim()
-	  }
+	}catch (e:any)
+	{
+	  console.log("It is coming all the way to uploadPostFile and catched error")
+		setSaveError(getApiErrorMessage(e))
+		return
+	}
+
+	if (postForm.caption?.trim().length > 0) {
+	  payload.content = postForm.caption.trim()
+	}
 	
 	  await sharePost.mutateAsync(payload)
 	  navigate('/profile')
@@ -166,6 +175,12 @@ export function PostCreatePage() {
 				/>
 			</div>
 			</div>
+			{/* Error message reveal */}
+            <div>
+                {saveError && (
+                  <div className="text-sm text-red-600 text-center">{saveError}</div>
+                )}
+            </div>
 		</div>
 	  </main>
 

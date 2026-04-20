@@ -4,13 +4,14 @@ import { PostDetailModal } from '../components/modals/PostDetailModal'
 import { useFeed } from '../hooks/useFeed'
 import { mockFeedPosts } from '../mocks/posts'
 import type { PostDto } from '../types/api'
-import { ProtectedPostThumb } from '../components/ui/ProtectedPostThumb'
+import { ProtectedPostThumbContent } from '../components/ui/ProtectedPostThumb'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-
+import { useTranslation } from 'react-i18next'
 
 export function FeedPage() {
   const { data, isLoading, error } = useFeed()
+  const { t } = useTranslation()
 
   const [postsFeed, setPostsFeed] = useState<PostDto[]>([])
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
@@ -81,7 +82,7 @@ const toggleLike = async (postId: string) => {
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-8">
         {isLoading ? (
           <div className="text-center py-12 text-gray-500">Loading...</div>
-        ) : (
+        ) : ( (posts?.length ?? 0) ?
           posts.map((post) => (
             <article key={post.id} className="space-y-4">
               <button onClick={() => navigate(`/profile/${post.authorId}`)} className="flex items-center gap-3">
@@ -104,7 +105,7 @@ const toggleLike = async (postId: string) => {
 
 
                <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden">
-                 <ProtectedPostThumb fileUrl={post.imageUrl} />
+                 <ProtectedPostThumbContent fileUrl={post.imageUrl} contentType={post.contentType} />
               </div>
               
               <div className="flex items-center gap-6">
@@ -132,7 +133,7 @@ const toggleLike = async (postId: string) => {
 
               <div className="border-t border-gray-100" />
             </article>
-          ))
+          )) : <div className="text-center py-12 text-gray-500">{t('feed.nothingtoshow')}</div>
         )}
       </main>
 

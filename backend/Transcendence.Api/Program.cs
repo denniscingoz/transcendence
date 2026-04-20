@@ -1,18 +1,15 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
+using Transcendence.Api.Common.Extensions;
 using Transcendence.Api.Configurations;
 using Transcendence.Api.Realtime;
-
+using Transcendence.Api.Realtime.Services;
 using Transcendence.Application;
 using Transcendence.Application.Auth.DTOs;
-
-using Transcendence.Infrastructure;
-using Transcendence.Api.Realtime.Services;
 using Transcendence.Application.Realtime.Contracts;
-
-using Microsoft.EntityFrameworkCore;
+using Transcendence.Infrastructure;
 using Transcendence.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -110,6 +107,9 @@ builder.Logging.AddConsole();
 // ================= APP =================
 
 var app = builder.Build();
+
+app.UseGlobalExceptionHandling();
+
 
 using (var scope = app.Services.CreateScope())
 {
