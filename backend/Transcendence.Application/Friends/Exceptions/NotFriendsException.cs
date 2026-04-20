@@ -1,5 +1,5 @@
 ﻿namespace Transcendence.Application.Friends.Exceptions;
-public class NotFriendsException : Exception
+public class NotFriendsException : UnauthorizedAccessException
 {
-	public NotFriendsException(){ }
+	public NotFriendsException() : base("You're not friends.")  { }
 }

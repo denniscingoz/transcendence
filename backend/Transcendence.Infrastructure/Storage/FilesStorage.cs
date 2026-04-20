@@ -30,8 +30,11 @@ public class FilesStorage : IFilesStorage
 	        "image/jpeg" => ".jpg",
 	        "image/png" => ".png",
 	        "image/webp" => ".webp",
-	        // "image/gif" => ".gif",
-	        _ => throw new InvalidOperationException("Unsupported file content type.")
+            "video/mp4" => ".mp4",
+            "video/webm" => ".webm",
+            "video/quicktime" => ".mov",
+			// "image/gif" => ".gif",
+			_ => throw new InvalidOperationException("Unsupported file content type.")
 	    };
 
 	    var fileName = $"{fileId:N}{extension}";

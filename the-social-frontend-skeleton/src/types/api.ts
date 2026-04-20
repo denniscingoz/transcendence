@@ -28,21 +28,27 @@ export type FriendDto =
 
 export type PostDto = 
 {
-  // public Guid Id { get; set; }
+
+	// public Guid Id { get; set; }
 	// public Guid AuthorId { get; set; }
 	// public DateTime CreatedAtUtc { get; set; }
 	// public string? Content { get; set; }
+	// public Guid ImageFileId { get; set; }
 	// public string? ImageUrl { get; set; }
+	// public string? ContentType { get; set; }
 	// public bool IsLikedByCurrentUser { get; set; }
 	// public int LikesCount { get; set; }
 	// public string? AuthorUsername { get; set; }
 	// public string? AuthorFullName { get; set; }
 	// public string? AuthorAvatarUrl { get; set; }
+
   id: string
 	authorId : string
 	createdAtUtc : string
 	content : string
+  imageFileId: string
 	imageUrl : string
+  contentType: string
 	isLikedByCurrentUser : boolean
 	likesCount : number
 	authorUsername : string
@@ -58,12 +64,19 @@ export type CursorPageDto<T> =
 
 export type ProfilePostPreviewDto = {
   // public Guid Id { get; set; }
-  // public Guid AuthorId { get; set; }
-  // public string? ImageUrl { get; set; }
+	// public Guid AuthorId { get; set; }
+	// 
+	// public DateTime CreatedAtUtc { get; set; }//dasha: a stable sorting field needed
+	// public Guid ImageFileId { get; set; }
+	// public string? ImageUrl { get; set; }
+	// public string? ContentType { get; set; }
 
   id: string
   authorId: string
+
   imageUrl: string | null
+  imageFileId: string | null
+  contentType: string | null
 }
 
 export type ApiResponse<T> = {

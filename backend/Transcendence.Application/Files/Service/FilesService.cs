@@ -38,8 +38,8 @@ public sealed class FilesService : IFilesService
 		if (file.Length > maxBytes) throw new ArgumentException("File is too large (max 10 MB).", nameof(file));
 
 		var contentType = (file.ContentType ?? "").Trim().ToLowerInvariant();
-		if (contentType is not ("image/png" or "image/jpeg" or "image/webp"))
-			throw new ArgumentException("Unsupported file type. Allowed: png, jpg, jpeg, webp.", nameof(file));
+		if (contentType is not ("image/jpg" or "image/png" or "image/jpeg" or "image/webp" or "video/mp4" or "video/webm" or "video/quicktime"))
+			throw new ArgumentException("Unsupported file type. Allowed: png, jpg, jpeg, webp, mp4, webm, quicktime.", nameof(file));
 
 		// Verifying magic bytes match the claimed type.
 		await using (var sniff = file.OpenReadStream())
@@ -72,28 +72,42 @@ public sealed class FilesService : IFilesService
 
 	private static async Task<bool> MatchesMagicBytesAsync(Stream s, string contentType, CancellationToken ct)
 	{
-		var header = new byte[12];
+		var header = new byte[16];
 		int read = await s.ReadAsync(header.AsMemory(0, header.Length), ct);
 		if (read < 12) return false;
 
-		// PNG: 89 50 4E 47 0D 0A 1A 0A
 		bool isPng =
 			header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47 &&
 			header[4] == 0x0D && header[5] == 0x0A && header[6] == 0x1A && header[7] == 0x0A;
 
-		// JPEG: FF D8 FF
-		bool isJpeg = header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
+		bool isJpeg =
+			header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
 
-		// WEBP: "RIFF" .... "WEBP"
 		bool isWebp =
 			header[0] == (byte)'R' && header[1] == (byte)'I' && header[2] == (byte)'F' && header[3] == (byte)'F' &&
 			header[8] == (byte)'W' && header[9] == (byte)'E' && header[10] == (byte)'B' && header[11] == (byte)'P';
+
+		bool hasFtyp =
+			header[4] == (byte)'f' && header[5] == (byte)'t' && header[6] == (byte)'y' && header[7] == (byte)'p';
+
+		bool isQuickTime =
+			hasFtyp &&
+			header[8] == (byte)'q' && header[9] == (byte)'t' && header[10] == (byte)' ' && header[11] == (byte)' ';
+
+		bool isMp4 =
+			hasFtyp && !isQuickTime;
+
+		bool isWebm =
+			header[0] == 0x1A && header[1] == 0x45 && header[2] == 0xDF && header[3] == 0xA3;
 
 		return contentType switch
 		{
 			"image/png" => isPng,
 			"image/jpeg" => isJpeg,
 			"image/webp" => isWebp,
+			"video/mp4" => isMp4,
+			"video/webm" => isWebm,
+			"video/quicktime" => isQuickTime,
 			_ => false
 		};
 	}

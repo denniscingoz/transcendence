@@ -39,6 +39,9 @@ public class PostsService : IPostsService
 		var post = await _postRepository.GetPostAsync(postId, ct)
 			?? throw new NotFoundException("Post not found.");
 
+		var file = await _filesRepository.GetByIdAsync(post.ImageFileId, ct)
+			?? throw new NotFoundException("Image file not found.");
+
 		var authorId = post.AuthorId;
 
 		if (authorId != currentUserId)
@@ -72,6 +75,7 @@ public class PostsService : IPostsService
 			CreatedAtUtc = post.CreatedAtUtc,
 			Content = post.Content,
 			ImageUrl = BuildImageFileUrl(post.ImageFileId),
+			ContentType = file.ContentType,
 			IsLikedByCurrentUser = isLikedByCurrentUser,
 			LikesCount = likesCount,
 			AuthorUsername = author.Username,

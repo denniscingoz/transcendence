@@ -76,7 +76,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 				if (existingUser != null)
 				{
 					// Stop! Do not proceed.
-					throw new InvalidOperationException($"Username '{newUsername}' is already taken.");
+					throw new ConflictException($"Username '{newUsername}' is already taken.");
 				}
 			}
 		}
@@ -107,7 +107,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 				var lastPart = dto.AvatarUrl.Split('/').LastOrDefault();
 
 				if (!Guid.TryParse(lastPart, out var parsedFileId))
-					throw new ValidationException("Invalid avatar URL.");
+					throw new NotFoundException("Invalid avatar URL.");
 
 				newAvatarFileId = parsedFileId;
 			}
@@ -155,7 +155,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			?? throw new NotFoundException("User not found.");
 		
 		if (string.IsNullOrWhiteSpace(user.PasswordHash))
-			throw new InvalidOperationException("This account does not support password change.");//created with Google
+			throw new ConflictException("This account does not support password change.");//created with Google
 		
 		var verificationResult = _passwordHasher.VerifyHashedPassword(
 			user,
@@ -164,7 +164,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 
 		if (verificationResult == PasswordVerificationResult.Failed)
 		{
-			throw new ArgumentException("Current password is incorrect.", nameof(dto.CurrentPassword));
+			throw new ConflictException("Current password is incorrect.");
 		}
 
 		user.SetPasswordHash(_passwordHasher.HashPassword(user, dto.NewPassword));
@@ -205,7 +205,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 
 		int offset = 0;
 		if (!string.IsNullOrWhiteSpace(cursor) && !int.TryParse(cursor, out offset))
-			throw new ArgumentException("Invalid cursor.");
+			throw new ConflictException("Invalid cursor.");
 
 		var items = await _userRepository.SearchProfilesAsync(
 			currentUserId,

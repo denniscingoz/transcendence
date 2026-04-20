@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using Transcendence.Application.Chat.Interfaces;
 using Transcendence.Application.Chat.DTOs;
 using Transcendence.Domain.Chat;
+using Transcendence.Application.Common.Exceptions;
 using Transcendence.Domain.Exceptions;
 using Transcendence.Domain.Users;
 using Transcendence.Application.Common.Responses;

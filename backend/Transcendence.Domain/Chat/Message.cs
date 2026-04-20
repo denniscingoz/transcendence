@@ -15,7 +15,7 @@ public class Message
     public Message (Guid conversationId,  Guid userId, Guid clientMessageId, string content )
     {
         if (string.IsNullOrWhiteSpace(content))
-            throw  new InvalidArgumentException("Message content cannot be empty");
+            throw  new ArgumentException("Message content cannot be empty");
 
         Id = Guid.NewGuid();
         Content = content ;
