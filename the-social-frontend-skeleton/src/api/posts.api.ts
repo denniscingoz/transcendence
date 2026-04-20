@@ -17,6 +17,15 @@ export async function sharePost(data: Partial<CreatePostDto>) {
   return response.data
 }
 
+export async function deletePost(postId: string): Promise<void> {
+  if (!postId) {
+    throw new Error('Post id is required.')
+  }
+
+  await api.delete(`/posts/${postId}`)
+}
+
+
 export async function uploadPostFile(file: File) {
   console.log("It is coming all the way to uploadPostFile Api")
   const formData = new FormData()

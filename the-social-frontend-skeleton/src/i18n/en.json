@@ -57,7 +57,6 @@
     "username": "Username",
     "savechanges": "Save Changes",
     "discard": "Discard",
-    
     "changepassword": "Change Password",
     "oldpassword": "Old Password",
     "newpassword": "New Password"
@@ -72,7 +71,8 @@
     "writeacomment": "Write a comment..." ,
     "loading": "Loading...",
     "postnotfound": "Post not found.",
-    "commentnotfound": "Comments not found."
+    "commentnotfound": "Comments not found.",
+    "delete": "Delete"
 
   },
   "searchpage":

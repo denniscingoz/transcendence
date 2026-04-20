@@ -55,7 +55,7 @@ export function SettingsPage() {
         <div className="space-y-8">
 
           { /*2FA Auth*/}
-          <section className="space-y-3">
+          {/* <section className="space-y-3">
             <h2 className="text-lg font-semibold text-text">{t('settings.privacy')}</h2>
 
             <div className="flex items-center justify-between gap-4 bg-white rounded-xl border border-panel px-4 py-4">
@@ -69,7 +69,7 @@ export function SettingsPage() {
                 {t('settings.Activate')}
               </button>
             </div>
-          </section>
+          </section> */}
 
           { /*Log out*/}
           <section className="space-y-3">

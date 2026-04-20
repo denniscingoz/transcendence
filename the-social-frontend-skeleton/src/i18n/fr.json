@@ -69,7 +69,8 @@
   "writeacomment": "Écrire un commentaire...",
   "loading": "Chargement...",
   "postnotfound": "Publication introuvable.",
-  "commentnotfound": "Commentaires introuvables."
+  "commentnotfound": "Commentaires introuvables.",
+  "delete": "Supprimer"
   },
   "searchpage": {
   "search": "Rechercher",

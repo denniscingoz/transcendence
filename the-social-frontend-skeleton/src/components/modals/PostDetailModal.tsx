@@ -1,13 +1,15 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { mockPosts, mockComments, mockFeedComments, mockFeedPosts } from '../../mocks/posts'
-import { usePost } from '../../hooks/usePost'
+import { usePost, useDeletePost } from '../../hooks/usePost'
 import { useComments, usePostComment } from '../../hooks/useComments'
 import { useState } from 'react'
 import { ProtectedPostThumbContent } from '../ui/ProtectedPostThumb'
 import { PostDto } from '../../types/api'
 import api from '../../api/axios'
 import { useQueryClient } from '@tanstack/react-query'
+import { useMyProfile } from '../../hooks/useProfile'
+import { useNavigate } from 'react-router-dom'
 
 type PostDetailModalProps = {
   postId: string
@@ -20,13 +22,21 @@ export function PostDetailModal({
 }: PostDetailModalProps) {
   const { t } = useTranslation()
   const { data: post, isLoading: isPostLoading, error: postError } = usePost(postId)
-  const { data: commentsData, isLoading: areCommentsLoading, error: commentsError } = useComments(postId)   
-  const comments = commentsData?.items ?? []
 
-  // const comments = allComments.filter((comment) => comment.postId === postId)
   const [content, setContent] = useState('')
   const postCommentMutation = usePostComment(postId)
   const [localPost, setLocalPost] = useState<PostDto | null>(null)
+  
+  const {data: myProfileResponse  } = useMyProfile()
+  const currentUserId = myProfileResponse?.id
+  const isOwner = !!post && !!currentUserId && post.authorId === currentUserId
+  
+  const deletePostMutation = useDeletePost()
+  const isDeletingPost = deletePostMutation.isPending
+  const navigate = useNavigate()
+  
+  const { data: commentsData, isLoading: areCommentsLoading, error: commentsError } = useComments(postId, 12, null, !isDeletingPost)   
+  const comments = commentsData?.items ?? []
   
   const queryClient = useQueryClient()
 
@@ -41,6 +51,19 @@ export function PostDetailModal({
     console.error('Failed to post comment:', error)
   }
 }
+
+
+  const handleDeletePost = async () => {
+  try {
+    await deletePostMutation.mutateAsync(postId)
+    // isDeletedPost = true
+    // navigate(-1)
+  } catch (error) {
+    console.error('Failed to delete post:', error)
+  }
+}
+
+
   useEffect(() => {
     const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -110,17 +133,37 @@ export function PostDetailModal({
           {t('postdetail.close')}
         </button>
 
+        {/* TOP PART/AVATAR-NAME ETC */}
         <div className="flex items-center gap-3">
+          
+          {/* Avatar */}
           <img
             src={displayPost.authorAvatarUrl ?  `${import.meta.env.VITE_API_BASE_URL}${displayPost.authorAvatarUrl}` : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'}
             alt=""
             className="w-12 h-12 rounded-full object-cover"
           />
+
+          {/* Names */}
           <div>
             <div className="font-semibold">{displayPost.authorFullName}</div>
             <div className="text-sm text-gray-500">@{displayPost.authorUsername}</div>
           </div>
+          
+          {/* Delete button if it is your account */}
+          <div className="ml-auto">
+            {isOwner && (
+              <button 
+                onClick={() => handleDeletePost()}
+                 className="rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white hover:opacity-80"
+              >
+                {t('postdetail.delete')}
+              </button>
+            )}
+          </div>
+
         </div>
+
+        {/* POST IMAGE/VIDEO */}
         <div className="w-full rounded-2xl object-cover">
         <ProtectedPostThumbContent fileUrl={displayPost.imageUrl} contentType={displayPost.contentType} />
         </div>

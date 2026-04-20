@@ -60,7 +60,7 @@ export function AuthPage() {
       const errors = e?.response?.data?.errors as Record<string, string[]> | undefined
       const firstError = errors ? Object.values(errors)[0]?.[0] : null
 
-      setSignupApiError(firstError ?? e?.response?.data?.title ?? 'Signup failed')
+      setSignupApiError(firstError ?? e?.response?.data?.detail ?? 'Signup failed')
     }
   }
 
@@ -78,7 +78,7 @@ export function AuthPage() {
     const to ='/feed'
     nav(to)
   } catch (e: any) {
-    setGoogleError(e?.response?.data?.message ?? e?.message ?? 'Google sign-in failed')
+    setGoogleError(e?.response?.data?.detail ?? e?.message ?? 'Google sign-in failed')
   } finally {
     setIsGoogleLoading(false)
   }

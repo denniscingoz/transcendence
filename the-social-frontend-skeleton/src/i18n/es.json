@@ -69,7 +69,8 @@
   "writeacomment": "Escribe un comentario...",
   "loading": "Cargando...",
   "postnotfound": "Publicación no encontrada.",
-  "commentnotfound": "Comentarios no encontrados."
+  "commentnotfound": "Comentarios no encontrados.",
+  "delete": "Eliminar"
   },
   "searchpage": {
   "search": "Buscar",

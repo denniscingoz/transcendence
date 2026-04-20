@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { getPost, sharePost, uploadPostFile } from '../api/posts.api'
 import type { PostDto, CreatePostDto } from '../types/api'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { deletePost } from '../api/posts.api'
 
 
 export function usePost(postId?: string) {
@@ -18,6 +19,19 @@ export function usePost(postId?: string) {
 }
 
 
+
+export function useDeletePost() {
+  const queryClient = useQueryClient()
+
+  return useMutation<void, Error, string>({
+    mutationFn: deletePost,
+    onSuccess: (_data, postId) => {
+      // queryClient.removeQueries({ queryKey: ['posts', postId] })
+      queryClient.invalidateQueries({ queryKey: ['posts', 'me'] })
+      queryClient.invalidateQueries({ queryKey: ['feed'] })
+    },
+  })
+}
 
 export function useSharePost() {
   return useMutation({
