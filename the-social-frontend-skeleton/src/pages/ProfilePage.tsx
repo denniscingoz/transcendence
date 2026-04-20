@@ -10,7 +10,7 @@ import { useEffect} from 'react'
 import { getMyProfilePostPreviews } from '../api/profile.api'
 import { EditProfilePage } from './EditProfilePage'
 import { useNavigate } from 'react-router-dom'
-import { ProtectedPostThumb } from '../components/ui/ProtectedPostThumb'
+import { ProtectedPostThumbPreview } from '../components/ui/ProtectedPostThumb'
 
 
 export function ProfilePage() {
@@ -116,7 +116,7 @@ export function ProfilePage() {
                 onClick={() => setSelectedPostId(post.id)}
                 className="aspect-square rounded-2xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
               >
-                <ProtectedPostThumb fileUrl={post.imageUrl} />
+                <ProtectedPostThumbPreview fileUrl={post.imageUrl} contentType={post.contentType} />
               </div>
             ))}
         </div>

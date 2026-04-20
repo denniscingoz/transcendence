@@ -17,15 +17,18 @@ public class PostsProfileService : IPostsProfileService
 	private readonly IPostsRepository _postRepository;
 	private readonly IFriendshipRepository _friendshipRepository;
 	private readonly IUserRepository _userRepository;
+	private readonly IFilesRepository _filesRepository;
 	public PostsProfileService(IPostsProfileRepository postProfileRepository,
 						IPostsRepository postRepository,
 						IFriendshipRepository friendshipRepository,
-						IUserRepository userRepository)
+						IUserRepository userRepository,
+						IFilesRepository filesRepository)
 	{
 		_postRepository = postRepository;
 		_postsProfileRepository = postProfileRepository;
 		_friendshipRepository = friendshipRepository;
 		_userRepository = userRepository;
+		_filesRepository = filesRepository;	
 	}
 
 	//GET /posts/me?take=20&cursor=<nextCursor>
@@ -48,7 +51,22 @@ public class PostsProfileService : IPostsProfileService
 				throw new ForbiddenException("You do not have permission to view this user's posts.");
 		}
 		// repository returns: Posts + NextCursor (cursor logic stays in repository)
-		return await _postsProfileRepository.GetProfilePostsPreviewAsync(targetUserId, take, cursor, ct);
+		var cursorPageDto = await _postsProfileRepository.GetProfilePostsPreviewAsync(targetUserId, take, cursor, ct);
+
+
+
+		foreach (var post in cursorPageDto.Items)
+		{
+			if (post.ImageUrl != null)
+			{
+				var file = await _filesRepository.GetByIdAsync(post.ImageFileId, ct)
+							?? throw new NotFoundException("Image file not found.");
+
+				post.ContentType = file.ContentType;
+			}
+		}
+
+		return cursorPageDto;
 	}
 
 	//GET /posts/{postId}/comments?take=20&cursor=<nextCursor>

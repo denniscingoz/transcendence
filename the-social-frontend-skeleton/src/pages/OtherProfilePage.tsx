@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { BottomNav } from '../components/BottomNav'
 import { PostDetailModal } from '../components/modals/PostDetailModal'
-import { ProtectedPostThumb } from '../components/ui/ProtectedPostThumb'
+import { ProtectedPostThumbPreview } from '../components/ui/ProtectedPostThumb'
 import { useAddFriend, useRemoveFriend } from '../hooks/useFriends'
 import { FriendshipStatus } from '../types/api'
 
@@ -215,7 +215,7 @@ const declineFriendRequest = async (profileId: string) => {
                 onClick={() => setSelectedPostId(post.id)}
                 className="aspect-square rounded-2xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
               >
-                <ProtectedPostThumb fileUrl={post.imageUrl} />
+                <ProtectedPostThumbPreview fileUrl={post.imageUrl} contentType={post.contentType}/>
               </div>
             ))}
         </div>

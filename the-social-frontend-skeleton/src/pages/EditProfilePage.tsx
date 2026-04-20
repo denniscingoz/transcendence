@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { useMyProfile, useUpdateProfile, useChangePassword, useUploadAvatar } from '../hooks/useProfile'
 import type { UpdateProfileDto, ChangePasswordDto } from '../types/api'
 import { useRef } from 'react'
+import { getApiErrorMessage } from '../utils/getApiErrorMessage'
+import axios from 'axios'
 
 type EditProfileForm = {
   fullName: string
@@ -33,6 +35,8 @@ export function EditProfilePage() {
   const uploadAvatar = useUploadAvatar()
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null)
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string>('')
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [passwordError, setPasswordError] = useState('')
 
   const [profileForm, setProfileForm] = useState<EditProfileForm>({
     fullName: '',
@@ -108,8 +112,14 @@ export function EditProfilePage() {
     }
 
     if (selectedAvatarFile) {
+      setSaveError(null)
+      try {
       const uploadedAvatarUrl = await uploadAvatar.mutateAsync(selectedAvatarFile)
       payload.avatarUrl = uploadedAvatarUrl
+      }catch (e: any)
+      {
+        setSaveError(getApiErrorMessage(e))
+      }
     }
 
     if (!selectedAvatarFile && profileForm.AvatarUrl !== originalProfileForm.AvatarUrl) {
@@ -137,24 +147,30 @@ export function EditProfilePage() {
     setAvatarPreviewUrl('')
   }
 
-  async function handleChangePassword(e: React.FormEvent) {
+async function handleChangePassword(e: React.FormEvent) {
   e.preventDefault()
 
-      if (!passwordForm.currentPassword || !passwordForm.newPassword) {
-        return
-      }
-    
-    
-      await changePassword.mutateAsync({
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
-      })
-    
-      setPasswordForm({
-        currentPassword: '',
-        newPassword: '',
-      })
+  if (!passwordForm.currentPassword || !passwordForm.newPassword) {
+    return
   }
+
+  setPasswordError('')
+
+  try {
+    await changePassword.mutateAsync({
+      currentPassword: passwordForm.currentPassword,
+      newPassword: passwordForm.newPassword,
+    })
+
+    setPasswordForm({
+      currentPassword: '',
+      newPassword: '',
+    })
+  } catch (e: any) {
+    setPasswordError(getApiErrorMessage(e))
+    return
+  }
+}
 
   function handleDiscard() {
     navigate(-1)
@@ -180,6 +196,7 @@ export function EditProfilePage() {
           onSubmit={handleSaveProfile}
           className="panel rounded-2xl border border-panel p-6 shadow-sm"
         >
+          
         {/* {Close x and Edit header} */}
           <div className="mb-8 flex items-center justify-between">
             <h1 className="text-2xl font-semibold text-text">{t('editprofile.editprofile')}</h1>
@@ -229,6 +246,7 @@ export function EditProfilePage() {
               <textarea
                 id="bio"
                 value={profileForm.bio}
+                maxLength={150}
                 onChange={(e) =>
                   setProfileForm((prev) => ({ ...prev, bio: e.target.value }))
                 }
@@ -246,6 +264,8 @@ export function EditProfilePage() {
                 id="fullName"
                 type="text"
                 value={profileForm.fullName}
+                maxLength={50}
+                minLength={1}
                 onChange={(e) =>
                   setProfileForm((prev) => ({ ...prev, fullName: e.target.value }))
                 }
@@ -262,13 +282,22 @@ export function EditProfilePage() {
                 id="username"
                 type="text"
                 value={profileForm.username}
+                maxLength={15}
+                minLength={6}
                 onChange={(e) =>
                   setProfileForm((prev) => ({ ...prev, username: e.target.value }))
                 }
                 className="h-11 w-full rounded-xl border border-panel px-4 outline-none focus:border-black"
               />
             </div>
-
+        
+            {/* Error message reveal */}
+            <div>
+                {saveError && (
+                  <div className="text-sm text-red-600 text-center">{saveError}</div>
+                )}
+            </div>
+        
             <div className="flex flex-wrap gap-3">
               <button
                 type="submit"
@@ -304,6 +333,8 @@ export function EditProfilePage() {
                 id="oldPassword"
                 type="password"
                 value={passwordForm.currentPassword}
+                maxLength={50}
+                minLength={8}
                 onChange={(e) =>
                   setPasswordForm((prev) => ({
                     ...prev,
@@ -322,6 +353,8 @@ export function EditProfilePage() {
                 id="newPassword"
                 type="password"
                 value={passwordForm.newPassword}
+                maxLength={50}
+                minLength={8}
                 onChange={(e) =>
                   setPasswordForm((prev) => ({
                     ...prev,
@@ -332,6 +365,12 @@ export function EditProfilePage() {
               />
             </div>
 
+                {/*Password Error Message reveall  */}
+             <div>
+                {passwordError && (
+                  <div className="text-sm text-red-600 text-center">{passwordError}</div>
+                )}
+            </div>   
             <div className="flex flex-wrap gap-3">
               <button
                 type="submit"

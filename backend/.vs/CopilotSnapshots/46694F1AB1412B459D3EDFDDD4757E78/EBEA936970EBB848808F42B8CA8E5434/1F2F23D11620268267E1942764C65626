@@ -154,7 +154,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			?? throw new NotFoundException("User not found.");
 		
 		if (string.IsNullOrWhiteSpace(user.PasswordHash))
-			throw new InvalidOperationException("This account does not support password change.");//created with Google
+			throw new ConflictException("This account does not support password change.");//created with Google
 		
 		var verificationResult = _passwordHasher.VerifyHashedPassword(
 			user,
