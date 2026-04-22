@@ -39,7 +39,35 @@ export type MessageReadDto = {
   readerId: string
   messageId: string
 }
+export enum NotificationType {
+  NewMessage = 1,
+  FriendRequest = 2,
+  FriendRequestAccepted = 3,
+  FriendRequestDeclined = 4,
+}
 
+export enum FriendshipRequestStatus {
+  Pending = 1,
+  Accepted = 2,
+  Declined = 3,
+}
+
+export type FriendshipRequestEventDto = {
+  requestId: string
+  requesterId: string
+  targetUserId: string
+  status: FriendshipRequestStatus
+  createdAt: string
+  requesterUsername: string
+  requesterAvatarUrl?: string | null
+}
+
+export type RealtimeNotificationDto = {
+  id: string
+  type: NotificationType
+  payload: unknown
+  createdAt: string
+}
 export type SendMessageCommandDto = {
   conversationId: string
   clientMessageId: string

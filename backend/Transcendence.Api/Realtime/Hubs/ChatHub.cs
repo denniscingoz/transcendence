@@ -85,8 +85,9 @@ public sealed class ChatHub : Hub<IRealtimeClient>
             }
         }
          
-        await Clients.Caller.OnlineUsersSnapshot(onlineUsers); //notify who is online now
- 
+        await Clients.Caller.OnlineUsersSnapshot(
+            onlineUsers.Select(id => id.ToString())
+        );
         await base.OnConnectedAsync();
     }
  public override async Task OnDisconnectedAsync(Exception? exception)
@@ -195,7 +196,9 @@ public sealed class ChatHub : Hub<IRealtimeClient>
     public Task RequestPresenceSnapshot()
     {
         var online = _presenceService.GetOnlineUsers();
-        return Clients.Caller.OnlineUsersSnapshot(online);
+        return  Clients.Caller.OnlineUsersSnapshot(
+            online.Select(id => id.ToString())
+        );
     }
    
     public async Task DeliveredMessage(Guid messageId, Guid conversationId, Guid senderId)
@@ -217,6 +220,9 @@ public sealed class ChatHub : Hub<IRealtimeClient>
         var  userId = GetUserId(); 
 
         await _chatService.MarkConversationAsRead(userId, conversationId);
+        await _notificationService.NotifyChange(userId);
+
+
         var lastMessageId = await _chatService.GetLastMessageId(conversationId);
 
        await Clients

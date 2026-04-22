@@ -59,7 +59,7 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 			Id = request.Id, RequesterId = request.RequesterId,
 			CreatedAt = request.CreatedAt, TargetUserId = request.TargetUserId
 		} ;
-		await _notificationService.NotifyFriendRequest(requesterId, requestDto);
+		await _notificationService.NotifyFriendRequest(targetUserId, requestDto);
 		return requestId;
 	}
 
@@ -82,7 +82,12 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 		await _friendshipRepository.AddAsync(friendship, ct);
 		await _friendshipRequestRepository.RemoveAsync(request.Id, ct);
 		await _friendshipRepository.SaveChangesAsync(ct);// Save both changes in one transaction.
-		// await _notificationService.NotifyFriendAccept(requesterId, requestDto);	
+		var requestDto = new FriendshipRequestDto
+		{
+			Id = request.Id, RequesterId = request.RequesterId,
+			CreatedAt = request.CreatedAt, TargetUserId = request.TargetUserId
+		} ;
+		await _notificationService.NotifyFriendRequestAccepted(request.RequesterId, requestDto);	
 	}
 
 	// DELETE friends/requests/{targetUserId}
@@ -94,6 +99,13 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 			throw new NotAllowedToFriendException("You cannot decline this friend request.");
 		await _friendshipRequestRepository.RemoveAsync(request.Id, ct);
 		await _friendshipRequestRepository.SaveChangesAsync(ct);
+				var requestDto = new FriendshipRequestDto
+		{
+			Id = request.Id, RequesterId = request.RequesterId,
+			CreatedAt = request.CreatedAt, TargetUserId = request.TargetUserId
+		} ;
+		await _notificationService.NotifyFriendRequestDeclined(targetUserId, requestDto);	
+
 	}
 
 	// GET friends/requests
