@@ -37,3 +37,4 @@ export async function stopConnection(conn: HubConnection) {
   if (conn.state === 'Disconnected') return
   await conn.stop()
 }
+

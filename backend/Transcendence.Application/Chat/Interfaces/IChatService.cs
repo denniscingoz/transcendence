@@ -9,7 +9,7 @@ public interface IChatService
         Guid clientMessageId, 
         string content
     );
-    Task <Guid> CreateOrGetDirectConversationAsync(
+    Task <CreateOrGetConversationResult> CreateOrGetDirectConversationAsync(
         Guid userA, Guid userB
         );
     Task <IReadOnlyList<ChatMessageDto>> GetMessagesAsync(

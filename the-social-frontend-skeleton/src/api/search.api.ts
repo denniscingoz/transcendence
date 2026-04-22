@@ -14,7 +14,7 @@ export async function searchProfilesApi(request: {
     params: {
       query: request.query,
       take: request.take,
-      cursor: request.cursor,
+      cursor: request.cursor
     },
   })
 

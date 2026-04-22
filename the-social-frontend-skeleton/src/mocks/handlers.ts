@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { db, requireAuth } from './db'
 import { mockPosts, mockComments, mockFeedPosts, mockFeedComments } from './posts'
-import { ChangePasswordDto, SignUpRequestDto, GoogleSignInRequestDto, AuthResponseDto } from '../types/api'
+import { ChangePasswordDto, SignUpRequestDto, GoogleSignInRequestDto, AuthResponseDto, AuthUserDto } from '../types/api'
 import { mockFriends } from './friends'
 
 export const handlers = [
@@ -50,9 +50,13 @@ http.post('/auth/google', async ({ request }) => {
       { status: 400 }
     )
   }
-
+  const dto: AuthUserDto  = {
+    id : '1',
+    username: 'user'
+  }
   const response: AuthResponseDto = {
     token: db.token,
+    user: dto
   }
 
   return HttpResponse.json(response)

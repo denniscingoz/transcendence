@@ -86,6 +86,13 @@ public sealed class UserRepository : IUserRepository
 			.ToListAsync(ct);
 	}
 
+	public async Task<IReadOnlyList<User>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct)
+	{
+		return await _db.Users
+			.Where(x => ids.Contains(x.Id))
+			.ToListAsync(ct);
+	}
+
 
 }
 

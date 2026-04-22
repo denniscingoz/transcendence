@@ -10,7 +10,7 @@ public interface IMessageRepository
         int limit
     );
     Task<Guid?> GetLastMessageId(Guid conversationId);
-    Task<int> GetUnreadCount(Guid conversationId, Guid userId, DateTimeOffset LastRead);
+    Task<int> GetUnreadCount(Guid conversationId, Guid userId, DateTimeOffset? LastRead);
 }
 
 /*

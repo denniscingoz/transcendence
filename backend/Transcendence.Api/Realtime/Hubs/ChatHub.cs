@@ -28,17 +28,32 @@ public sealed class ChatHub : Hub<IRealtimeClient>
         _notificationService = notificationService;
     }
 
-    public override async Task OnConnectedAsync() // triggered when a client establishes a SignalR connection
-    {
-        var userId = Context.User.GetUserId();
-        await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.User(userId)); // add connId to user's collection of connections  
+    // public override async Task OnConnectedAsync() // triggered when a client establishes a SignalR connection
+    // {
+    //     var userId = GetUserId();
+ 
+    //       if (_presenceService.AddConnection(userId, Context.ConnectionId)) // returns true if this is the first active connection (user just became online)
+    //     {
+    public override async Task OnConnectedAsync()
+{
+    var userId = GetUserId();
+
+    Console.WriteLine($"OnConnectedAsync fired. ConnectionId={Context.ConnectionId}, UserId={userId}");
+
+    await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.User(userId));
+
+       await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.User(userId)); // add connId to user's collection of connections  
         Console.WriteLine($"User {userId} joined group user:{userId}");
         
         var userConversations = await _chatService.GetUserConversationsIds(userId);
         foreach (var c in userConversations)
             await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(c)); // add connection to conversation groups (group names are based on DB conversation IDs)
 
-          if (_presenceService.AddConnection(userId, Context.ConnectionId)) // returns true if this is the first active connection (user just became online)
+    var becameOnline = _presenceService.AddConnection(userId, Context.ConnectionId);
+
+    Console.WriteLine(
+        $"AddConnection result. UserId={userId}, ConnectionId={Context.ConnectionId}, BecameOnline={becameOnline}");
+    if (becameOnline)
         {
             var presence = new PresenceEventDto
             {
@@ -74,38 +89,75 @@ public sealed class ChatHub : Hub<IRealtimeClient>
  
         await base.OnConnectedAsync();
     }
- 
+ public override async Task OnDisconnectedAsync(Exception? exception)
+{
+    var userId = TryGetCurrentUserId();
 
-    public override async Task OnDisconnectedAsync(Exception? exception)//triggered when a SignalR connection is closed (tab closed, network lost, etc.)
+    Console.WriteLine($"OnDisconnectedAsync fired. ConnectionId={Context.ConnectionId}, UserId={userId}");
+
+    if (userId is not null)
     {
-        var userId = Context.User.TryGetUserId();
+        var removedLast = _presenceService.RemoveConnection(userId.Value, Context.ConnectionId);
 
-        if (userId is not null)
+        Console.WriteLine(
+            $"RemoveConnection result. UserId={userId.Value}, ConnectionId={Context.ConnectionId}, RemovedLast={removedLast}");
+
+        if (removedLast)
         {
-            // await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.User(userId.Value)); //not necessary
-            if (_presenceService.RemoveConnection(userId.Value, Context.ConnectionId)) // no more
+            var presence = new PresenceEventDto
             {
-                var presence = new PresenceEventDto
-                {
-                    UserId = userId.Value,
-                    IsOnline = false,
-                    ChangedAt = DateTimeOffset.UtcNow
-                };
-                var userConversations = await _chatService.GetUserConversationsIds(userId.Value);
+                UserId = userId.Value,
+                IsOnline = false,
+                ChangedAt = DateTimeOffset.UtcNow
+            };
 
-                foreach(var conv in userConversations)
-                    await Clients.Group(GroupNames.Conversation(conv)).UserOffLine(presence);
-            }
+            var userConversations = await _chatService.GetUserConversationsIds(userId.Value);
 
+            Console.WriteLine(
+                $"Broadcasting UserOffLine for user {userId.Value} to {userConversations.Count} conversations");
+
+            foreach (var conv in userConversations)
+                await Clients.Group(GroupNames.Conversation(conv)).UserOffLine(presence);
         }
-        await base.OnDisconnectedAsync(exception); 
-
-        //OnDisconnectedAsync is a lifecycle hook provided by SignalR. It is invoked by the framework when a client connection is terminated. We override it to execute domain-specific cleanup logic, while still calling the base implementation to allow SignalR to perform its internal resource cleanup. At this point, the HTTP request is already completed, but the authenticated user’s ClaimsPrincipal is still available via the Hub context.
     }
+    else
+    {
+        Console.WriteLine($"OnDisconnectedAsync could not resolve user. ConnectionId={Context.ConnectionId}");
+    }
+
+    await base.OnDisconnectedAsync(exception);
+}
+
+    // public override async Task OnDisconnectedAsync(Exception? exception)//triggered when a SignalR connection is closed (tab closed, network lost, etc.)
+    // {
+    //     var userId = TryGetCurrentUserId();
+
+    //     if (userId is not null)
+    //     {
+    //         // await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.User(userId.Value)); //not necessary
+    //         if (_presenceService.RemoveConnection(userId.Value, Context.ConnectionId)) // no more
+    //         {
+    //             var presence = new PresenceEventDto
+    //             {
+    //                 UserId = userId.Value,
+    //                 IsOnline = false,
+    //                 ChangedAt = DateTimeOffset.UtcNow
+    //             };
+    //             var userConversations = await _chatService.GetUserConversationsIds(userId.Value);
+
+    //             foreach(var conv in userConversations)
+    //                 await Clients.Group(GroupNames.Conversation(conv)).UserOffLine(presence);
+    //         }
+
+    //     }
+    //     await base.OnDisconnectedAsync(exception); 
+
+    //     //OnDisconnectedAsync is a lifecycle hook provided by SignalR. It is invoked by the framework when a client connection is terminated. We override it to execute domain-specific cleanup logic, while still calling the base implementation to allow SignalR to perform its internal resource cleanup. At this point, the HTTP request is already completed, but the authenticated user’s ClaimsPrincipal is still available via the Hub context.
+    // }
 
     public async Task JoinConversation(Guid conversationId) // user opened a chat → subscribe connection to conversation group
     {
-        var userId = Context.User.GetUserId();
+        var userId = GetUserId();
         await _chatService.AssertUserIsParticipant(conversationId, userId); 
         await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(conversationId));
     }
@@ -117,7 +169,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
 
     public async Task SendMessage(SendMessageCommandDto dto)// user sends a message → persist and broadcast to conversation group
     {
-        var senderId = Context.User.GetUserId();
+        var senderId = GetUserId();
 
         var messageDto = await _chatService.SendMessageAsync( //validate, normalize timestamps, and persist message to databas
             senderId,
@@ -148,7 +200,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
    
     public async Task DeliveredMessage(Guid messageId, Guid conversationId, Guid senderId)
     {
-        var  userId = Context.User.GetUserId(); 
+        var  userId = GetUserId(); 
         
 
         await Clients
@@ -162,7 +214,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
 
     public  async Task MarkAsRead(Guid conversationId)
     {
-        var  userId = Context.User.GetUserId(); 
+        var  userId = GetUserId(); 
 
         await _chatService.MarkConversationAsRead(userId, conversationId);
         var lastMessageId = await _chatService.GetLastMessageId(conversationId);
@@ -175,9 +227,52 @@ public sealed class ChatHub : Hub<IRealtimeClient>
                 ReaderId = userId,
                 MessageId = lastMessageId ?? Guid.Empty
             });
-    }   
-    /*
+    }  
+     private Guid GetUserId()
+    {
+        var claimValue =
+            Context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? Context.User?.FindFirst("sub")?.Value;
 
+        if (Guid.TryParse(claimValue, out var claimUserId))
+            return claimUserId;
+
+        var httpContext = Context.GetHttpContext();
+
+        var devQuery = httpContext?.Request.Query["devUserId"].FirstOrDefault();
+        if (Guid.TryParse(devQuery, out var queryUserId))
+            return queryUserId;
+
+        var devHeader = httpContext?.Request.Headers["X-Dev-UserId"].FirstOrDefault();
+        if (Guid.TryParse(devHeader, out var headerUserId))
+            return headerUserId;
+
+        throw new UnauthorizedAccessException("Invalid token.");
+    }
+
+    private Guid? TryGetCurrentUserId()
+    {
+        var claimValue =
+            Context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? Context.User?.FindFirst("sub")?.Value;
+
+        if (Guid.TryParse(claimValue, out var claimUserId))
+            return claimUserId;
+
+        var httpContext = Context.GetHttpContext();
+
+        var devQuery = httpContext?.Request.Query["devUserId"].FirstOrDefault();
+        if (Guid.TryParse(devQuery, out var queryUserId))
+            return queryUserId;
+
+        var devHeader = httpContext?.Request.Headers["X-Dev-UserId"].FirstOrDefault();
+        if (Guid.TryParse(devHeader, out var headerUserId))
+            return headerUserId;
+
+        return null;
+    }
+}
+    /*
     connection.invoke → request to server
 
     Clients.* → сервер пушит событие
@@ -220,7 +315,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
 
         Server -> MessageRead -> UserA       
     */
-}
+
 /*
 
 Browser

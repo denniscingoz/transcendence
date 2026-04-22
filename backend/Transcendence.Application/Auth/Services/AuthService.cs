@@ -100,7 +100,15 @@ public sealed class AuthService : IAuthService
 		await _userRepository.SaveChangesAsync(ct);
 
 		var token = _jwtTokenGenerator.GenerateToken(user);
-		return new AuthResponseDto { Token = token };
+		return new AuthResponseDto
+		{
+			Token = token,
+			User = new AuthUserDto
+			{
+				Id = user.Id,
+				Username = user.Username
+			}
+		};
 
 	}
 	public async Task<AuthResponseDto> SignInAsync(SignInRequestDto request, CancellationToken ct)
@@ -135,7 +143,12 @@ public sealed class AuthService : IAuthService
 		var token = _jwtTokenGenerator.GenerateToken(user);
 		return new AuthResponseDto
 		{
-			Token = token
+			Token = token,
+			User = new AuthUserDto
+			{
+				Id = user.Id,
+				Username = user.Username
+			}
 		};
 	}
 	
@@ -196,7 +209,15 @@ public sealed class AuthService : IAuthService
 			throw new UnauthorizedAccessException("Invalid credentials.");
 
 		var token = _jwtTokenGenerator.GenerateToken(user);
-		return new AuthResponseDto { Token = token };
+		return new AuthResponseDto
+		{
+			Token = token,
+			User = new AuthUserDto
+			{
+				Id = user.Id,
+				Username = user.Username
+			}
+		};
 	}
 
 

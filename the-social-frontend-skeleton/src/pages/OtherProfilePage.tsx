@@ -70,13 +70,7 @@ export function OtherProfilePage() {
       }
       return
     }
-
-
-
-
-
-
-
+ 
     if (currentStatus === 'none') {
       try {
         console.log('add ')

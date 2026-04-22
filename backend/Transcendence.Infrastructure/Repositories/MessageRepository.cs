@@ -40,12 +40,14 @@ public sealed class  MessageRepository : IMessageRepository
             .Select(m => m.Id)
             .FirstOrDefaultAsync();
     }
-    public async Task<int> GetUnreadCount(Guid conversationId, Guid userId, DateTimeOffset LastRead)
+    public async Task<int> GetUnreadCount(Guid conversationId, Guid userId, DateTimeOffset? lastRead)
     {
-       return await _db.Messages.Where(m=> m.ConversationId == conversationId)
-                                .Where(m => m.CreatedAt > LastRead)
-                                .Where(m => m.SenderId != userId)
-                                .CountAsync();
+       var querry =  _db.Messages.Where(m=> m.ConversationId == conversationId)
+                                .Where(m => m.SenderId != userId);
+
+        if (lastRead.HasValue)
+            querry = querry.Where(m => m.CreatedAt > lastRead);
+        return  await querry.CountAsync();
     }
 }
 

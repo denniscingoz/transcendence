@@ -7,6 +7,8 @@ using Transcendence.Application.Friends.Queries;
 using Transcendence.Domain.Exceptions;
 using Transcendence.Domain.Friends;
 using Transcendence.Domain.Users;
+using Transcendence.Application.Realtime.Contracts;
+
 using NotFoundException = Transcendence.Application.Common.Exceptions.NotFoundException;
 
 namespace Transcendence.Application.Friends.Services;
@@ -17,16 +19,21 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 	private readonly IUserRepository _userRepository;
 	private readonly IFriendshipRequestRepository _friendshipRequestRepository;
 	private readonly IFriendsQuery _friendsQuery;
+	private readonly INotificationService _notificationService;
 
 	public FriendsService(IFriendshipRepository friendshipRepository, 
 						IFriendshipRequestRepository friendshipRequestRepository,
 						IUserRepository userRepository,
-						IFriendsQuery friendsQuery)
+						IFriendsQuery friendsQuery,
+						INotificationService notificationService
+						)
+						
 	{
 		_friendshipRequestRepository = friendshipRequestRepository;
 		_friendshipRepository = friendshipRepository;
 		_userRepository = userRepository;
 		_friendsQuery = friendsQuery;
+		_notificationService = notificationService;
 	}
 
 	// POST friends/{username}
@@ -47,7 +54,12 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 		var request = new FriendshipRequest(requestId, requesterId, targetUserId, DateTime.UtcNow);
 		await _friendshipRequestRepository.AddAsync(request, ct);
 		await _friendshipRequestRepository.SaveChangesAsync(ct);
-
+		var requestDto = new FriendshipRequestDto
+		{
+			Id = request.Id, RequesterId = request.RequesterId,
+			CreatedAt = request.CreatedAt, TargetUserId = request.TargetUserId
+		} ;
+		await _notificationService.NotifyFriendRequest(requesterId, requestDto);
 		return requestId;
 	}
 
@@ -70,6 +82,7 @@ public sealed class FriendsService : IFriendsService // use-case (Command)
 		await _friendshipRepository.AddAsync(friendship, ct);
 		await _friendshipRequestRepository.RemoveAsync(request.Id, ct);
 		await _friendshipRepository.SaveChangesAsync(ct);// Save both changes in one transaction.
+		// await _notificationService.NotifyFriendAccept(requesterId, requestDto);	
 	}
 
 	// DELETE friends/requests/{targetUserId}

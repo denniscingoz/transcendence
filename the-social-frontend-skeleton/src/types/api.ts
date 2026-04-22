@@ -23,13 +23,7 @@ export type FriendDto =
   fullName: string
   avatarUrl?: string | null
 }
-
-export type ChatMessageDto = {
-  id: string
-  fromUserId: string
-  content: string
-  sentAt: string
-}
+ 
 
 
 export type PostDto = 
@@ -204,11 +198,15 @@ export type SignUpRequestDto =
 
 }
 
-export type AuthResponseDto = 
-{
-  token : string
+export type AuthUserDto = {
+  id: string
+  username: string
 }
 
+export type AuthResponseDto = {
+  token: string
+  user: AuthUserDto
+}
 export interface GoogleSignInRequestDto {
   idToken: string // JWT token from Google
 }

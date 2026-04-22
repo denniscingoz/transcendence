@@ -25,3 +25,4 @@ public class Message
         CreatedAt = DateTimeOffset.UtcNow;
     }
 }
+

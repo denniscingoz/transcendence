@@ -1,11 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { useTranslation } from 'react-i18next'
 import { setLanguage } from '../i18n/i18n'
 
+
 interface HeaderProps {
   showNotification?: boolean
+}
+
+function playSystemBeep() {
+  try {
+    const audioContext = new AudioContext()
+    const oscillator = audioContext.createOscillator()
+    const gain = audioContext.createGain()
+
+    oscillator.type = 'sine'
+    oscillator.frequency.value = 880
+    gain.gain.value = 0.05
+
+    oscillator.connect(gain)
+    gain.connect(audioContext.destination)
+
+    oscillator.start()
+
+    setTimeout(() => {
+      oscillator.stop()
+      void audioContext.close()
+    }, 120)
+  } catch (err) {
+    console.error('Failed to play sound', err)
+  }
 }
 
 function NavItem({ to, label }: { to: string; label: string }) {
@@ -22,69 +47,52 @@ function NavItem({ to, label }: { to: string; label: string }) {
 }
 
 export function Header({ showNotification = true }: HeaderProps) {
-  const [hasNotifications] = useState(true)
-  const { t, i18n } = useTranslation()
+  const [unreadCount, setUnreadCount] = useState(0)
+  const { t } = useTranslation()
   const { isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
 
+  useEffect(() => {
+    function handleUnreadChanged(event: Event) {
+      const customEvent = event as CustomEvent<number>
+      setUnreadCount(customEvent.detail ?? 0)
+    }
+
+    window.addEventListener('chat-unread-changed', handleUnreadChanged as EventListener)
+
+    return () => {
+      window.removeEventListener('chat-unread-changed', handleUnreadChanged as EventListener)
+    }
+  }, [])
+
+  const hasNotifications = unreadCount > 0
+
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-gray-100">
-      
       <div className="mx-auto w-full max-w-6xl px-4 py-4 flex items-center justify-between">
-        
-        { /*Logo*/}
         <NavLink to="/feed">
           <TheSocialLogo className="h-4 w-auto text-gray-900" />
         </NavLink>
-        
-        { /*Notification*/}
+
         <div className="flex items-center gap-3">
           {showNotification && (
             <button className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
               <BellIcon className="w-6 h-6 text-gray-700" />
               {hasNotifications && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full" />
+                <>
+                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full" />
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                </>
               )}
             </button>
           )}
-
-          {/* <select
-            className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
-            value={i18n.language}
-            onChange={(e) => setLanguage(e.target.value as any)}
-          >
-            <option value="en">EN</option>
-            <option value="fr">FR</option>
-            <option value="es">ES</option>
-          </select>
-
-          {isAuthenticated ? (
-            <button
-              className="btn-ghost"
-              onClick={() => {
-                logout()
-                navigate('/signin')
-              }}
-            >
-              {t('nav.logout')}
-            </button>
-          ) : (
-            <NavItem to="/signin" label="Signin" />
-          )} */}
         </div>
       </div>
     </header>
   )
 }
-
-// function BellIcon({ className }: { className?: string }) {
-//   return (
-//     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-//       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-//       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-//     </svg>
-//   )
-// }
 
 function BellIcon({ className }: { className?: string }) {
   return (

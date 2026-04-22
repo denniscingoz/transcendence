@@ -5,6 +5,7 @@ namespace Transcendence.Application.Users.Interfaces;
 public interface IUserRepository
 {
     Task<User?> GetByIdAsync(Guid id, CancellationToken ct);
+
     Task<User?> GetByUsernameAsync(string username, CancellationToken ct);
 	Task<User?> GetByEmailAsync(string email, CancellationToken ct);
 	Task<Guid?> GetUserIdByAvatarFileIdAsync(Guid fileId, CancellationToken ct);//dasha: can be null
@@ -17,7 +18,10 @@ public interface IUserRepository
 		int take,
 		int offset,
 		CancellationToken ct);
+    Task<IReadOnlyList<User>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct);
 }
+
+
 /*
     Repository
 	•	знает как читать / писать данные
