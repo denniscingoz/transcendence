@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { RequireAuth } from '../auth/RequireAuth'
 import { Layout } from '../components/Layout'
 import { RealtimeProvider } from '../realtime/RealtimeProvider'
@@ -15,30 +15,24 @@ import { OtherProfilePage } from '../pages/OtherProfilePage'
 export const router = createBrowserRouter([
   { path: '/signin', element: <AuthPage /> },
   {
-    element: <Layout />,
+    element: <RequireAuth />,
     children: [
-      { path: '/', element: <Navigate to="/feed" replace /> },
-      { path: '/signin', element: <AuthPage /> },
       {
-        element: <RequireAuth />,
+        element: (
+          <RealtimeProvider>
+            <Layout />
+          </RealtimeProvider>
+        ),
         children: [
-          {
-            element: (
-              <RealtimeProvider>
-                <Outlet />
-              </RealtimeProvider>
-            ),
-            children: [
-              { path: '/feed', element: <FeedPage /> },
-              { path: '/profile', element: <ProfilePage /> },
-              { path: '/friends', element: <FriendsPage /> },
-              { path: '/chat', element: <ChatPage /> },
-              { path: '/edit-profile', element: <EditProfilePage /> },
-              { path: '/settings', element: <SettingsPage /> },
-              { path: '/post-create', element: <PostCreatePage /> },
-              { path: '/profile/:userId', element: <OtherProfilePage /> },
-            ],
-          },
+          { path: '/', element: <Navigate to="/feed" replace /> },
+          { path: '/feed', element: <FeedPage /> },
+          { path: '/profile', element: <ProfilePage /> },
+          { path: '/friends', element: <FriendsPage /> },
+          { path: '/chat', element: <ChatPage /> },
+          { path: '/edit-profile', element: <EditProfilePage /> },
+          { path: '/settings', element: <SettingsPage /> },
+          { path: '/post-create', element: <PostCreatePage /> },
+          { path: '/profile/:userId', element: <OtherProfilePage /> },
         ],
       },
     ],

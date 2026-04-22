@@ -63,7 +63,7 @@ function publishUnreadCount(nextConversations: ConversationDto[]) {
 
 export function ChatPage() {
   const { user } = useAuth()
-  const { connection, isConnected } = useRealtime()
+  const { connection, isConnected, onlineUserIds } = useRealtime()
   const currentUserId = user?.id ?? null
 
   const messagesRef = useRef<ChatMessageDto[]>([])
@@ -75,12 +75,8 @@ export function ChatPage() {
   const [messages, setMessages] = useState<ChatMessageDto[]>([])
   const [text, setText] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [loadingChats, setLoadingChats] = useState(false)
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [sending, setSending] = useState(false)
-  const [creatingDirect, setCreatingDirect] = useState(false)
-  const [targetUserIdInput, setTargetUserIdInput] = useState('')
-  const [onlineUserIds, setOnlineUserIds] = useState<string[]>([])
   const [deliveredMessageIds, setDeliveredMessageIds] = useState<string[]>([])
   const [search, setSearch] = useState('')
 const [searchResults, setSearchResults] = useState<{ id: string; username: string }[]>([])   
@@ -103,7 +99,6 @@ async function handleCreateDirectConversationFromSearch(targetUserId: string) {
   async function loadConversations() {
     if (!currentUserId) return []
 
-    setLoadingChats(true)
     setError(null)
 
     try {
@@ -114,9 +109,7 @@ async function handleCreateDirectConversationFromSearch(targetUserId: string) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load conversations')
       return []
-    } finally {
-      setLoadingChats(false)
-    }
+    }  
   }
 
   async function loadConversationMessages(conversationId: string) {
@@ -165,53 +158,7 @@ async function handleCreateDirectConversationFromSearch(targetUserId: string) {
     }
   }
   
-
-async function handleCreateDirectConversation() {
-  if (!currentUserId) return
-
-  const targetUserId = targetUserIdInput.trim()
-  if (!targetUserId) return
-
-  setCreatingDirect(true)
-  setError(null)
-
-  try {
-    const result = await createDirectConversation(currentUserId, targetUserId)
-
-    const updatedConversations = await loadConversations()
-
-    const createdConversationExists = updatedConversations.some(
-      item => item.id === result.conversationId
-    )
-
-    if (!createdConversationExists) {
-      setConversations(prev => {
-        const exists = prev.some(item => item.id === result.conversationId)
-        if (exists) return prev
-
-        return [
-          {
-            id: result.conversationId,
-            targetUserId,
-            targetUserName: targetUserId,
-            lastMessage: '',
-            lastMessageAt: null,
-            unreadCount: 0,
-          },
-          ...prev,
-        ]
-      })
-    }
-
-    await openConversation(result.conversationId)
-    setTargetUserIdInput('')
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Failed to create direct conversation')
-  } finally {
-    setCreatingDirect(false)
-  }
-}
-
+ 
   async function handleSend() {
     if (!connection) return
     if (!activeConversationId) return
@@ -412,31 +359,10 @@ async function handleCreateDirectConversation() {
       )
     }
   }
+ 
+ 
 
-  const handleOnlineUsersSnapshot = (users: string[]) => {
-    console.log('OnlineUsersSnapshot', users)
-    setOnlineUserIds(users)
-  }
-
-  const handleUserOnline = (payload: { userId: string }) => {
-    console.log('UserOnLine', payload)
-
-    const userId = payload.userId
-
-    setOnlineUserIds(prev => {
-      if (prev.includes(userId)) return prev
-      return [...prev, userId]
-    })
-  }
-
-  const handleUserOffline = (payload: { userId: string }) => {
-    console.log('UserOffLine', payload)
-
-    const userId = payload.userId
-
-    setOnlineUserIds(prev => prev.filter(id => id !== userId))
-  }
-
+  
   const handleReconnected = async () => {
     try {
       if (activeConversationIdRef.current) {
@@ -447,23 +373,14 @@ async function handleCreateDirectConversation() {
       console.error('Failed after reconnect', err)
     }
   }
-
-  const handleClose = () => {
-    console.log('Chat connection closed')
-    setOnlineUserIds([])
-  }
-
+ 
   connection.on('MessageReceived', handleMessageReceived)
   connection.on('MessageAck', handleMessageAck)
   connection.on('MessageDelivered', handleMessageDelivered)
   connection.on('ConversationsChanged', handleConversationsChanged)
   connection.on('NotificationReceived', handleNotificationReceived)
   connection.on('MessageRead', handleMessageRead)
-  connection.on('OnlineUsersSnapshot', handleOnlineUsersSnapshot)
-  connection.on('UserOnLine', handleUserOnline)
-  connection.on('UserOffLine', handleUserOffline)
   connection.onreconnected(handleReconnected)
-  connection.onclose(handleClose)
 
   return () => {
     connection.off('MessageReceived', handleMessageReceived)
@@ -472,9 +389,6 @@ async function handleCreateDirectConversation() {
     connection.off('ConversationsChanged', handleConversationsChanged)
     connection.off('NotificationReceived', handleNotificationReceived)
     connection.off('MessageRead', handleMessageRead)
-    connection.off('OnlineUsersSnapshot', handleOnlineUsersSnapshot)
-    connection.off('UserOnLine', handleUserOnline)
-    connection.off('UserOffLine', handleUserOffline)
   }
 }, [connection, currentUserId])
 
@@ -486,7 +400,6 @@ useEffect(() => {
 
   async function init() {
     try {
-      setLoadingChats(true)
       setError(null)
 
       const list = await getConversations(currentUserId!)
@@ -505,10 +418,6 @@ useEffect(() => {
     } catch (err) {
       if (!isMounted) return
       setError(err instanceof Error ? err.message : 'Failed to initialize chat')
-    } finally {
-      if (isMounted) {
-        setLoadingChats(false)
-      }
     }
   }
 
