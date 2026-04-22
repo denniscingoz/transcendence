@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link, useLocation } from 'react-router-dom'
 
 type NavItem = 'home' | 'search' | 'messages' | 'profile'
@@ -9,6 +10,7 @@ interface BottomNavProps {
 
 export function BottomNav({ active, onSearchClick }: BottomNavProps) {
   const location = useLocation()
+  const { t } = useTranslation()
 
   const isActive = (item: NavItem) => {
     if (active) return active === item
@@ -21,7 +23,7 @@ export function BottomNav({ active, onSearchClick }: BottomNavProps) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-gray-100/95 backdrop-blur-sm border-t border-gray-200 z-50">
-      <div className="max-w-lg mx-auto px-6 py-3 flex justify-around items-center">
+      <div className="max-w-lg mx-auto px-6 flex justify-around items-center">
         <NavLink to="/feed" active={isActive('home')}>
           <HomeIcon />
         </NavLink>
@@ -42,6 +44,15 @@ export function BottomNav({ active, onSearchClick }: BottomNavProps) {
           <ProfileIcon />
         </NavLink>
       </div>
+      <div className="flex justify-center pb-2 gap-2">
+            <Link to="/privacy-policy" className="text-sm text-gray-600 hover:underline">
+               {t('privacyPolicy.header')}
+             </Link>  
+
+               <Link to="/terms-service" className="text-sm text-gray-600 hover:underline">
+               {t('termsService.header')}
+             </Link>
+          </div>
     </nav>
   )
 }

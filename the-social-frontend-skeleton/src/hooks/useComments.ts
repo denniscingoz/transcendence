@@ -67,7 +67,7 @@ export function useDeleteComment(postId: string) {
     },
     onSuccess: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['comments', postId] }),
+        queryClient.invalidateQueries({ queryKey: ['posts', postId, 'comments'] }),
         queryClient.invalidateQueries({ queryKey: ['post', postId] }),
       ])
     },

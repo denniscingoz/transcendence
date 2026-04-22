@@ -63,7 +63,8 @@
   },
   "postdetail": {
   "close": "Cerrar",
-  "likes": "Me gusta",
+  "like": "Me gusta",
+  "likes": "Me gustan",
   "post": "Publicar",
   "posting": "Publicando...",
   "writeacomment": "Escribe un comentario...",
@@ -92,5 +93,29 @@
   "feed":  {
 
     "nothingtoshow": "Nada que mostrar"
+  },
+  "auth": {
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "signin": "Iniciar sesión",
+    "or": "O",
+    "fullname": "Nombre completo",
+    "username": "Nombre de usuario",
+    "signup": "Registrarse",
+    "emailRequired": "El correo electrónico es obligatorio",
+    "passwordRequired": "La contraseña es obligatoria",
+    "loggingin": "Iniciando sesión...",
+    "fullnameRequired": "El nombre completo es obligatorio",
+    "usernameRequired": "El nombre de usuario es obligatorio",
+    "signingup": "Registrándose...",
+    "signingin": "Iniciando sesión..."
+  },
+  "privacyPolicy": {
+    "header": "Política de Privacidad",
+  "body": "Última actualización: abril de 2026\n\nEsta Política de privacidad explica cómo recopilamos, usamos y protegemos su información cuando utiliza nuestra plataforma de red social («el Servicio»).\n\n1. Información que recopilamos\n\nPodemos recopilar los siguientes tipos de datos:\n\n• Información de la cuenta: correo electrónico, nombre de usuario, contraseña (almacenada de forma segura y con hash)\n• Datos de perfil: avatar, biografía y otros detalles opcionales del perfil\n• Contenido generado por el usuario: publicaciones, comentarios, mensajes e interacciones con otros usuarios\n• Datos de uso: actividad en la plataforma (por ejemplo, me gusta, seguimientos, conexiones)\n• Datos técnicos: dirección IP, tipo de navegador e información del dispositivo\n\n2. Cómo utilizamos sus datos\n\nUtilizamos sus datos para:\n\n• Proporcionar y mantener el Servicio\n• Permitir la interacción entre usuarios (publicaciones, mensajería, perfiles, etc.)\n• Mejorar la experiencia del usuario y el rendimiento de la plataforma\n• Garantizar la seguridad y prevenir abusos\n• Cumplir con obligaciones legales\n\n3. Compartición de datos\n\nNo vendemos sus datos personales.\n\nSolo podemos compartir datos:\n\n• Cuando lo requiera la ley\n• Para proteger la plataforma de abusos o amenazas de seguridad\n\n4. Almacenamiento y seguridad de los datos\n\nTomamos medidas razonables para proteger sus datos, incluyendo:\n\n• Hash seguro de contraseñas\n• Controles de acceso\n• Conexiones cifradas (HTTPS)\n\nSin embargo, ningún sistema es completamente seguro y no podemos garantizar una seguridad absoluta.\n\n5. Derechos del usuario\n\nUsted tiene derecho a:\n\n• Acceder a sus datos personales\n• Actualizar o eliminar su cuenta\n• Solicitar la eliminación de sus datos\n\nPara ejercer estos derechos, contáctenos en: denizcaglarcingoz@gmail.com\n\n6. Retención de datos\n\nConservamos sus datos mientras su cuenta esté activa.\nLas cuentas eliminadas pueden tener sus datos eliminados o anonimizados en un plazo razonable.\n\n7. Cookies y seguimiento\n\nPodemos utilizar cookies básicas o tecnologías similares para:\n\n• Mantener sesiones de usuario\n• Mejorar la funcionalidad\n\n8. Cambios en esta política\n\nPodemos actualizar esta Política de privacidad de vez en cuando. El uso continuado del Servicio implica la aceptación de la versión actualizada.\n\n9. Contacto\n\nSi tiene alguna pregunta, contáctenos en: denizcaglarcingoz@gmail.com"
+  },
+  "termsService": {
+  "header": "Términos del servicio",
+  "body": "Última actualización: abril de 2026\n\nAl acceder a esta plataforma o utilizarla («el Servicio»), usted acepta los siguientes Términos del servicio.\n\n1. Uso del Servicio\n\nUsted acepta utilizar el Servicio solo con fines legales y de manera respetuosa.\n\nNo debe:\n\n• Publicar contenido ilegal, dañino o abusivo\n• Acosar, amenazar o hacerse pasar por otros usuarios\n• Intentar hackear, interrumpir o hacer un uso indebido de la plataforma\n\n2. Cuentas de usuario\n\n• Usted es responsable de mantener la confidencialidad de su cuenta\n• Usted es responsable de toda la actividad realizada bajo su cuenta\n• Debe proporcionar información precisa al registrarse\n\n3. Contenido del usuario\n\nUsted conserva la propiedad del contenido que publica.\n\nSin embargo, al publicar contenido, nos otorga un derecho no exclusivo para:\n\n• Mostrar y distribuir su contenido dentro de la plataforma\n• Utilizarlo para la funcionalidad del servicio (por ejemplo, feed, perfiles, interacciones)\n\nUsted es el único responsable del contenido que publique.\n\n4. Moderación de contenido\n\nNos reservamos el derecho de:\n\n• Eliminar contenido que infrinja estos términos\n• Suspender o prohibir cuentas que participen en conductas dañinas\n\n5. Disponibilidad del Servicio\n\nNuestro objetivo es proporcionar un servicio fiable, pero no garantizamos:\n\n• Disponibilidad continua\n• Funcionamiento sin errores\n\nEl Servicio se proporciona «tal cual».\n\n6. Terminación\n\nPodemos suspender o cancelar su cuenta si:\n\n• Usted infringe estos Términos\n• Sus acciones perjudican a la plataforma o a otros usuarios\n\nPuede dejar de utilizar el Servicio en cualquier momento.\n\n7. Limitación de responsabilidad\n\nNo somos responsables de:\n\n• Contenido generado por los usuarios\n• Interacciones entre usuarios\n• Cualquier daño derivado del uso del Servicio\n\n8. Cambios en los Términos\n\nPodemos actualizar estos Términos en cualquier momento. El uso continuado del Servicio significa que usted acepta los cambios.\n\n9. Contacto\n\nPara preguntas, contáctenos en: denizcaglarcingoz@gmail.com"
   }
 }

@@ -11,8 +11,10 @@ obj/
 # Rider / VS Code
 .idea/
 .vscode/
+.vs/
 .obsidian/
 .idea/
+backend/.vs
 
 *.log
 *.cache
@@ -35,6 +37,7 @@ TestResults/
 node_modules/
 dist/
 build/
+uploads/
 
 *.swp
 *.bak

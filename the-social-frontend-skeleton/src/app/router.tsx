@@ -10,12 +10,16 @@ import { EditProfilePage } from '../pages/EditProfilePage'
 import { SettingsPage } from '../pages/SettingsPage'
 import { PostCreatePage } from '../pages/PostCreatePage'
 import { OtherProfilePage } from '../pages/OtherProfilePage'
+import { PrivacyPolicyPage } from '../pages/PrivacyPolicyPage'
+import { TermsOfServicePage} from '../pages/TermsOfServicePage'
 // import { PostDetailPage} from '../pages/PostDetailPage'
 //import { SearchPage } from '../pages/SearchPage'
 
 export const router = createBrowserRouter([
   
   { path: '/signin', element: <AuthPage /> },
+  { path: '/terms-service', element: <TermsOfServicePage /> },
+  { path: '/privacy-policy', element: <PrivacyPolicyPage /> },
   
   {
     element: <Layout />,
@@ -32,8 +36,7 @@ export const router = createBrowserRouter([
           { path: '/edit-profile', element: <EditProfilePage /> },
           { path: 'settings', element: <SettingsPage /> },
           { path: '/post-create', element: <PostCreatePage />},
-          { path: '/profile/:userId', element: <OtherProfilePage /> }
-          // { path: '/posts/:postId', element: <PostDetailPage /> },
+          { path: '/profile/:userId', element: <OtherProfilePage /> },
           // { path: '/search', element: <SearchPage /> },
         ],
       },

@@ -6,12 +6,15 @@ import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { TheSocialLogo } from '../components/Header'
 import api from '../api/axios'
-import { GoogleLogin } from '@react-oauth/google'
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { googleSignInApi } from '../api/auth.api'
+import { LanguageDropdown } from '../components/language/LanguageDropdown'
+import { setLanguage } from '../i18n/i18n'
+import { Link } from 'react-router-dom'
 
 
 export function AuthPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { signIn } = useAuth()
   const { signup } = useAuth()
   const { googleSignIn } = useAuth()
@@ -48,7 +51,6 @@ export function AuthPage() {
     setSignInApiError(firstError ?? e?.response?.data?.detail ?? 'Sign in failed')
   }
 }
-
 
   const onSignupSubmit = async (values: SignUpRequestDto) => {
     setSignupApiError(null)
@@ -91,6 +93,20 @@ export function AuthPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md space-y-6">
+        
+        { /*Languages*/}
+        <div className="bg-white flex items-center justify-between gap-4 rounded-xl border border-panel px-4 py-4">
+          
+            {/* Text */}
+            <p className="text-sm text-text">{t('settings.changelanguage')}.</p>
+            {/* Dropdown */}
+            <LanguageDropdown
+              value={i18n.language as 'en' | 'fr' | 'es'}
+              onChange={(lang) => setLanguage(lang)}
+            />
+        </div>
+        
+
         <h1 className="flex justify-center">
           <TheSocialLogo className="h-4 w-auto text-gray-900" />
         </h1>
@@ -102,8 +118,8 @@ export function AuthPage() {
             <div>
               <input
                 className="input"
-                placeholder="Email"
-                {...signInForm.register('email', { required: 'Email is required' })}
+                placeholder={t('auth.email')}
+                {...signInForm.register('email', { required: t('auth.emailRequired') })}
                 />
               <div className="flex justify-center">
                   {signInForm.formState.errors.email && (
@@ -114,13 +130,13 @@ export function AuthPage() {
               </div>
             
             </div> 
-            
+
             <div>
               <input
                 className="input"
-                placeholder="Password"
+                placeholder={t('auth.password')}
                 type="password"
-                {...signInForm.register('password', { required: 'Password is required' })}
+                {...signInForm.register('password', { required: t('auth.passwordRequired') })}
                 />
               <div className="flex justify-center">
                   {signInForm.formState.errors.password && (
@@ -142,38 +158,44 @@ export function AuthPage() {
                 type="submit"
                 disabled={signInForm.formState.isSubmitting}
               >
-                {signInForm.formState.isSubmitting ? 'Logging in...' : 'Sign in'}
+                {signInForm.formState.isSubmitting ? t('auth.signingin') : t('auth.signin')}
               </button>
             </div>
           </form>
         </div>
 
         {/* {Or text} */}
-        <div className="divider">OR</div>
+        <div className="divider">{t('auth.or')}</div>
 
         {/* {Singup with Google and Local} */}
         <div className="panel space-y-4">
           
           {/* Signup with Google */}
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              text="continue_with"
-              theme="outline"
-              shape="pill"
-              size="large"
-              logo_alignment="center"
-              width={400}
-            />
-          </div>
+          <GoogleOAuthProvider
+            key={i18n.language}
+            clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+            locale={i18n.language}
+          >
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                text="continue_with"
+                theme="outline"
+                shape="pill"
+                size="large"
+                logo_alignment="center"
+                width={400}
+              />
+            </div>
+          </GoogleOAuthProvider>
 
           {googleError && (
             <div className="text-sm text-red-600 text-center">{googleError}</div>
           )}
 
           {/* {Or text} */}
-          <div className="divider">OR</div>
+          <div className="divider">{t('auth.or')}</div>
 
           {/* Local Signup */}
           <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
@@ -181,8 +203,8 @@ export function AuthPage() {
           <div>
               <input
                 className="input"
-                placeholder="Email"
-                {...signupForm.register('email', { required: 'Email is required' })}
+                placeholder={t('auth.email')}
+                {...signupForm.register('email', { required: t('auth.emailRequired') })}
               />
 
               <div className="flex justify-center">
@@ -199,9 +221,9 @@ export function AuthPage() {
             <div>
               <input
                 className="input"
-                placeholder="Password"
+                placeholder={t('auth.password')}
                 type="password"
-                {...signupForm.register('password', { required: 'Password is required' })}
+                {...signupForm.register('password', { required: t('auth.passwordRequired') })}
 
                />
                <div className="flex justify-center">
@@ -217,8 +239,8 @@ export function AuthPage() {
             <div>
             <input
               className="input"
-              placeholder="Full name"
-              {...signupForm.register('fullName', { required: 'Full name is required' })}
+              placeholder={t('auth.fullname')}
+              {...signupForm.register('fullName', { required: t('auth.fullnameRequired')})}
             />
               <div className="flex justify-center">
                 {signupForm.formState.errors.fullName && (
@@ -232,8 +254,8 @@ export function AuthPage() {
             <div>
               <input
                 className="input"
-                placeholder="Username"
-                {...signupForm.register('username', { required: 'Username is required' })}
+                placeholder={t('auth.username')}
+                {...signupForm.register('username', { required: t('auth.usernameRequired')})}
                 
               />
 
@@ -256,11 +278,23 @@ export function AuthPage() {
                 className="btn-primary w-64"
                 disabled={signupForm.formState.isSubmitting}
               >
-                {signupForm.formState.isSubmitting ? 'Signing up...' : 'Sign up'}
+                {signupForm.formState.isSubmitting ? t('auth.signinup') : t('auth.signup')}
               </button>
             </div>
           </form>
         </div>
+
+          <div className="flex justify-center gap-2">
+            <Link to="/privacy-policy" className="text-sm text-gray-600 hover:underline">
+               {t('privacyPolicy.header')}
+             </Link>  
+
+               <Link to="/terms-service" className="text-sm text-gray-600 hover:underline">
+               {t('termsService.header')}
+             </Link>
+          </div>
+
+
       </div>
     </div>
   )
