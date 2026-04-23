@@ -206,7 +206,7 @@ public sealed class AuthService : IAuthService
 		}
 
 		if (user.IsDeleted)
-			throw new UnauthorizedAccessException("Invalid credentials.");
+			throw new UnauthorizedException("The account was deleted. Access is not permitted. Use another email.");
 
 		var token = _jwtTokenGenerator.GenerateToken(user);
 		return new AuthResponseDto

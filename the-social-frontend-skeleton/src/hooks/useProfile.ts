@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getMyProfile, getOtherProfile, updateMyProfile, uploadAvatar, getMyProfilePostPreviews, getOtherProfilePostPreviews,changePassword } from '../api/profile.api'
 import type { UpdateProfileDto, ChangePasswordDto } from '../types/api'
+import type { UploadAvatarInput } from '../api/profile.api'
 
 export function useMyProfile() {
   return useQuery({
@@ -45,8 +46,8 @@ export function useChangePassword() {
 
 
 export function useUploadAvatar() {
-  return useMutation({
-    mutationFn: (file: File) => uploadAvatar(file),
+  return useMutation<string, Error, UploadAvatarInput | File>({
+    mutationFn: uploadAvatar,
   })
 }
 

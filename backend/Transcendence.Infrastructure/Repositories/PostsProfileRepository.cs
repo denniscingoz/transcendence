@@ -106,7 +106,7 @@ public sealed class PostsProfileRepository : IPostsProfileRepository
 				AuthorId = l.AuthorId,
 				CreatedAtUtc = l.CreatedAtUtc,
 				AuthorUsername = u.Username,
-				AuthorProfileImageUrl = u.AvatarFileId != null ? "/files/" + u.AvatarFileId : ""
+				AuthorProfileImageUrl = u.AvatarFileId != null ? "/files/avatar/" + u.AvatarFileId : ""
 			};
 
 		query = ApplyLikeCursor(query, cursor);

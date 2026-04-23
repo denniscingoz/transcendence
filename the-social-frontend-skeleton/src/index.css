@@ -131,7 +131,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
+  @apply bg-gray-200 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {

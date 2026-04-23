@@ -172,6 +172,17 @@ export type CommentPreviewDto =
 
 }
 
+export type LikesPreviewDto = {
+  id: string
+  postId: string
+  authorId: string
+  createdAtUtc: string
+  authorUsername: string
+  authorFullName?: string | null
+  authorProfileImageUrl: string | null
+  isFollowedByMe?: boolean
+}
+
 
 export type SignUpRequestDto =
 {
