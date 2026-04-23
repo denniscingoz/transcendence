@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { useRealtime } from '../realtime/RealtimeProvider'
+import { useTranslation } from 'react-i18next'
+import { BottomNav } from '../components/BottomNav'
 
 import {
   createDirectConversation,
@@ -549,214 +551,184 @@ useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      <aside
-        style={{
-          width: '320px',
-          borderRight: '1px solid #ddd',
-          padding: '16px',
-          overflowY: 'auto',
-        }}
-      >
-        <h2>Chats</h2>
-        
- 
-<div style={{ marginBottom: '12px', position: 'relative' }}> 
-  <input
-    value={search}
-    onChange={e => setSearch(e.target.value)}
-    placeholder="Search users..."
-    style={{
-      width: '100%',
-      padding: '10px',
-      border: '1px solid #ccc',
-      borderRadius: '8px',
-    }}
-  />
+  const { t } = useTranslation()
 
-        {searchResults.length > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            zIndex: 10,
-            background: 'white',
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            maxHeight: '200px',
-            overflowY: 'auto'
-          }}>
-            {searchResults.map(user => (
-              <button
-                key={user.id}
-                onClick={() => void handleCreateDirectConversationFromSearch(user.id)}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '10px',
-                  border: 'none',
-                  borderBottom: '1px solid #eee',
-                  background: 'white',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-              >
-                {user.username}
-              </button>
-            ))}
+  return (
+      //  <div className="h-[calc(100dvh-250px)] overflow-hidden bg-white">
+      // {/* <main className="mx-auto h-full max-w-2xl px-4 py-6"> */}
+      //   {/* <div className="panel flex h-[85%] flex-col overflow-hidden"> */}
+
+    <div className="flex h-[calc(100dvh-250px)] items-center justify-center bg-white p-4">
+  <div className="mx-auto h-full w-full max-w-8xl py-6">
+    <div className="panel flex h-[85%] w-full gap-4">
+        {/* Sidebar Panel */}
+        <aside className="w-l bg-gray-300 rounded-2xl flex flex-col">
+          <h2 className="text-base font-bold text-text mb-2">{t('chat.chats')}</h2>
+          
+          {/* Search Input */}
+          <div className="relative mb-2">
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={t('chat.searchUsers')}
+              className="input w-full text-xs"
+            />
+
+            {/* Search Results Dropdown */}
+            {searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg max-h-32 overflow-y-auto">
+                {searchResults.map(user => (
+                  <button
+                    key={user.id}
+                    onClick={() => void handleCreateDirectConversationFromSearch(user.id)}
+                    className="block w-full text-left px-2 py-1 border-b border-gray-100 hover:bg-gray-100 transition-colors text-xs"
+                  >
+                    <div className="font-medium text-gray-900">{user.username}</div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Error Message */}
+          {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+
+          {/* Conversations List */}
+          <div className="space-y-0.5 flex-1 min-h-0 overflow-y-auto">
+            {conversations.length === 0 ? (
+              <p className="text-gray-600 text-center py-2 text-xs">{t('chat.selectConversation')}</p>
+            ) : (
+              conversations.map(conversation => {
+                const isOnline = onlineUserIds.includes(conversation.targetUserId)
+
+                return (
+                  <button
+                    key={conversation.id}
+                    onClick={() => void openConversation(conversation.id)}
+                    className={`w-full text-left p-1.5 rounded-lg transition-all ${
+                      conversation.id === activeConversationId
+                        ? 'bg-gray-400 border border-gray-500'
+                        : 'bg-gray-200 hover:bg-gray-250'
+                    }`}
+                  >
+                    {/* User with avatar */}
+                    <div className="flex items-center gap-1.5">
+                      <img
+                        src={
+                          conversation?.targetUserAvatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${conversation.targetUserAvatarUrl}` : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
+                        }
+                        onError={(event) => {
+                          event.currentTarget.src = 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
+                        }}
+                        alt={conversation.targetUserName}
+                        className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-900 truncate text-xs">{conversation.targetUserName}</div>
+                        <div className="text-xs text-gray-600 truncate">{conversation.lastMessage || t('chat.noMessagesYet')}</div>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <span
+                          className={`inline-block w-2.5 h-2.5 rounded-full ring-1 ring-gray-300 ${
+                            isOnline ? 'bg-green-500' : 'bg-gray-400'
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </button>
+                )
+              })
+            )}
+          </div>
+        </aside>
+
+        {/* Main Chat Area Panel */}
+        <main className="flex-1 flex flex-col bg-gray-300 rounded-2xl p-3 min-h-0">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-2 space-y-0.5 min-h-0 bg-white rounded-lg mb-1.5">
+            {loadingChats && (
+              <div className="text-center py-2 text-gray-500 text-xs">{t('common.loading')}</div>
+            )}
+
+            {!activeConversationId && !loadingChats && (
+              <div className="text-center py-2 text-gray-500 text-xs">{t('chat.selectConversation')}</div>
+            )}
+
+            {loadingMessages && (
+              <div className="text-center py-2 text-gray-500 text-xs">{t('chat.loadingMessages')}</div>
+            )}
+
+            {!loadingMessages &&
+              messages.map(message => {
+                const isMine = message.senderId === currentUserId
+
+                return (
+                  <div
+                    key={message.messageId}
+                    className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-xs px-1.5 py-0.5 rounded-lg text-xs ${
+                        isMine
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-200 text-gray-900'
+                      }`}
+                    >
+                      <div>{message.content}</div>
+
+                      <div className={`text-xs mt-0.5 ${isMine ? 'text-blue-100' : 'text-gray-600'}`}>
+                        {new Date(message.createdAt).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </div>
+
+                      {isMine && (
+                        <div className={`text-xs mt-0.5 ${isMine ? 'text-blue-100' : 'text-gray-600'}`}>
+                          {message.isReadByOthers
+                            ? t('chat.read')
+                            : deliveredMessageIds.includes(message.messageId)
+                              ? t('chat.delivered')
+                              : t('chat.sent')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area */}
+          <div className="bg-white rounded-lg p-1.5 flex-shrink-0">
+            <div className="flex gap-1">
+              <input
+                value={text}
+                onChange={e => setText(e.target.value)}
+                onKeyPress={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    void handleSend()
+                  }
+                }}
+                placeholder={t('chat.typeMessage')}
+                className="input flex-1 text-xs"
+              />
+              <button
+                onClick={() => void handleSend()}
+                disabled={sending || !text.trim() || !currentUserId}
+                className="btn-primary px-2 py-1 text-xs disabled:opacity-50"
+              >
+                {sending ? t('common.loading') : t('chat.send')}
+              </button>
+            </div>
+          </div>
+        </main>
       </div>
 
-          
-        <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexDirection: 'column' }}>
-  
-
-        </div>
-
-        {error && <p style={{ color: 'red', marginTop: '12px' }}>{error}</p>}
-
-        <div style={{ marginTop: '16px' }}>
-          {conversations.map(conversation => {
-            const isOnline = onlineUserIds.includes(conversation.targetUserId)
-
-            return (
-              <button
-                key={conversation.id}
-                onClick={() => void openConversation(conversation.id)}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  textAlign: 'left',
-                  marginBottom: '8px',
-                  padding: '12px',
-                  border:
-                    conversation.id === activeConversationId
-                      ? '2px solid black'
-                      : '1px solid #ccc',
-                  background: 'white',
-                  cursor: 'pointer',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    fontSize: '14px',
-                    marginBottom: '4px',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: '10px',
-                      height: '10px',
-                      borderRadius: '50%',
-                      backgroundColor: isOnline ? '#22c55e' : '#9ca3af',
-                      display: 'inline-block',
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span>{conversation.targetUserName}</span>
-                </div>
-
-                <div style={{ fontSize: '13px', color: '#555' }}>
-                  {conversation.lastMessage || 'No messages yet'}
-                </div>
-
-                <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
-                  unread: {conversation.unreadCount}
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      </aside>
-
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div
-          style={{
-            flex: 1,
-            padding: '16px',
-            overflowY: 'auto',
-            background: '#fafafa',
-          }}
-        >
-          {!activeConversationId && <p>Select a conversation</p>}
-          {loadingMessages && <p>Loading messages...</p>}
-
-          {!loadingMessages &&
-            messages.map(message => {
-              const isMine = message.senderId === currentUserId
-
-              return (
-                <div
-                  key={message.messageId}
-                  style={{
-                    display: 'flex',
-                    justifyContent: isMine ? 'flex-end' : 'flex-start',
-                    marginBottom: '10px',
-                  }}
-                >
-                  <div
-                    style={{
-                      maxWidth: '70%',
-                      padding: '10px 12px',
-                      borderRadius: '12px',
-                      border: '1px solid #ddd',
-                      background: 'white',
-                    }}
-                  >
-                    <div>{message.content}</div>
-
-                    <div style={{ fontSize: '11px', color: '#888', marginTop: '4px' }}>
-                      {new Date(message.createdAt).toLocaleString()}
-                    </div>
-
-                    {isMine && (
-                      <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
-                        {message.isReadByOthers
-                          ? 'Read'
-                          : deliveredMessageIds.includes(message.messageId)
-                            ? 'Delivered'
-                            : 'Sent'}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-
-          <div ref={messagesEndRef} />
-        </div>
-
-        <div
-          style={{
-            padding: '16px',
-            borderTop: '1px solid #ddd',
-            display: 'flex',
-            gap: '8px',
-          }}
-        >
-          <input
-            value={text}
-            onChange={e => setText(e.target.value)}
-            placeholder="Type a message..."
-            style={{ flex: 1, padding: '10px' }}
-          />
-          <button
-            onClick={() => void handleSend()}
-            disabled={sending || !text.trim() || !currentUserId}
-          >
-            {sending ? 'Sending...' : 'Send'}
-          </button>
-        </div>
-      </main>
+      <BottomNav active="messages" />
+    </div>
     </div>
   )
 }

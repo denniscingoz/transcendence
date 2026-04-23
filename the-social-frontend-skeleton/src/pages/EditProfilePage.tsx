@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { useMyProfile, useUpdateProfile, useChangePassword, useUploadAvatar } from '../hooks/useProfile'
 import type { UpdateProfileDto, ChangePasswordDto } from '../types/api'
 import { useRef } from 'react'
+import { UploadProgressOverlay } from '../components/UploadProgressOverlay'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
-import axios from 'axios'
 
 type EditProfileForm = {
   fullName: string
@@ -37,6 +37,12 @@ export function EditProfilePage() {
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string>('')
   const [saveError, setSaveError] = useState<string | null>(null)
   const [passwordError, setPasswordError] = useState('')
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false)
+  const [overlayProgress, setOverlayProgress] = useState(0)
+  const [isOverlayComplete, setIsOverlayComplete] = useState(false)
+  const [overlayTitle, setOverlayTitle] = useState('Saving changes')
+  const [overlaySubtitle, setOverlaySubtitle] = useState('Please wait while we update your profile.')
+  const [overlayCompletionText, setOverlayCompletionText] = useState('Saved')
 
   const [profileForm, setProfileForm] = useState<EditProfileForm>({
     fullName: '',
@@ -53,6 +59,57 @@ export function EditProfilePage() {
   })
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  const isAnyProfileActionPending =
+    updateProfile.isPending || uploadAvatar.isPending || changePassword.isPending
+
+  useEffect(() => {
+    if (!isOverlayOpen || isOverlayComplete || !isAnyProfileActionPending) {
+      return
+    }
+
+    const id = window.setInterval(() => {
+      setOverlayProgress(prev => (prev < 90 ? prev + 5 : prev))
+    }, 140)
+
+    return () => {
+      window.clearInterval(id)
+    }
+  }, [isOverlayOpen, isOverlayComplete, isAnyProfileActionPending])
+
+  function startOverlay(mode: 'save' | 'password') {
+    setIsOverlayOpen(true)
+    setIsOverlayComplete(false)
+    setOverlayProgress(12)
+
+    if (mode === 'save') {
+      setOverlayTitle('Saving changes')
+      setOverlaySubtitle('Please wait while we update your profile.')
+      setOverlayCompletionText('Profile updated')
+      return
+    }
+
+    setOverlayTitle('Changing password')
+    setOverlaySubtitle('Please wait while we update your password.')
+    setOverlayCompletionText('Password changed')
+  }
+
+  function failAndCloseOverlay() {
+    setIsOverlayOpen(false)
+    setIsOverlayComplete(false)
+    setOverlayProgress(0)
+  }
+
+  function completeAndCloseOverlay() {
+    setOverlayProgress(100)
+    setIsOverlayComplete(true)
+
+    window.setTimeout(() => {
+      setIsOverlayOpen(false)
+      setIsOverlayComplete(false)
+      setOverlayProgress(0)
+    }, 650)
+  }
 
   const handleChangePhotoClick = () => {
     fileInputRef.current?.click()
@@ -97,6 +154,8 @@ export function EditProfilePage() {
     e.preventDefault()
     if (!originalProfileForm) return
 
+    startOverlay('save')
+
     const payload: Partial<UpdateProfileDto> = {}
 
     if (profileForm.fullName !== originalProfileForm.fullName) {
@@ -119,6 +178,8 @@ export function EditProfilePage() {
       }catch (e: any)
       {
         setSaveError(getApiErrorMessage(e))
+        failAndCloseOverlay()
+        return
       }
     }
 
@@ -127,24 +188,31 @@ export function EditProfilePage() {
     }
 
     if (Object.keys(payload).length === 0) {
+      failAndCloseOverlay()
       return
     }
 
-    const updated = await updateProfile.mutateAsync(payload)
-    setOriginalProfileForm({
-      fullName: updated.fullName,
-      username: updated.username,
-      bio: updated.bio ?? '',
-      AvatarUrl: updated.avatarUrl ?? '',
-    })
-    setProfileForm({
-      fullName: updated.fullName,
-      username: updated.username,
-      bio: updated.bio ?? '',
-      AvatarUrl: updated.avatarUrl ?? '',
-    })
-    setSelectedAvatarFile(null)
-    setAvatarPreviewUrl('')
+    try {
+      const updated = await updateProfile.mutateAsync(payload)
+      setOriginalProfileForm({
+        fullName: updated.fullName,
+        username: updated.username,
+        bio: updated.bio ?? '',
+        AvatarUrl: updated.avatarUrl ?? '',
+      })
+      setProfileForm({
+        fullName: updated.fullName,
+        username: updated.username,
+        bio: updated.bio ?? '',
+        AvatarUrl: updated.avatarUrl ?? '',
+      })
+      setSelectedAvatarFile(null)
+      setAvatarPreviewUrl('')
+      completeAndCloseOverlay()
+    } catch (e: any) {
+      setSaveError(getApiErrorMessage(e))
+      failAndCloseOverlay()
+    }
   }
 
 async function handleChangePassword(e: React.FormEvent) {
@@ -153,6 +221,8 @@ async function handleChangePassword(e: React.FormEvent) {
   if (!passwordForm.currentPassword || !passwordForm.newPassword) {
     return
   }
+
+  startOverlay('password')
 
   setPasswordError('')
 
@@ -166,8 +236,10 @@ async function handleChangePassword(e: React.FormEvent) {
       currentPassword: '',
       newPassword: '',
     })
+    completeAndCloseOverlay()
   } catch (e: any) {
     setPasswordError(getApiErrorMessage(e))
+    failAndCloseOverlay()
     return
   }
 }
@@ -375,8 +447,9 @@ async function handleChangePassword(e: React.FormEvent) {
               <button
                 type="submit"
                 className="btn-ghost rounded-xl px-5 py-2 text-sm font-medium"
+                disabled={changePassword.isPending}
               >
-                {t('editprofile.changepassword')}
+                {changePassword.isPending ? t('common.loading') : t('editprofile.changepassword')}
               </button>
 
               <button
@@ -390,6 +463,15 @@ async function handleChangePassword(e: React.FormEvent) {
           </div>
         </form>
       </div>
+
+      <UploadProgressOverlay
+        open={isOverlayOpen}
+        progress={overlayProgress}
+        isComplete={isOverlayComplete}
+        title={overlayTitle}
+        subtitle={overlaySubtitle}
+        completionText={overlayCompletionText}
+      />
     </div>
   )
 }

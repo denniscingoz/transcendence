@@ -18,6 +18,7 @@ export type ConversationDto = {
   id: string
   targetUserId: string
   targetUserName: string
+  targetUserAvatarUrl?: string | null
   lastMessage: string
   lastMessageAt?: string | null
   unreadCount: number

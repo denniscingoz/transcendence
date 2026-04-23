@@ -29,7 +29,17 @@
   "chat": {
     "title": "Chat",
     "send": "Send",
-    "placeholder": "Write a message..."
+    "placeholder": "Write a message...",
+    "chats": "Chats",
+    "searchUsers": "Search users...",
+    "selectConversation": "Select a conversation",
+    "loadingMessages": "Loading messages...",
+    "read": "Read",
+    "delivered": "Delivered",
+    "sent": "Sent",
+    "unread": "Unread",
+    "noMessagesYet": "No messages yet",
+    "typeMessage": "Type a message..."
   },
   "common": {
     "loading": "Loading...",

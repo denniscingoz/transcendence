@@ -212,7 +212,7 @@ public async Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId)
             TargetUserId = targetUserId,
             TargetUserName = targetUser?.Username ?? targetUserId.ToString()[..8],
             TargetUserAvatarUrl = targetUser?.AvatarFileId.HasValue == true
-                ? "/files/" + targetUser.AvatarFileId.Value
+                ? "/files/avatar/" + targetUser.AvatarFileId.Value
                 : null,
             LastMessage = c.LastMessageText ?? "",
             LastMessageAt = c.LastMessageAt,

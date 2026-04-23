@@ -29,7 +29,17 @@
   "chat": {
     "title": "Chat",
     "send": "Enviar",
-    "placeholder": "Escribe un mensaje..."
+    "placeholder": "Escribe un mensaje...",
+    "chats": "Mensajes",
+    "searchUsers": "Buscar usuarios...",
+    "selectConversation": "Selecciona una conversación",
+    "loadingMessages": "Cargando mensajes...",
+    "read": "Leído",
+    "delivered": "Entregado",
+    "sent": "Enviado",
+    "unread": "No leído",
+    "noMessagesYet": "Sin mensajes aún",
+    "typeMessage": "Escribe un mensaje..."
   },
   "common": {
     "loading": "Cargando...",
