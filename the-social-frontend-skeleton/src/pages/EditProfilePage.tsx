@@ -15,9 +15,9 @@ type EditProfileForm = {
 }
 
 const DUMMY_PROFILE_FORM: EditProfileForm = {
-  fullName: '...',
-  username: '...',
-  bio: '....',
+  fullName: '',
+  username: '',
+  bio: '',
   AvatarUrl:
     'https://placehold.co/200x200',
 }

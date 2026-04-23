@@ -3,6 +3,7 @@ import { setLanguage } from '../i18n/i18n'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth/AuthContext'
 import {deleteAccountApi} from '../api/auth.api'
+import { LanguageDropdown } from '../components/language/LanguageDropdown'
 
 function NavItem({ to, label }: { to: string; label: string }) {
   return (
@@ -41,7 +42,7 @@ export function SettingsPage() {
         
        { /*settings header and close x*/}
         <div className="mb-8 flex items-start justify-between">
-          <h1 className="text-2xl font-semibold text-text">{t('settings.privacy')}</h1>
+          <h1 className="text-2xl font-semibold text-text">{t('settings.Settings')}</h1>
           <button
             type="button"
             onClick={handleClose}
@@ -55,7 +56,7 @@ export function SettingsPage() {
         <div className="space-y-8">
 
           { /*2FA Auth*/}
-          <section className="space-y-3">
+          {/* <section className="space-y-3">
             <h2 className="text-lg font-semibold text-text">{t('settings.privacy')}</h2>
 
             <div className="flex items-center justify-between gap-4 bg-white rounded-xl border border-panel px-4 py-4">
@@ -69,7 +70,7 @@ export function SettingsPage() {
                 {t('settings.Activate')}
               </button>
             </div>
-          </section>
+          </section> */}
 
           { /*Log out*/}
           <section className="space-y-3">
@@ -115,12 +116,16 @@ export function SettingsPage() {
                     
           { /*Languages*/}
           <section className="space-y-3">
+           
             <h2 className="text-lg font-semibold text-text">{t('settings.language')}</h2>
 
             <div className="bg-white flex items-center justify-between gap-4 rounded-xl border border-panel px-4 py-4">
-              <p className="text-sm text-text">{t('settings.changelanguage')}.</p>
-
-              <select
+              
+                {/* Text */}
+                <p className="text-sm text-text">{t('settings.changelanguage')}.</p>
+          
+                {/* Dropdown Menu */}
+                {/* <select
                           className="rounded-full border border-black/10 bg-white px-4 py-2 text-sm"
                           value={i18n.language}
                           onChange={(e) => setLanguage(e.target.value as any)}
@@ -128,8 +133,15 @@ export function SettingsPage() {
                           <option value="en">EN</option>
                           <option value="fr">FR</option>
                           <option value="es">ES</option>
-                        </select>
+            
+               </select> */}
+                <LanguageDropdown
+                  value={i18n.language as 'en' | 'fr' | 'es'}
+                  onChange={(lang) => setLanguage(lang)}
+                />
+
             </div>
+
           </section>
 
         </div>

@@ -11,10 +11,11 @@ obj/
 # Rider / VS Code
 .idea/
 .vscode/
+.vs/
 .obsidian/
 .idea/
 #.vs/
-#backend/.vs/
+backend/.vs/
 
 # Copilot-generated local caches/sessions
 #**/CopilotSnapshots/
@@ -44,6 +45,7 @@ TestResults/
 node_modules/
 dist/
 build/
+uploads/
 
 *.swp
 *.bak

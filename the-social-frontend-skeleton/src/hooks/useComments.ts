@@ -3,10 +3,12 @@ import type { CommentPreviewDto, CursorPageDto} from '../types/api'
 import { getComments, postComment, deleteComment } from '../api/comment.api'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
+
 export function useComments(
   postId?: string,
   take = 12,
-  cursor?: string | null
+  cursor?: string | null,
+  enabled = true
 ) {
   const normalizedCursor = cursor ?? null
 
@@ -18,9 +20,16 @@ export function useComments(
       }
       return getComments(postId, take, normalizedCursor)
     },
-    enabled: !!postId,
+    enabled: !!postId && enabled,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.status === 404) {
+        return false
+      }
+      return failureCount < 2
+    },
   })
 }
+
 
 export function usePostComment(postId: string) {
   const queryClient = useQueryClient()
@@ -58,7 +67,7 @@ export function useDeleteComment(postId: string) {
     },
     onSuccess: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['comments', postId] }),
+        queryClient.invalidateQueries({ queryKey: ['posts', postId, 'comments'] }),
         queryClient.invalidateQueries({ queryKey: ['post', postId] }),
       ])
     },

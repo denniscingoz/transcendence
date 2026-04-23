@@ -1,13 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { mockPosts, mockComments, mockFeedComments, mockFeedPosts } from '../../mocks/posts'
-import { usePost } from '../../hooks/usePost'
-import { useComments, usePostComment } from '../../hooks/useComments'
-import { useState } from 'react'
+import { usePost, useDeletePost } from '../../hooks/usePost'
+import { useComments, usePostComment, useDeleteComment } from '../../hooks/useComments'
 import { ProtectedPostThumbContent } from '../ui/ProtectedPostThumb'
 import { PostDto } from '../../types/api'
 import api from '../../api/axios'
-import { useQueryClient } from '@tanstack/react-query'
+import { useMyProfile } from '../../hooks/useProfile'
+import { LikesModal } from './LikesModal'
 
 type PostDetailModalProps = {
   postId: string
@@ -19,28 +18,71 @@ export function PostDetailModal({
   onClose,
 }: PostDetailModalProps) {
   const { t } = useTranslation()
-  const { data: post, isLoading: isPostLoading, error: postError } = usePost(postId)
-  const { data: commentsData, isLoading: areCommentsLoading, error: commentsError } = useComments(postId)   
+
+  const [content, setContent] = useState('')
+  const [localPost, setLocalPost] = useState<PostDto | null>(null)
+  const [isPostDeleted, setIsPostDeleted] = useState(false)
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null)
+  const [isLikesModalOpen, setIsLikesModalOpen] = useState(false)
+
+  const postCommentMutation = usePostComment(postId)
+  const deleteCommentMutation = useDeleteComment(postId)
+  const deletePostMutation = useDeletePost()
+  const isDeletingPost = deletePostMutation.isPending
+  const shouldLoadPost = !isDeletingPost && !isPostDeleted
+
+  const { data: myProfileResponse } = useMyProfile()
+  const currentUserId = myProfileResponse?.id
+
+  const { data: post, isLoading: isPostLoading, error: postError } = usePost(postId, shouldLoadPost)
+  const isOwner = !!post && !!currentUserId && post.authorId === currentUserId
+
+  const {
+    data: commentsData,
+    isLoading: areCommentsLoading,
+    error: commentsError,
+  } = useComments(postId, 12, null, !isDeletingPost && !isPostDeleted)
   const comments = commentsData?.items ?? []
 
-  // const comments = allComments.filter((comment) => comment.postId === postId)
-  const [content, setContent] = useState('')
-  const postCommentMutation = usePostComment(postId)
-  const [localPost, setLocalPost] = useState<PostDto | null>(null)
-  
-  const queryClient = useQueryClient()
-
   const handlePostComment = async () => {
-  const trimmedContent = content.trim()
-  if (!trimmedContent) return
+    const trimmedContent = content.trim()
+    if (!trimmedContent) return
 
-  try {
-    await postCommentMutation.mutateAsync(trimmedContent)
-    setContent('')
-  } catch (error) {
-    console.error('Failed to post comment:', error)
+    try {
+      await postCommentMutation.mutateAsync(trimmedContent)
+      setContent('')
+    } catch (error) {
+      console.error('Failed to post comment:', error)
+    }
   }
-}
+
+  const handleDeleteComment = async (commentId: string) => {
+    setDeletingCommentId(commentId)
+    try {
+      await deleteCommentMutation.mutateAsync(commentId)
+    } catch (error) {
+      console.error('Failed to delete comment:', error)
+    } finally {
+      setDeletingCommentId(null)
+    }
+  }
+
+  const handleDeletePost = async () => {
+    setIsPostDeleted(true)
+    try {
+      await deletePostMutation.mutateAsync(postId)
+      onClose()
+    } catch (error) {
+      setIsPostDeleted(false)
+      console.error('Failed to delete post:', error)
+    }
+  }
+
+  const openLikesModal = () => {
+    if (!isOwner) return
+    setIsLikesModalOpen(true)
+  }
+
   useEffect(() => {
     const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -49,8 +91,7 @@ export function PostDetailModal({
       document.body.style.overflow = originalOverflow
     }
   }, [])
-  
- 
+
   useEffect(() => {
     if (post) setLocalPost(post)
   }, [post])
@@ -87,12 +128,11 @@ export function PostDetailModal({
     if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K'
     return n.toString()
   }
-   
+
   if (isPostLoading) return <div>{t('postdetail.loading')}</div>
   if (postError || !displayPost) return <div>{t('postdetail.postnotfound')}</div>
   if (areCommentsLoading) return <div>{t('postdetail.loading')}</div>
   if (commentsError) return <div>{t('postdetail.commentnotfound')}</div>
-
 
   return (
     <div
@@ -103,62 +143,99 @@ export function PostDetailModal({
         onClick={(e) => e.stopPropagation()}
         className="panel relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 space-y-6"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-sm text-gray-500 hover:text-black"
-        >
-          {t('postdetail.close')}
-        </button>
+        <div>
+          <button
+            onClick={onClose}
+            className="btn-ghost absolute right-6 top-4 flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-text hover:bg-gray-100"
+            >
+            ×
+          </button>
+        </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4 pt-2">
           <img
-            src={displayPost.authorAvatarUrl ?  `${import.meta.env.VITE_API_BASE_URL}${displayPost.authorAvatarUrl}` : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'}
+            src={displayPost.authorAvatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${displayPost.authorAvatarUrl}` : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'}
             alt=""
-            className="w-12 h-12 rounded-full object-cover"
+            className="h-12 w-12 rounded-full object-cover"
           />
+
           <div>
             <div className="font-semibold">{displayPost.authorFullName}</div>
             <div className="text-sm text-gray-500">@{displayPost.authorUsername}</div>
           </div>
+
+          <div className="ml-auto">
+            {isOwner && (
+              <button
+                onClick={handleDeletePost}
+                className="rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white hover:opacity-80"
+              >
+                {t('postdetail.delete')}
+              </button>
+            )}
+          </div>
         </div>
+
         <div className="w-full rounded-2xl object-cover">
-        <ProtectedPostThumbContent fileUrl={displayPost.imageUrl} contentType={displayPost.contentType} />
+          <ProtectedPostThumbContent fileUrl={displayPost.imageUrl} contentType={displayPost.contentType} />
         </div>
 
         <p>{displayPost.content}</p>
-       <button
-          onClick={toggleLike}
-          className="flex items-center gap-2 group"
-        >
-          {localPost?.isLikedByCurrentUser ? (
-            <HeartFilledIcon className="w-7 h-7 text-red-500" />
-          ) : (
-            <HeartIcon className="w-7 h-7 text-gray-700 transition-colors group-hover:text-red-500" />
-          )}
-          <span className="text-sm text-gray-600">
-            {formatCount(localPost?.likesCount ?? 0)}
-          </span>
-        </button>
 
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleLike}
+            className="group flex items-center gap-2"
+          >
+            {localPost?.isLikedByCurrentUser ? (
+              <HeartFilledIcon className="h-7 w-7 text-red-500" />
+            ) : (
+              <HeartIcon className="h-7 w-7 text-gray-700 transition-colors group-hover:text-red-500" />
+            )}
+            <span className="text-sm text-gray-600">
+              {formatCount(localPost?.likesCount ?? 0)}
+            </span>
+          </button>
 
-        {/* Visualize comments */}
+          <button
+            type="button"
+            onClick={openLikesModal}
+            disabled={!isOwner}
+            className={`text-sm ${isOwner ? 'text-gray-600 hover:underline' : 'cursor-default text-gray-400'}`}
+          >
+            {(localPost?.likesCount ?? 0) > 1 ? t('postdetail.likes') : t('postdetail.like')}
+          </button>
+        </div>
+
         <div className="space-y-4">
           {comments.map((comment) => (
-            <div key={comment.id} className="flex gap-3 items-start">
+            <div key={comment.id} className="flex items-start gap-3">
               <img
                 src={
-                  comment.authorProfileImageUrl ?  `${import.meta.env.VITE_API_BASE_URL}${comment.authorProfileImageUrl}` :
-                  'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
+                  comment.authorProfileImageUrl
+                    ? `${import.meta.env.VITE_API_BASE_URL}${comment.authorProfileImageUrl}`
+                    : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
                 }
                 alt=""
-                className="w-10 h-10 rounded-full object-cover"
+                className="h-10 w-10 rounded-full object-cover"
               />
-              <div>
-                <div className="flex gap-2 items-center">
+
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
                   <span className="font-semibold">{comment.fullName}</span>
-                  <span className="text-sm text-gray-500">
-                    @{comment.username}
-                  </span>
+                  <span className="text-sm text-gray-500">@{comment.username}</span>
+                  {comment.authorId === currentUserId && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteComment(comment.id)}
+                      disabled={deleteCommentMutation.isPending}
+                      className="ml-auto text-xs text-gray-400 hover:text-red-600 disabled:opacity-50"
+                      aria-label="Delete comment"
+                      title="Delete comment"
+                    >
+                      {deletingCommentId === comment.id ? '...' : 'x'}
+                    </button>
+                  )}
                 </div>
                 <p>{comment.content}</p>
               </div>
@@ -166,8 +243,7 @@ export function PostDetailModal({
           ))}
         </div>
 
-          {/* {Enter and Click to Post Comment} */}
-        <div className="flex gap-3 items-center">
+        <div className="flex items-center gap-3">
           <input
             type="text"
             placeholder={t('postdetail.writeacomment')}
@@ -180,20 +256,26 @@ export function PostDetailModal({
               }
             }}
             disabled={postCommentMutation.isPending}
-            className="flex-1 border border-gray-300 rounded-full px-4 py-2 outline-none"
+            className="flex-1 rounded-full border border-gray-300 px-4 py-2 outline-none"
           />
-        
+
           <button
             type="button"
             onClick={handlePostComment}
             disabled={postCommentMutation.isPending || !content.trim()}
-            className="bg-black text-white px-4 py-2 rounded-full disabled:opacity-50"
+            className="rounded-full bg-black px-4 py-2 text-white disabled:opacity-50"
           >
             {postCommentMutation.isPending ? t('postdetail.posting') : t('postdetail.post')}
           </button>
         </div>
-
       </div>
+
+      {isLikesModalOpen && (
+        <LikesModal
+          postId={postId}
+          onClose={() => setIsLikesModalOpen(false)}
+        />
+      )}
     </div>
   )
 }

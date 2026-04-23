@@ -57,7 +57,6 @@
     "username": "Username",
     "savechanges": "Save Changes",
     "discard": "Discard",
-    
     "changepassword": "Change Password",
     "oldpassword": "Old Password",
     "newpassword": "New Password"
@@ -67,12 +66,14 @@
   {
     "close": "Close",
     "likes": "Likes",
+    "like": "Like",
     "post": "Post",
     "posting": "Posting..",
     "writeacomment": "Write a comment..." ,
     "loading": "Loading...",
     "postnotfound": "Post not found.",
-    "commentnotfound": "Comments not found."
+    "commentnotfound": "Comments not found.",
+    "delete": "Delete"
 
   },
   "searchpage":
@@ -98,5 +99,30 @@
   "feed":
   {
     "nothingtoshow": "Nothing to show"
-  }
+  },
+  "auth":
+  {
+    "email": "Email",
+    "password": "Password",
+    "signin": "Sign in",
+    "or": "OR",
+    "fullname": "Full name",
+    "username": "Username",
+    "signup": "Sign up",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "loggingin": "Logging in...",
+    "fullnameRequired": "Full name is required",
+    "usernameRequired": "Username is required",
+    "signingup": "Signing up...",
+    "signingin": "Signing in..." 
+  },
+  "privacyPolicy": {
+    "header": "Privacy Policy",
+    "body": "Last updated: April 2026\n\nThis Privacy Policy explains how we collect, use, and protect your information when you use our social networking platform (\"the Service\").\n\n1. Information We Collect\n\nWe may collect the following types of data:\n\n• Account information: email address, username, password (stored securely and hashed)\n• Profile data: avatar, bio, and other optional profile details\n• User-generated content: posts, comments, messages, and interactions with other users\n• Usage data: activity on the platform (e.g., likes, follows, connections)\n• Technical data: IP address, browser type, and device information\n\n2. How We Use Your Data\n\nWe use your data to:\n\n• Provide and maintain the Service\n• Allow user interaction (posts, messaging, profiles, etc.)\n• Improve user experience and platform performance\n• Ensure security and prevent abuse\n• Comply with legal obligations\n\n3. Data Sharing\n\nWe do not sell your personal data.\n\nWe may share data only:\n\n• When required by law\n• To protect the platform from abuse or security threats\n\n4. Data Storage and Security\n\nWe take reasonable measures to protect your data, including:\n\n• Secure password hashing\n• Access controls\n• Encrypted connections (HTTPS)\n\nHowever, no system is completely secure, and we cannot guarantee absolute security.\n\n5. User Rights\n\nYou have the right to:\n\n• Access your personal data\n• Update or delete your account\n• Request deletion of your data\n\nTo exercise these rights, contact us at: denizcaglarcingoz@gmail.com\n\n6. Data Retention\n\nWe retain your data as long as your account is active.\nDeleted accounts may have their data removed or anonymized within a reasonable timeframe.\n\n7. Cookies and Tracking\n\nWe may use basic cookies or similar technologies to:\n\n• Maintain user sessions\n• Improve functionality\n\n8. Changes to This Policy\n\nWe may update this Privacy Policy from time to time. Continued use of the Service means you accept the updated version.\n\n9. Contact\n\nIf you have any questions, contact us at: denizcaglarcingoz@gmail.com"
+  },
+  "termsService": {
+  "header": "Terms of Service",
+  "body": "Last updated: April 2026\n\nBy accessing or using this platform (\"the Service\"), you agree to the following Terms of Service.\n\n1. Use of the Service\n\nYou agree to use the Service only for lawful purposes and in a respectful manner.\n\nYou must not:\n\n• Post illegal, harmful, or abusive content\n• Harass, threaten, or impersonate other users\n• Attempt to hack, disrupt, or misuse the platform\n\n2. User Accounts\n\n• You are responsible for maintaining the confidentiality of your account\n• You are responsible for all activity under your account\n• You must provide accurate information when registering\n\n3. User Content\n\nYou retain ownership of the content you post.\n\nHowever, by posting content, you grant us a non-exclusive right to:\n\n• Display and distribute your content within the platform\n• Use it for functionality (e.g., feeds, profiles, interactions)\n\nYou are solely responsible for the content you publish.\n\n4. Content Moderation\n\nWe reserve the right to:\n\n• Remove content that violates these terms\n• Suspend or ban accounts engaging in harmful behavior\n\n5. Availability of the Service\n\nWe aim to provide a reliable service but do not guarantee:\n\n• Continuous availability\n• Error-free operation\n\nThe Service is provided \"as is\".\n\n6. Termination\n\nWe may suspend or terminate your account if:\n\n• You violate these Terms\n• Your actions harm the platform or other users\n\nYou may stop using the Service at any time.\n\n7. Limitation of Liability\n\nWe are not responsible for:\n\n• User-generated content\n• Interactions between users\n• Any damages resulting from use of the Service\n\n8. Changes to the Terms\n\nWe may update these Terms at any time. Continued use of the Service means you accept the changes.\n\n9. Contact\n\nFor questions, contact us at: denizcaglarcingoz@gmail.com"
+}
 }

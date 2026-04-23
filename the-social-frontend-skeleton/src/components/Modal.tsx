@@ -42,12 +42,14 @@ export function Modal({
         onClick={(e) => e.stopPropagation()}
         className="panel w-full max-w-3xl p-6 relative"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-sm text-gray-500 hover:text-black"
-        >
-          {t('searchpage.close')}
-        </button>
+        <div>
+          <button
+            onClick={onClose}
+            className="btn-ghost absolute right-6 top-4 flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-text hover:bg-gray-100"
+            >
+            ×
+          </button>
+        </div>
 
         <h2 className="mb-4 text-lg font-semibold">{title}</h2>
 
