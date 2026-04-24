@@ -21,8 +21,8 @@ services:
     build:
       context: .
       dockerfile: backend/Transcendence.Api/Dockerfile
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     env_file: .env
     environment:
       ASPNETCORE_URLS: http://0.0.0.0:8080
@@ -45,8 +45,8 @@ services:
       context: .
       dockerfile: docker/nginx/Dockerfile
     ports:
-      - "8081:80"
-      - "8443:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./docker/nginx/certs:/etc/nginx/certs:ro
     depends_on:
@@ -54,4 +54,4 @@ services:
 
 volumes:
   pgdata:
-  uploads_data:
+  #uploads_data: //api bind mount can be changed later to a volume, for production

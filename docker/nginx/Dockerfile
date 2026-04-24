@@ -9,6 +9,7 @@ RUN npm run build
 
 FROM nginx:alpine
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-COPY --from=webbuild /web/dist /usr/share/nginx/html
+#frontend is served by Nginx from static files
+COPY --from=webbuild /web/dist /usr/share/nginx/html 
 
 EXPOSE 80 443

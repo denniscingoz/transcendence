@@ -9,7 +9,7 @@ Thumbs.db
 
 # Secrets
 .env
-.env.*
+
 docker/nginx/certs/
 
 # Logs / temp
