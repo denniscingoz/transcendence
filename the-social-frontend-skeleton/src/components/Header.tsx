@@ -3,25 +3,26 @@ import { NavLink } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { useRealtime } from '../realtime/RealtimeProvider'
 import {
-  getConversations,
-  type ConversationDto,
   type ChatMessageDto,
   type RealtimeNotificationDto,
   NotificationType,
-  type FriendshipRequestEventDto,
 } from '../api/chat.api'
 import {
-  getFriendshipRequests,
   acceptFriendshipRequest,
   declineFriendshipRequest,
-  type FriendshipRequestDto,
 } from '../api/friends.api'
+import {
+  getNotifications,
+  markAllNotificationsAsRead,
+  type NotificationListItemDto,
+} from '../api/notifications.api'
 import { NotificationsModal } from './modals/NotificationsModal'
+
 interface HeaderProps {
   showNotification?: boolean
 }
 
- export type UiNotificationKind =
+export type UiNotificationKind =
   | 'unread_chat'
   | 'friend_request'
   | 'friend_request_accepted'
@@ -36,9 +37,9 @@ export type UiNotification = {
   isUnread?: boolean
   relatedUserId?: string
   relatedConversationId?: string
+  relatedRequestId?: string
   actionUserId?: string
 }
- 
 
 function playSystemBeep() {
   try {
@@ -64,11 +65,36 @@ function playSystemBeep() {
   }
 }
 
+function mapNotificationTypeToKind(type: number): UiNotificationKind {
+  if (type === NotificationType.FriendRequest) return 'friend_request'
+  if (type === NotificationType.FriendRequestAccepted) return 'friend_request_accepted'
+  if (type === NotificationType.FriendRequestDeclined) return 'friend_request_declined'
+  return 'unread_chat'
+}
+
+function toUiNotification(item: NotificationListItemDto): UiNotification {
+  return {
+    id: item.id,
+    kind: mapNotificationTypeToKind(item.type),
+    text: item.text,
+    avatarUrl: item.avatarUrl ?? null,
+    createdAt: item.createdAt,
+    isUnread: !item.isRead,
+    relatedUserId: item.actorUserId ?? undefined,
+    relatedConversationId: item.relatedConversationId ?? undefined,
+    relatedRequestId: item.relatedRequestId ?? undefined,
+    actionUserId:
+      item.type === NotificationType.FriendRequest
+        ? item.actorUserId ?? undefined
+        : undefined,
+  }
+}
+
 export function Header({ showNotification = true }: HeaderProps) {
   const [unreadCount, setUnreadCount] = useState(0)
-  const [friendRequestCount, setFriendRequestCount] = useState(0)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [notifications, setNotifications] = useState<UiNotification[]>([])
+  const [activeChatConversationId, setActiveChatConversationId] = useState<string | null>(null)
 
   const { user } = useAuth()
   const { connection, isConnected } = useRealtime()
@@ -79,93 +105,77 @@ export function Header({ showNotification = true }: HeaderProps) {
     if (!currentUserId) return
 
     try {
-      const [conversations, friendshipRequests] = await Promise.all([
-        getConversations(currentUserId),
-        getFriendshipRequests(),
-      ])
+      const list = await getNotifications()
 
-      const unreadMessages = conversations.reduce(
-        (sum, item) => sum + (item.unreadCount ?? 0),
-        0
-      )
+      const visibleUnreadCount = list.filter(item => {
+        const isRead = item.isRead
+        const isActiveChatNotification =
+          item.type === NotificationType.NewMessage &&
+          item.relatedConversationId === activeChatConversationId
 
-      setUnreadCount(unreadMessages)
-      setFriendRequestCount(friendshipRequests.length)
+        return !isRead && !isActiveChatNotification
+      }).length
+
+      setUnreadCount(visibleUnreadCount)
     } catch (err) {
       console.error('Failed to load header summary', err)
     }
   }
-function upsertNotification(nextItem: UiNotification) {
-  setNotifications(prev => {
-    const filtered = prev.filter(item => item.id !== nextItem.id)
-    return [nextItem, ...filtered].sort((a, b) => {
-      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0
-      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0
-      return bTime - aTime
-    })
-  })
-}
- async function loadNotifications() {
-  if (!currentUserId) return
 
-  try {
-    const [conversations, friendshipRequests] = await Promise.all([
-      getConversations(currentUserId),
-      getFriendshipRequests(),
-    ])
+  async function loadNotifications() {
+    if (!currentUserId) return
 
-    const unreadChatNotifications: UiNotification[] = conversations
-      .filter(item => (item.unreadCount ?? 0) > 0)
-      .map(item => ({
-        id: `chat-${item.id}`,
-        kind: 'unread_chat',
-        text: `${item.targetUserName} sent you ${item.unreadCount} unread message${item.unreadCount > 1 ? 's' : ''}`,
-        avatarUrl: null,
-        createdAt: item.lastMessageAt ?? undefined,
-        isUnread: true,
-        relatedUserId: item.targetUserId,
-        relatedConversationId: item.id,
-      }))
+    try {
+      const list = await getNotifications()
 
-    const friendRequestNotifications: UiNotification[] = friendshipRequests.map(
-      (request: FriendshipRequestDto) => ({
-        id: `friend-request-${request.id}`,
-        kind: 'friend_request',
-        text: `Friend request from ${request.requesterId}`,
-        avatarUrl: null,
-        createdAt: request.createdAt,
-        isUnread: true,
-        relatedUserId: request.requesterId,
-        actionUserId: request.requesterId,
+      const filtered = list.filter(item => {
+        const isRead = item.isRead
+        const isActiveChatNotification =
+          item.type === NotificationType.NewMessage &&
+          item.relatedConversationId === activeChatConversationId
+
+        return !isRead && !isActiveChatNotification
       })
-    )
 
-    const allNotifications = [
-      ...friendRequestNotifications,
-      ...unreadChatNotifications,
-    ].sort((a, b) => {
-      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0
-      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0
-      return bTime - aTime
-    })
-
-    setNotifications(allNotifications)
-  } catch (err) {
-    console.error('Failed to load notifications', err)
+      setNotifications(filtered.map(toUiNotification))
+    } catch (err) {
+      console.error('Failed to load notifications', err)
+    }
   }
-}
 
+  async function refreshNotificationsUi() {
+    await loadHeaderSummary()
+
+    if (isNotificationsOpen) {
+      await loadNotifications()
+    }
+  }
 
   async function handleBellClick() {
     setIsNotificationsOpen(true)
     await loadNotifications()
+    await loadHeaderSummary()
+  }
+
+  async function handleCloseNotifications() {
+    try {
+      await markAllNotificationsAsRead()
+      setNotifications([])
+      setUnreadCount(0)
+      setIsNotificationsOpen(false)
+    } catch (err) {
+      console.error('Failed to mark notifications as read', err)
+    }
   }
 
   async function handleAcceptFriendRequest(requesterId: string) {
     try {
       await acceptFriendshipRequest(requesterId)
-      await loadHeaderSummary()
-      await loadNotifications()
+      await markAllNotificationsAsRead()
+      setNotifications([])
+      setUnreadCount(0)
+      setIsNotificationsOpen(false)
+      await refreshNotificationsUi()
     } catch (err) {
       console.error('Failed to accept friend request', err)
     }
@@ -174,17 +184,50 @@ function upsertNotification(nextItem: UiNotification) {
   async function handleDeclineFriendRequest(requesterId: string) {
     try {
       await declineFriendshipRequest(requesterId)
-      await loadHeaderSummary()
-      await loadNotifications()
+      await markAllNotificationsAsRead()
+      setNotifications([])
+      setUnreadCount(0)
+      setIsNotificationsOpen(false)
+      await refreshNotificationsUi()
     } catch (err) {
       console.error('Failed to decline friend request', err)
     }
   }
 
   useEffect(() => {
+    function handleActiveChatChanged(event: Event) {
+      const customEvent = event as CustomEvent<{ conversationId: string | null }>
+      setActiveChatConversationId(customEvent.detail?.conversationId ?? null)
+    }
+
+    window.addEventListener('active-chat-changed', handleActiveChatChanged)
+
+    return () => {
+      window.removeEventListener('active-chat-changed', handleActiveChatChanged)
+    }
+  }, [])
+
+  useEffect(() => {
+    function handleNotificationsVisualRefresh() {
+      void refreshNotificationsUi()
+    }
+
+    window.addEventListener('notifications-visual-refresh', handleNotificationsVisualRefresh)
+
+    return () => {
+      window.removeEventListener('notifications-visual-refresh', handleNotificationsVisualRefresh)
+    }
+  }, [isNotificationsOpen, activeChatConversationId, currentUserId])
+
+  useEffect(() => {
     if (!currentUserId) return
-    void loadHeaderSummary()
+    void refreshNotificationsUi()
   }, [currentUserId])
+
+  useEffect(() => {
+    if (!currentUserId) return
+    void refreshNotificationsUi()
+  }, [activeChatConversationId])
 
   useEffect(() => {
     if (!connection || !currentUserId || !isConnected) return
@@ -193,111 +236,45 @@ function upsertNotification(nextItem: UiNotification) {
       if (notification.type === NotificationType.NewMessage) {
         const payload = notification.payload as ChatMessageDto
         const isMyOwnMessage = payload.senderId === currentUserId
+        const isActiveChatMessage = payload.conversationId === activeChatConversationId
 
         if (isMyOwnMessage) return
 
-        playSystemBeep()
-        void loadHeaderSummary()
-
-        if (isNotificationsOpen) {
-          void loadNotifications()
+        if (isActiveChatMessage) {
+          void refreshNotificationsUi()
+          return
         }
-
-        return
       }
 
-      if (notification.type === NotificationType.FriendRequest) {
-        const payload = notification.payload as FriendshipRequestEventDto
+      playSystemBeep()
+      void refreshNotificationsUi()
+    }
 
-        if (payload.targetUserId !== currentUserId) return
+    const handleNotificationsChanged = () => {
+      void refreshNotificationsUi()
+    }
 
-        playSystemBeep()
-        void loadHeaderSummary()
+    const handleConversationsChanged = () => {
+      void refreshNotificationsUi()
+    }
 
-        upsertNotification({
-          id: `friend-request-${payload.requestId}`,
-          kind: 'friend_request',
-          text: `${payload.requesterUsername} sent you a friend request`,
-          avatarUrl: payload.requesterAvatarUrl ?? null,
-          createdAt: payload.createdAt,
-          isUnread: true,
-          relatedUserId: payload.requesterId,
-          actionUserId: payload.requesterId,
-        })
-
-        return
-      }
-
-  if (notification.type === NotificationType.FriendRequestAccepted) {
-    const payload = notification.payload as FriendshipRequestEventDto
-
-    if (payload.requesterId !== currentUserId) return
-
-    playSystemBeep()
-
-    upsertNotification({
-      id: `friend-request-accepted-${payload.requestId}`,
-      kind: 'friend_request_accepted',
-      text: `${payload.requesterUsername} accepted your friend request`,
-      avatarUrl: payload.requesterAvatarUrl ?? null,
-      createdAt: payload.createdAt,
-      isUnread: true,
-      relatedUserId: payload.targetUserId,
-    })
-
-    return
-  }
-
-  if (notification.type === NotificationType.FriendRequestDeclined) {
-    const payload = notification.payload as FriendshipRequestEventDto
-
-    if (payload.requesterId !== currentUserId) return
-
-    playSystemBeep()
-
-    upsertNotification({
-      id: `friend-request-declined-${payload.requestId}`,
-      kind: 'friend_request_declined',
-      text: `${payload.requesterUsername} declined your friend request`,
-      avatarUrl: payload.requesterAvatarUrl ?? null,
-      createdAt: payload.createdAt,
-      isUnread: true,
-      relatedUserId: payload.targetUserId,
-    })
-
-    return
-  }
-}
-
-  const handleConversationsChanged = () => {
-  void loadHeaderSummary()
-
-  if (isNotificationsOpen) {
-    void loadNotifications()
-  }
-  }
-
-  const handleNotificationsChanged = () => {
-    void loadHeaderSummary()
-  }
     connection.on('NotificationReceived', handleNotificationReceived)
-    connection.on('ConversationsChanged', handleConversationsChanged)
     connection.on('NotificationsChanged', handleNotificationsChanged)
+    connection.on('ConversationsChanged', handleConversationsChanged)
 
     return () => {
       connection.off('NotificationReceived', handleNotificationReceived)
-      connection.off('ConversationsChanged', handleConversationsChanged)
       connection.off('NotificationsChanged', handleNotificationsChanged)
+      connection.off('ConversationsChanged', handleConversationsChanged)
     }
-  }, [connection, currentUserId, isConnected, isNotificationsOpen])
+  }, [connection, currentUserId, isConnected, isNotificationsOpen, activeChatConversationId])
 
-  const totalNotifications = unreadCount + friendRequestCount
-  const hasNotifications = totalNotifications > 0
+  const hasNotifications = unreadCount > 0
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-100">
-        <div className="mx-auto w-full max-w-6xl px-4 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-40 border-b border-gray-100 bg-white">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4">
           <NavLink to="/feed">
             <TheSocialLogo className="h-4 w-auto text-gray-900" />
           </NavLink>
@@ -307,14 +284,14 @@ function upsertNotification(nextItem: UiNotification) {
               <button
                 type="button"
                 onClick={() => void handleBellClick()}
-                className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="relative rounded-full p-2 transition-colors hover:bg-gray-100"
               >
-                <BellIcon className="w-6 h-6 text-gray-700" />
+                <BellIcon className="h-6 w-6 text-gray-700" />
                 {hasNotifications && (
                   <>
-                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full" />
-                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
-                      {totalNotifications > 99 ? '99+' : totalNotifications}
+                    <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full bg-red-500" />
+                    <span className="absolute -right-1 -top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] text-white">
+                      {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   </>
                 )}
@@ -325,13 +302,13 @@ function upsertNotification(nextItem: UiNotification) {
       </header>
 
       {isNotificationsOpen && (
-      <NotificationsModal
-        onClose={() => setIsNotificationsOpen(false)}
-        notifications={notifications}
-        onAcceptFriendRequest={(requesterId) => void handleAcceptFriendRequest(requesterId)}
-        onDeclineFriendRequest={(requesterId) => void handleDeclineFriendRequest(requesterId)}
-      />
-    )}
+        <NotificationsModal
+          onClose={() => void handleCloseNotifications()}
+          notifications={notifications}
+          onAcceptFriendRequest={handleAcceptFriendRequest}
+          onDeclineFriendRequest={handleDeclineFriendRequest}
+        />
+      )}
     </>
   )
 }

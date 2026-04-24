@@ -14,6 +14,10 @@ using Transcendence.Application.Files.Interface;
 using Transcendence.Application.Files.Service;
 using Transcendence.Application.Posts.Interfaces;
 using Transcendence.Application.Posts.Services;
+using Transcendence.Application.Notifications.Interfaces;
+using Transcendence.Application.Notifications.Services;
+
+
 
 namespace Transcendence.Application;
 
@@ -44,6 +48,7 @@ public static class DependencyInjection
 		//Friends
 		services.AddScoped<IFriendsService, FriendsService>();
 
+		services.AddScoped<INotificationsService, NotificationsService>();
 		return services;
 	}
 

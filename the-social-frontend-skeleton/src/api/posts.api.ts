@@ -25,7 +25,7 @@ export async function uploadPostFile(file: File) {
   const response = await api.post('/files', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
-    },
+    },  
   })
 
   return response.data.data.fileId

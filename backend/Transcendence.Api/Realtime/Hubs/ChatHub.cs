@@ -27,13 +27,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
         _presenceService = presenceService;
         _notificationService = notificationService;
     }
-
-    // public override async Task OnConnectedAsync() // triggered when a client establishes a SignalR connection
-    // {
-    //     var userId = GetUserId();
  
-    //       if (_presenceService.AddConnection(userId, Context.ConnectionId)) // returns true if this is the first active connection (user just became online)
-    //     {
     public override async Task OnConnectedAsync()
 {
     var userId = GetUserId();
@@ -127,35 +121,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
     }
 
     await base.OnDisconnectedAsync(exception);
-}
-
-    // public override async Task OnDisconnectedAsync(Exception? exception)//triggered when a SignalR connection is closed (tab closed, network lost, etc.)
-    // {
-    //     var userId = TryGetCurrentUserId();
-
-    //     if (userId is not null)
-    //     {
-    //         // await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupNames.User(userId.Value)); //not necessary
-    //         if (_presenceService.RemoveConnection(userId.Value, Context.ConnectionId)) // no more
-    //         {
-    //             var presence = new PresenceEventDto
-    //             {
-    //                 UserId = userId.Value,
-    //                 IsOnline = false,
-    //                 ChangedAt = DateTimeOffset.UtcNow
-    //             };
-    //             var userConversations = await _chatService.GetUserConversationsIds(userId.Value);
-
-    //             foreach(var conv in userConversations)
-    //                 await Clients.Group(GroupNames.Conversation(conv)).UserOffLine(presence);
-    //         }
-
-    //     }
-    //     await base.OnDisconnectedAsync(exception); 
-
-    //     //OnDisconnectedAsync is a lifecycle hook provided by SignalR. It is invoked by the framework when a client connection is terminated. We override it to execute domain-specific cleanup logic, while still calling the base implementation to allow SignalR to perform its internal resource cleanup. At this point, the HTTP request is already completed, but the authenticated user’s ClaimsPrincipal is still available via the Hub context.
-    // }
-
+} 
     public async Task JoinConversation(Guid conversationId) // user opened a chat → subscribe connection to conversation group
     {
         var userId = GetUserId();

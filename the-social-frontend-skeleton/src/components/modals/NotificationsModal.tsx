@@ -4,8 +4,8 @@ import type { UiNotification } from '../Header'
 type NotificationsModalProps = {
   onClose: () => void
   notifications: UiNotification[]
-  onAcceptFriendRequest: (requesterId: string) => void
-  onDeclineFriendRequest: (requesterId: string) => void
+  onAcceptFriendRequest: (requesterId: string) => Promise<void>
+  onDeclineFriendRequest: (requesterId: string) => Promise<void>
 }
 
 export function NotificationsModal({
@@ -21,7 +21,7 @@ export function NotificationsModal({
           <div className="text-gray-500">No notifications</div>
         ) : (
           notifications.map(item => (
-            <div key={item.id} className="card p-4 flex items-center gap-4">
+            <div key={item.id} className="card flex items-center gap-4 p-4">
               <img
                 className="h-12 w-12 rounded-full border object-cover"
                 src={
@@ -45,7 +45,9 @@ export function NotificationsModal({
                   <div className="mt-3 flex gap-2">
                     <button
                       type="button"
-                      onClick={() => onAcceptFriendRequest(item.actionUserId!)}
+                      onClick={async () => {
+                        await onAcceptFriendRequest(item.actionUserId!)
+                      }}
                       className="rounded-full bg-green-500 px-4 py-2 text-white transition-colors hover:bg-green-600"
                     >
                       Accept
@@ -53,7 +55,9 @@ export function NotificationsModal({
 
                     <button
                       type="button"
-                      onClick={() => onDeclineFriendRequest(item.actionUserId!)}
+                      onClick={async () => {
+                        await onDeclineFriendRequest(item.actionUserId!)
+                      }}
                       className="rounded-full bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600"
                     >
                       Decline

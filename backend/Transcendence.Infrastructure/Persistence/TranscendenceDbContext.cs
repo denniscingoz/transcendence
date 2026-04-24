@@ -6,6 +6,8 @@ using Transcendence.Domain.Posts;
 using Transcendence.Domain.Friends;
 using Transcendence.Domain.Files;
 using Transcendence.Domain.Chat;
+using Transcendence.Domain.Notifications;
+using Microsoft.AspNetCore.Identity;
 
 namespace Transcendence.Infrastructure.Persistence;
 
@@ -33,7 +35,7 @@ public class TranscendenceDbContext: DbContext
     public DbSet<Conversation> Conversations => Set<Conversation>();
     public DbSet<ConversationParticipant> ConversationParticipants => Set<ConversationParticipant>();
     public DbSet<Message> Messages => Set<Message>();
-
+    public DbSet<Notification> Notifications => Set<Notification>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("app");
