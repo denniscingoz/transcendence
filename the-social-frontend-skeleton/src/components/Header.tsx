@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { useRealtime } from '../realtime/RealtimeProvider'
+
 import {
   type ChatMessageDto,
   type RealtimeNotificationDto,
@@ -95,53 +96,57 @@ export function Header({ showNotification = true }: HeaderProps) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [notifications, setNotifications] = useState<UiNotification[]>([])
   const [activeChatConversationId, setActiveChatConversationId] = useState<string | null>(null)
-
+  const activeChatConversationIdRef = useRef<string | null>(null)
+  const readConversationIdsRef = useRef<Set<string>>(new Set())
   const { user } = useAuth()
   const { connection, isConnected } = useRealtime()
 
   const currentUserId = user?.id ?? null
 
-  async function loadHeaderSummary() {
-    if (!currentUserId) return
+async function loadHeaderSummary() {
+  if (!currentUserId) return
 
-    try {
-      const list = await getNotifications()
+  try {
+    const list = await getNotifications()
+  const visibleUnreadCount = list.filter(item => {
+    const isRead = item.isRead
 
-      const visibleUnreadCount = list.filter(item => {
-        const isRead = item.isRead
-        const isActiveChatNotification =
-          item.type === NotificationType.NewMessage &&
-          item.relatedConversationId === activeChatConversationId
+    const isAlreadyOpenedChatNotification =
+      item.type === NotificationType.NewMessage &&
+      item.relatedConversationId &&
+      readConversationIdsRef.current.has(item.relatedConversationId)
 
-        return !isRead && !isActiveChatNotification
-      }).length
+    return !isRead && !isAlreadyOpenedChatNotification
+  }).length
 
-      setUnreadCount(visibleUnreadCount)
-    } catch (err) {
-      console.error('Failed to load header summary', err)
-    }
+    setUnreadCount(visibleUnreadCount)
+  } catch (err) {
+    console.error('Failed to load header summary', err)
   }
+}
 
-  async function loadNotifications() {
-    if (!currentUserId) return
+async function loadNotifications() {
+  if (!currentUserId) return
 
-    try {
-      const list = await getNotifications()
+  try {
+    const list = await getNotifications()
+const filtered = list.filter(item => {
+  const isRead = item.isRead
 
-      const filtered = list.filter(item => {
-        const isRead = item.isRead
-        const isActiveChatNotification =
-          item.type === NotificationType.NewMessage &&
-          item.relatedConversationId === activeChatConversationId
+  const isAlreadyOpenedChatNotification =
+    item.type === NotificationType.NewMessage &&
+    item.relatedConversationId &&
+    readConversationIdsRef.current.has(item.relatedConversationId)
 
-        return !isRead && !isActiveChatNotification
-      })
+  return !isRead && !isAlreadyOpenedChatNotification
+}) 
+ 
 
-      setNotifications(filtered.map(toUiNotification))
-    } catch (err) {
-      console.error('Failed to load notifications', err)
-    }
+    setNotifications(filtered.map(toUiNotification))
+  } catch (err) {
+    console.error('Failed to load notifications', err)
   }
+}
 
   async function refreshNotificationsUi() {
     await loadHeaderSummary()
@@ -193,19 +198,28 @@ export function Header({ showNotification = true }: HeaderProps) {
       console.error('Failed to decline friend request', err)
     }
   }
+ 
+useEffect(() => {
+  function handleActiveChatChanged(event: Event) {
+    const customEvent = event as CustomEvent<{ conversationId: string | null }>
+    const conversationId = customEvent.detail?.conversationId ?? null
 
-  useEffect(() => {
-    function handleActiveChatChanged(event: Event) {
-      const customEvent = event as CustomEvent<{ conversationId: string | null }>
-      setActiveChatConversationId(customEvent.detail?.conversationId ?? null)
-    }
+  activeChatConversationIdRef.current = conversationId
+  setActiveChatConversationId(conversationId)
 
-    window.addEventListener('active-chat-changed', handleActiveChatChanged)
+  if (conversationId) {
+    readConversationIdsRef.current.add(conversationId)
+  }
 
-    return () => {
-      window.removeEventListener('active-chat-changed', handleActiveChatChanged)
-    }
-  }, [])
+void refreshNotificationsUi()
+  }
+
+  window.addEventListener('active-chat-changed', handleActiveChatChanged)
+
+  return () => {
+    window.removeEventListener('active-chat-changed', handleActiveChatChanged)
+  }
+}, []) 
 
   useEffect(() => {
     function handleNotificationsVisualRefresh() {
@@ -236,8 +250,7 @@ export function Header({ showNotification = true }: HeaderProps) {
       if (notification.type === NotificationType.NewMessage) {
         const payload = notification.payload as ChatMessageDto
         const isMyOwnMessage = payload.senderId === currentUserId
-        const isActiveChatMessage = payload.conversationId === activeChatConversationId
-
+        const isActiveChatMessage = payload.conversationId === activeChatConversationIdRef.current
         if (isMyOwnMessage) return
 
         if (isActiveChatMessage) {

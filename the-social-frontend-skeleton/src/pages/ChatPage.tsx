@@ -37,6 +37,7 @@ export function ChatPage() {
   const activeConversationIdRef = useRef<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const messagesRequestIdRef = useRef(0)
+  const shouldScrollToBottomRef = useRef(false)
 
   const [conversations, setConversations] = useState<ConversationDto[]>([])
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
@@ -105,7 +106,7 @@ async function loadConversationMessages(conversationId: string) {
     if (activeConversationIdRef.current !== conversationId) {
       return
     }
-
+    shouldScrollToBottomRef.current = true
     setMessages(data)
     setMessagesOffset(data.length)
     setHasMoreMessages(data.length === limit)
@@ -213,6 +214,7 @@ async function openConversation(conversationId: string) {
     const trimmedText = text.trim()
     const clientMessageId = crypto.randomUUID()
 
+
     const optimisticMessage: ChatMessageDto = {
       messageId: clientMessageId,
       clientMessageId,
@@ -224,6 +226,8 @@ async function openConversation(conversationId: string) {
       isReadByOthers: false,
     }
 
+    
+    shouldScrollToBottomRef.current = true
     setMessages(prev => [...prev, optimisticMessage])
     setText('')
 
@@ -341,6 +345,8 @@ useEffect(() => {
       ).catch(err => console.error('Failed to mark as delivered', err))
 
       if (isActive) {
+        shouldScrollToBottomRef.current = true
+
         setMessages(prev => {
           const exists = prev.some(item => item.messageId === message.messageId)
           if (exists) return prev
@@ -490,9 +496,12 @@ const handleMessageDelivered = (payload: MessageDeliveredDto) => {
     return () => clearTimeout(timeout)
   }, [search])
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+useEffect(() => {
+  if (!shouldScrollToBottomRef.current) return
+
+  messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  shouldScrollToBottomRef.current = false
+}, [messages])
 
   useEffect(() => {
     return () => {
