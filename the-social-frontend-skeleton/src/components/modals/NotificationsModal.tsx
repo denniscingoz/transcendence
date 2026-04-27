@@ -22,6 +22,8 @@ export function NotificationsModal({
         ) : (
           notifications.map(item => (
             <div key={item.id} className="card flex items-center gap-4 p-4">
+              
+              {/* Photo of the Nofitication Sender */}
               <img
                 className="h-12 w-12 rounded-full border object-cover"
                 src={
@@ -32,8 +34,11 @@ export function NotificationsModal({
                 alt=""
               />
 
+                
               <div className="min-w-0 flex-1">
-                <div className="font-medium">{item.text}</div>
+               <div className="font-normal truncate">
+                {item.text}
+                </div>
 
                 {item.createdAt && (
                   <div className="mt-1 text-sm text-gray-500">

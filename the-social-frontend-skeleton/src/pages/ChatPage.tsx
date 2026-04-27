@@ -63,7 +63,12 @@ export function ChatPage() {
   
 
 
- 
+ const shouldShowDraft =
+  draftTargetUserId &&
+  !activeConversationId &&
+  !conversations.some(c => c.targetUserId === draftTargetUserId)
+
+
   async function loadConversations() {
     if (!currentUserId) return []
 
@@ -560,25 +565,36 @@ return (
               placeholder={t('chat.searchUsers')}
               className="input w-full text-xs"
             />
-
-            {searchResults.length > 0 && (
+            { searchResults.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg max-h-32 overflow-y-auto">
-                {searchResults.map(userItem => (
-                  <button
-                    key={userItem.id}
-                    type="button"
-                    onMouseDown={e => {
-                      e.preventDefault()
-                      openDraftConversation(userItem.id, userItem.username)
-                    }}
-                    className="block w-full text-left px-2 py-1 border-b border-gray-100 hover:bg-gray-100 transition-colors text-xs"
-                  >
-                    <div className="font-medium text-gray-900">
-                      {userItem.username}
-                    </div>
-                  </button>
-                ))}
-              </div>
+                  {searchResults.map(userItem => (
+                <button
+                  key={userItem.id}
+                  type="button"
+                  onMouseDown={e => {
+                  e.preventDefault()
+                
+                  const existingConversation = conversations.find(
+                    conversation => conversation.targetUserId === userItem.id
+                  )
+                
+                  if (existingConversation) {
+                    setSearch('')
+                    void openConversation(existingConversation.id)
+                    return
+                  }
+                
+                  openDraftConversation(userItem.id, userItem.username)
+                  setSearch('')
+                }}
+                className="block w-full text-left px-2 py-1 border-b border-gray-100 hover:bg-gray-100 transition-colors text-xs"
+              >
+                <div className="font-medium text-gray-900">
+                  {userItem.username}
+                </div>
+              </button>
+              ))}
+            </div>
             )}
           </div>
 
@@ -590,9 +606,9 @@ return (
 
 
           {/* Left  Part with existing user conversations */}
-          <div className="space-y-0.5 flex-1 min-h-0 overflow-y-auto">
+          <div className="w-[420px] flex-shrink-0 overflow-y-auto">
 
-            {draftTargetUserId && (
+           {shouldShowDraft && (
               <button
                 type="button"
                 className="w-full text-left p-1.5 rounded-lg transition-all bg-gray-400 border border-gray-500 mb-0.5"
@@ -700,13 +716,13 @@ return (
             ref={messagesContainerRef}
             className="flex-1 overflow-y-auto p-2 space-y-0.5 min-h-0 bg-white rounded-lg mb-1.5"
           >
-              {!activeConversationId && !draftTargetUserId && !loadingMessages && (
+              {!activeConversationId && !shouldShowDraft  && !loadingMessages && (
                 <div className="text-center py-2 text-gray-500 text-xs">
                   {t('chat.selectConversation')}
                 </div>
               )}
 
-              {draftTargetUserId && (
+              {shouldShowDraft  && (
                 <div className="text-center py-2 text-gray-500 text-xs">
                   New chat with {draftTargetUserName}
                 </div>

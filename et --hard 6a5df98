@@ -1,0 +1,83 @@
+[33macd3524[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdeniz[m[33m, [m[1;31morigin/deniz[m[33m)[m HEAD@{0}: commit: Overflow of words due to length in bubbles fixed. Left Window with conversation overflow of last message preview is fixed with 10max letter. Message input fixed to 150letters.
+[33m3bb292e[m HEAD@{1}: rebase (finish): returning to refs/heads/deniz
+[33m3bb292e[m HEAD@{2}: rebase (continue): Overflow of words due to length in bubbles fixed. Left Window with conversation overflow of last message preview is fixed with 10max letter. Message input fixed to 150letters.
+[33m21370d7[m HEAD@{3}: rebase (pick): Add persistent notifications, friend request alerts, infinite scroll, and Enter-to-send
+[33m9406627[m HEAD@{4}: rebase (continue): Add persistent notifications, friend request alerts, infinite scroll, and Enter-to-send
+[33m6af65e6[m HEAD@{5}: rebase (pick): friend request notifications, modal
+[33mca254c4[m HEAD@{6}: commit: Overflow of words due to length in bubbles fixed. Left Window with conversation overflow of last message preview is fixed with 10max letter. Message input fixed to 150letters.
+[33m0cd843c[m HEAD@{7}: pull --rebase origin deniz (pick): working on new header
+[33m09ca564[m HEAD@{8}: pull --rebase origin deniz (start): checkout 09ca5642566866c308a6ba571ceaa65fdb2c3418
+[33m6a5df98[m HEAD@{9}: commit: Overflow of words due to length in bubbles fixed. Left Window with conversation overflow of last message preview is fixed with 10max letter. Message input fixed to 150letters.
+[33mae9b419[m HEAD@{10}: rebase (finish): returning to refs/heads/deniz
+[33mae9b419[m HEAD@{11}: rebase (pick): Updates
+[33ma73896b[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{12}: rebase (start): checkout origin/main
+[33m09ca564[m HEAD@{13}: commit: Updates
+[33m8dfd744[m HEAD@{14}: rebase (finish): returning to refs/heads/deniz
+[33m8dfd744[m HEAD@{15}: rebase (start): checkout origin/main
+[33m8cb394a[m HEAD@{16}: rebase (finish): returning to refs/heads/deniz
+[33m8cb394a[m HEAD@{17}: rebase (start): checkout origin/main
+[33m4471cae[m HEAD@{18}: commit: small fix for appsettings
+[33md9d61b8[m HEAD@{19}: commit: docker environment conenctions addition
+[33m815f587[m HEAD@{20}: commit: appsetting.json updates
+[33mdcfa3db[m HEAD@{21}: commit: UI changes over ChatService, EditProfilePage progress indicator addition
+[33m13552f6[m HEAD@{22}: commit: The issue with unauth feed visit is fixed
+[33mc72e2cb[m HEAD@{23}: commit (merge): Update over router
+[33m84fbb49[m HEAD@{24}: checkout: moving from deniz to deniz
+[33m84fbb49[m HEAD@{25}: commit: Changes over ProgressOverlay, Comments, Posts hooks, Language additions. Terms and Privacy Pages. Post creation limits for ratio 1:6 and 6:1
+[33mcf86ade[m HEAD@{26}: commit: Remove .vs files from tracking
+[33m029baef[m HEAD@{27}: commit: Some deletion progress
+[33m817c8f4[m HEAD@{28}: commit: Video updates for frontend and backend| Videos can be uploaded from now on
+[33m129698b[m HEAD@{29}: commit: Changes over the comments state, like toggle, search hover,
+[33m4f96408[m HEAD@{30}: commit: Changes over Feed, Search, Profile Detail, File transfer, Conenction between frontend and backend checks, login, signin
+[33m8b8f753[m HEAD@{31}: rebase (finish): returning to refs/heads/deniz
+[33m8b8f753[m HEAD@{32}: rebase (pick): rest in
+[33m1cb09cd[m HEAD@{33}: rebase (start): checkout origin/main
+[33m57759a9[m HEAD@{34}: checkout: moving from main to deniz
+[33m410cfb1[m[33m ([m[1;32mmain[m[33m)[m HEAD@{35}: checkout: moving from deniz to main
+[33m57759a9[m HEAD@{36}: commit: rest in
+[33md00792d[m HEAD@{37}: commit: Changes over Auth(sign-up, continue with google), Avatar Upload, Delete Account, Search Modal, handlers
+[33m05dcac6[m HEAD@{38}: pull --rebase origin main (finish): returning to refs/heads/deniz
+[33m05dcac6[m HEAD@{39}: pull --rebase origin main (pick): Some addition
+[33m5a17df2[m HEAD@{40}: pull --rebase origin main (pick): Some extra changes to areas
+[33mff6caed[m HEAD@{41}: pull --rebase origin main (start): checkout ff6caed7a97e9027a4468aea497001799ecd15b7
+[33m3c6a83b[m HEAD@{42}: commit: Some addition
+[33m9ac8eeb[m HEAD@{43}: pull --rebase origin main (finish): returning to refs/heads/deniz
+[33m9ac8eeb[m HEAD@{44}: pull --rebase origin main (pick): Some extra changes to areas
+[33m028de2e[m HEAD@{45}: pull --rebase origin main (start): checkout 028de2e4f2e49cc3eee5e54644b50701b526c773
+[33m9419eee[m HEAD@{46}: commit: Some extra changes to areas
+[33m3272fb6[m HEAD@{47}: commit: Language additions to each page and modals
+[33mba25ebd[m HEAD@{48}: commit: Updates over the FriendsPage Buttons, added Friends, Add Friends, and Requested|| EditProfile Page button updates over || Handler updates || Dto updates
+[33mbfc05d4[m HEAD@{49}: commit: Comment button added
+[33m1320ddc[m HEAD@{50}: commit: The api routes updated for a better realistic connection. It is connected well better
+[33m59d13c3[m HEAD@{51}: commit: Errors are fixed. Some needs to be rechecked by Valery. Such as ChatPage, and GetConversations
+[33m5c1a269[m HEAD@{52}: rebase (finish): returning to refs/heads/deniz
+[33m5c1a269[m HEAD@{53}: rebase (continue): Work over frontend. Added: SettingsPage, EditProfilePage, PostDetailPage, Friends Page. Edited: SearchPage to SearchModal, Logo edited, Notification icon edited, Profile view edited, Logout and language moved over to settings.
+[33m2636529[m HEAD@{54}: rebase (pick): cahce
+[33m410cfb1[m[33m ([m[1;32mmain[m[33m)[m HEAD@{55}: rebase (start): checkout main
+[33m76a9dbc[m HEAD@{56}: checkout: moving from main to deniz
+[33m410cfb1[m[33m ([m[1;32mmain[m[33m)[m HEAD@{57}: reset: moving to origin/main
+[33m69069b7[m HEAD@{58}: checkout: moving from deniz to main
+[33m76a9dbc[m HEAD@{59}: checkout: moving from main to deniz
+[33m69069b7[m HEAD@{60}: checkout: moving from deniz to main
+[33m76a9dbc[m HEAD@{61}: commit: Work over frontend. Added: SettingsPage, EditProfilePage, PostDetailPage, Friends Page. Edited: SearchPage to SearchModal, Logo edited, Notification icon edited, Profile view edited, Logout and language moved over to settings.
+[33m69069b7[m HEAD@{62}: checkout: moving from main to deniz
+[33m69069b7[m HEAD@{63}: pull --rebase origin main (finish): returning to refs/heads/main
+[33m69069b7[m HEAD@{64}: pull --rebase origin main (pick): cahce
+[33mba682b2[m HEAD@{65}: pull --rebase origin main (start): checkout ba682b20a523555344d0dfbd2cdb09d9a8a817e0
+[33m284db6b[m HEAD@{66}: commit: cahce
+[33m465de69[m[33m ([m[1;31morigin/deniz-work[m[33m)[m HEAD@{67}: checkout: moving from main to main
+[33m465de69[m[33m ([m[1;31morigin/deniz-work[m[33m)[m HEAD@{68}: checkout: moving from deniz-work to main
+[33m465de69[m[33m ([m[1;31morigin/deniz-work[m[33m)[m HEAD@{69}: checkout: moving from main to deniz-work
+[33m465de69[m[33m ([m[1;31morigin/deniz-work[m[33m)[m HEAD@{70}: pull --rebase origin main (finish): returning to refs/heads/main
+[33m465de69[m[33m ([m[1;31morigin/deniz-work[m[33m)[m HEAD@{71}: pull --rebase origin main (pick): JWT auth, Google Auth, Password Hash updates
+[33m8a2639b[m HEAD@{72}: pull --rebase origin main (start): checkout 8a2639bbc0f8d734845847661e5882648a5cec77
+[33me489d4f[m HEAD@{73}: checkout: moving from deniz to main
+[33me7b23a3[m HEAD@{74}: checkout: moving from main to deniz
+[33me489d4f[m HEAD@{75}: commit: JWT auth, Google Auth, Password Hash updates
+[33me7b23a3[m HEAD@{76}: merge deniz: Fast-forward
+[33mede2fc3[m HEAD@{77}: checkout: moving from deniz to main
+[33me7b23a3[m HEAD@{78}: commit: Person 2 role additions. Finaly working stage
+[33ma6d4c0e[m HEAD@{79}: commit: metadata
+[33m441043f[m HEAD@{80}: commit: The final update before holiday. PostsFeedController and PostsProfileController are not done yet. Their equiavalent of service, dto, interfaces are also not done. The rest is finished.
+[33mfa24cf4[m HEAD@{81}: commit: Updated endpoints, Posts flow
+[33m5d1772a[m HEAD@{82}: commit: New DTOs(For Frontend Micha), New Repositories(For In
