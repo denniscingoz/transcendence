@@ -22,16 +22,21 @@ public sealed class  MessageRepository : IMessageRepository
             .SingleOrDefaultAsync(m => m.SenderId == senderId 
                 && m.ClientMessageId == clientMessageId);
     }    
-    public async Task <IReadOnlyList<Message>> GetByConversationIdAsync(
-        Guid conversationId, int offset, int limit
-        )
+    public async Task<IReadOnlyList<Message>> GetByConversationIdAsync(
+        Guid conversationId,
+        int offset,
+        int limit)
     {
-        return await _db.Messages
-        .Where(m => m.ConversationId == conversationId)
-        .OrderBy(m => m.CreatedAt)
-        .Skip(offset)
-        .Take(limit)
-        .ToListAsync();
+        var messages = await _db.Messages
+            .Where(m => m.ConversationId == conversationId)
+            .OrderByDescending(m => m.CreatedAt)
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+
+        return messages
+            .OrderBy(m => m.CreatedAt)
+            .ToList();
     }
     public async Task<Guid?> GetLastMessageId(Guid conversationId)
     {

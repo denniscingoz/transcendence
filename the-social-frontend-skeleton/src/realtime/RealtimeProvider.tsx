@@ -1,17 +1,19 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import type { HubConnection } from '@microsoft/signalr'
+import React from 'react'
 import { useAuth } from '../auth/AuthContext'
-import React from 'react';
 import { createChatConnection, startConnection } from '../api/chat.api'
 
 type RealtimeContextValue = {
   connection: HubConnection | null
   isConnected: boolean
+  onlineUserIds: string[]
 }
 
 const RealtimeContext = createContext<RealtimeContextValue>({
   connection: null,
   isConnected: false,
+  onlineUserIds: [],
 })
 
 export function RealtimeProvider({ children }: { children: React.ReactNode }) {
@@ -20,6 +22,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
   const connectionRef = useRef<HubConnection | null>(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [onlineUserIds, setOnlineUserIds] = useState<string[]>([])
 
   useEffect(() => {
     if (!currentUserId) {
@@ -31,31 +34,55 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       }
 
       setIsConnected(false)
+      setOnlineUserIds([])
       return
     }
 
     let disposed = false
 
     async function init() {
-      if (!currentUserId) 
-          return
-
+      if (!currentUserId) return
+      if (connectionRef.current) return
 
       const connection = createChatConnection(currentUserId)
       connectionRef.current = connection
 
-      connection.onclose(() => {
-        setIsConnected(false)
+      connection.on('OnlineUsersSnapshot', (users: string[]) => {
+        setOnlineUserIds(users)
       })
 
-      connection.onreconnected(() => {
-        setIsConnected(true)
+      connection.on('UserOnLine', (payload: { userId: string }) => {
+        setOnlineUserIds(prev =>
+          prev.includes(payload.userId) ? prev : [...prev, payload.userId]
+        )
       })
+
+      connection.on('UserOffLine', (payload: { userId: string }) => {
+        setOnlineUserIds(prev => prev.filter(id => id !== payload.userId))
+      })
+
+      connection.onclose(() => {
+        setIsConnected(false)
+        setOnlineUserIds([])
+      })
+
+        connection.onreconnected(() => {
+
+          setIsConnected(true)
+          void connection.invoke('RequestPresenceSnapshot')
+            .catch(err => console.error('Failed to request presence snapshot after reconnect', err))
+
+        })
 
       try {
         await startConnection(connection)
         if (disposed) return
+
         setIsConnected(true)
+
+        await connection.invoke('RequestPresenceSnapshot')
+          .catch(err => console.error('Failed to request presence snapshot', err))
+
       } catch (err) {
         console.error('Failed to start realtime connection', err)
         setIsConnected(false)
@@ -66,6 +93,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       disposed = true
+
       const existing = connectionRef.current
       connectionRef.current = null
 
@@ -74,6 +102,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       }
 
       setIsConnected(false)
+      setOnlineUserIds([])
     }
   }, [currentUserId])
 
@@ -82,6 +111,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       value={{
         connection: connectionRef.current,
         isConnected,
+        onlineUserIds,
       }}
     >
       {children}

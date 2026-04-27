@@ -15,6 +15,7 @@ using Transcendence.Infrastructure.Persistence;
 using Transcendence.Infrastructure.Queries;
 using Transcendence.Infrastructure.Repositories;
 using Transcendence.Application.Chat.Interfaces;
+using Transcendence.Application.Notifications.Interfaces;
 
 using Transcendence.Infrastructure.Storage;
 
@@ -54,6 +55,7 @@ public static class DependencyInjection
         services.AddScoped<IConversationRepository, ConversationRepository>();
                 services.AddScoped<IMessageRepository, MessageRepository>();
 
+		services.AddScoped<INotificationRepository, NotificationRepository>();
        
 		return services;
 	}

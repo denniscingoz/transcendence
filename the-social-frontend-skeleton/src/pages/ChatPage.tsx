@@ -3,13 +3,14 @@ import { useAuth } from '../auth/AuthContext'
 import { useRealtime } from '../realtime/RealtimeProvider'
 import { useTranslation } from 'react-i18next'
 import { BottomNav } from '../components/BottomNav'
+import { markConversationNotificationsAsRead } from '../api/notifications.api'
 
 import {
   createDirectConversation,
   getConversations,
   getMessages,
   joinConversation,
-  leaveConversation,
+  // leaveConversation,
   markAsRead,
   markAsDelivered,
   sendMessage,
@@ -20,39 +21,6 @@ import {
   type MessageDeliveredDto,
   type MessageReadDto,
 } from '../api/chat.api'
-
-type NotificationType = 1 | 2 | 3 | 4 | 5
-
-type NotificationDto = {
-  id: string
-  type: NotificationType
-  payload: ChatMessageDto
-  createdAt: string
-}
-
-function playSystemBeep() {
-  try {
-    const audioContext = new AudioContext()
-    const oscillator = audioContext.createOscillator()
-    const gain = audioContext.createGain()
-
-    oscillator.type = 'sine'
-    oscillator.frequency.value = 880
-    gain.gain.value = 0.05
-
-    oscillator.connect(gain)
-    gain.connect(audioContext.destination)
-
-    oscillator.start()
-
-    setTimeout(() => {
-      oscillator.stop()
-      void audioContext.close()
-    }, 120)
-  } catch (err) {
-    console.error('Failed to play sound', err)
-  }
-}
 
 function publishUnreadCount(nextConversations: ConversationDto[]) {
   const unreadCount = nextConversations.reduce(
@@ -65,47 +33,38 @@ function publishUnreadCount(nextConversations: ConversationDto[]) {
 
 export function ChatPage() {
   const { user } = useAuth()
-  const { connection, isConnected } = useRealtime()
+  const { connection, isConnected, onlineUserIds } = useRealtime()
   const currentUserId = user?.id ?? null
 
   const messagesRef = useRef<ChatMessageDto[]>([])
   const activeConversationIdRef = useRef<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const messagesRequestIdRef = useRef(0)
+  const shouldScrollToBottomRef = useRef(false)
 
   const [conversations, setConversations] = useState<ConversationDto[]>([])
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessageDto[]>([])
   const [text, setText] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [loadingChats, setLoadingChats] = useState(false)
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [sending, setSending] = useState(false)
-  const [creatingDirect, setCreatingDirect] = useState(false)
-  const [targetUserIdInput, setTargetUserIdInput] = useState('')
-  const [onlineUserIds, setOnlineUserIds] = useState<string[]>([])
   const [deliveredMessageIds, setDeliveredMessageIds] = useState<string[]>([])
   const [search, setSearch] = useState('')
-const [searchResults, setSearchResults] = useState<{ id: string; username: string }[]>([])   
+  const [searchResults, setSearchResults] = useState<{ id: string; username: string }[]>([])
 
-async function handleCreateDirectConversationFromSearch(targetUserId: string) {
-  if (!currentUserId) return
+  const [messagesOffset, setMessagesOffset] = useState(0)
+  const [hasMoreMessages, setHasMoreMessages] = useState(true)
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false)
 
-  try {
-    const result = await createDirectConversation(currentUserId, targetUserId)
-
-    setSearch('')
-    setSearchResults([])
-
-    await loadConversations()
-    await openConversation(result.conversationId)
-  } catch (err) {
-    console.error('Failed to create chat', err)
-  }
-}
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null)
+  const [draftTargetUserId, setDraftTargetUserId] = useState<string | null>(null)
+  const [draftTargetUserName, setDraftTargetUserName] = useState<string | null>(null)
+  
+ 
   async function loadConversations() {
     if (!currentUserId) return []
 
-    setLoadingChats(true)
     setError(null)
 
     try {
@@ -116,112 +75,153 @@ async function handleCreateDirectConversationFromSearch(targetUserId: string) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load conversations')
       return []
-    } finally {
-      setLoadingChats(false)
     }
   }
 
-  async function loadConversationMessages(conversationId: string) {
-    if (!currentUserId) return
-
-    setLoadingMessages(true)
-    setError(null)
-
-    try {
-      const data = await getMessages(currentUserId, conversationId)
-      setMessages(data)
-      setDeliveredMessageIds([])
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load messages')
-    } finally {
-      setLoadingMessages(false)
-    }
-  }
-
-  async function openConversation(conversationId: string) {
-    try {
-      if (!connection) {
-        throw new Error('Chat connection is not initialized')
-      }
-
-      if (
-        activeConversationIdRef.current &&
-        activeConversationIdRef.current !== conversationId
-      ) {
-        await leaveConversation(connection, activeConversationIdRef.current)
-      }
-
-      await joinConversation(connection, conversationId)
-
-      activeConversationIdRef.current = conversationId
-      setActiveConversationId(conversationId)
-
-      await loadConversationMessages(conversationId)
-
-      if (!document.hidden) {
-        await markAsRead(connection, conversationId)
-        await loadConversations()
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to open conversation')
-    }
-  }
-  
-
-async function handleCreateDirectConversation() {
+async function loadConversationMessages(conversationId: string) {
   if (!currentUserId) return
 
-  const targetUserId = targetUserIdInput.trim()
-  if (!targetUserId) return
-
-  setCreatingDirect(true)
+  const requestId = ++messagesRequestIdRef.current
+  setLoadingMessages(true)
   setError(null)
 
   try {
-    const result = await createDirectConversation(currentUserId, targetUserId)
+    const limit = 20
+    const data = await getMessages(currentUserId, conversationId, 0, limit)
 
-    const updatedConversations = await loadConversations()
-
-    const createdConversationExists = updatedConversations.some(
-      item => item.id === result.conversationId
-    )
-
-    if (!createdConversationExists) {
-      setConversations(prev => {
-        const exists = prev.some(item => item.id === result.conversationId)
-        if (exists) return prev
-
-        return [
-          {
-            id: result.conversationId,
-            targetUserId,
-            targetUserName: targetUserId,
-            lastMessage: '',
-            lastMessageAt: null,
-            unreadCount: 0,
-          },
-          ...prev,
-        ]
-      })
+    if (requestId !== messagesRequestIdRef.current) {
+      return
     }
 
-    await openConversation(result.conversationId)
-    setTargetUserIdInput('')
+    if (activeConversationIdRef.current !== conversationId) {
+      return
+    }
+    shouldScrollToBottomRef.current = true
+    setMessages(data)
+    setMessagesOffset(data.length)
+    setHasMoreMessages(data.length === limit)
+    setDeliveredMessageIds([])
   } catch (err) {
-    setError(err instanceof Error ? err.message : 'Failed to create direct conversation')
+    if (requestId !== messagesRequestIdRef.current) {
+      return
+    }
+
+    setError(err instanceof Error ? err.message : 'Failed to load messages')
   } finally {
-    setCreatingDirect(false)
+    if (requestId === messagesRequestIdRef.current) {
+      setLoadingMessages(false)
+    }
   }
 }
 
-  async function handleSend() {
-    if (!connection) return
-    if (!activeConversationId) return
-    if (!text.trim()) return
-    if (!currentUserId) return
+async function loadOlderMessages() {
+  if (!currentUserId) return
+  if (!activeConversationIdRef.current) return
+  if (loadingOlderMessages) return
+  if (!hasMoreMessages) return
 
+  const container = messagesContainerRef.current
+  if (!container) return
+
+  const conversationId = activeConversationIdRef.current
+  const previousScrollHeight = container.scrollHeight
+  const previousScrollTop = container.scrollTop
+
+  setLoadingOlderMessages(true)
+
+  try {
+    const limit = 20
+    const olderMessages = await getMessages(
+      currentUserId,
+      conversationId,
+      messagesOffset,
+      limit
+    )
+
+    if (activeConversationIdRef.current !== conversationId) {
+      return
+    }
+
+    if (olderMessages.length === 0) {
+      setHasMoreMessages(false)
+      return
+    }
+
+    setMessages(prev => [...olderMessages, ...prev])
+    setMessagesOffset(prev => prev + olderMessages.length)
+    setHasMoreMessages(olderMessages.length === limit)
+
+    requestAnimationFrame(() => {
+      const newScrollHeight = container.scrollHeight
+      const delta = newScrollHeight - previousScrollHeight
+      container.scrollTop = previousScrollTop + delta
+    })
+  } catch (err) {
+    console.error('Failed to load older messages', err)
+  } finally {
+    setLoadingOlderMessages(false)
+  }
+}
+
+async function openConversation(conversationId: string) {
+  try {
+    if (!connection) {
+      throw new Error('Chat connection is not initialized')
+    }
+    
+    setDraftTargetUserId(null)
+    setDraftTargetUserName(null)
+ 
+    activeConversationIdRef.current = conversationId
+    setActiveConversationId(conversationId)
+    setMessages([])
+    setDeliveredMessageIds([])
+    setMessagesOffset(0)
+    setHasMoreMessages(true)
+
+    window.dispatchEvent(
+      new CustomEvent('active-chat-changed', {
+        detail: { conversationId },
+      })
+    )
+
+    await joinConversation(connection, conversationId)
+    await loadConversationMessages(conversationId)
+
+    if (!document.hidden) {
+      await markAsRead(connection, conversationId)
+      await markConversationNotificationsAsRead(conversationId)
+      window.dispatchEvent(new CustomEvent('notifications-visual-refresh'))
+      await loadConversations()
+      window.dispatchEvent(new CustomEvent('notifications-visual-refresh'))
+    }
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to open conversation')
+  }
+}
+ async function handleSend() {
+  if (!connection) return
+  if (!text.trim()) return
+  if (!currentUserId) return
+
+  let conversationId = activeConversationId
+
+  try {
     setSending(true)
     setError(null)
+
+    if (!conversationId) {
+      if (!draftTargetUserId) return
+
+      const result = await createDirectConversation(currentUserId, draftTargetUserId)
+      conversationId = result.conversationId
+      activeConversationIdRef.current = conversationId
+      setActiveConversationId(conversationId)
+      setDraftTargetUserId(null)
+      setDraftTargetUserName(null)
+
+      await joinConversation(connection, conversationId)
+    }
 
     const trimmedText = text.trim()
     const clientMessageId = crypto.randomUUID()
@@ -229,7 +229,7 @@ async function handleCreateDirectConversation() {
     const optimisticMessage: ChatMessageDto = {
       messageId: clientMessageId,
       clientMessageId,
-      conversationId: activeConversationId,
+      conversationId,
       senderId: currentUserId,
       content: trimmedText,
       createdAt: new Date().toISOString(),
@@ -237,47 +237,67 @@ async function handleCreateDirectConversation() {
       isReadByOthers: false,
     }
 
+    shouldScrollToBottomRef.current = true
     setMessages(prev => [...prev, optimisticMessage])
     setText('')
 
-    try {
-      await sendMessage(connection, {
-        conversationId: activeConversationId,
-        clientMessageId,
-        content: trimmedText,
-      })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send message')
+    await sendMessage(connection, {
+      conversationId,
+      clientMessageId,
+      content: trimmedText,
+    })
 
-      setMessages(prev =>
-        prev.filter(message => message.clientMessageId !== clientMessageId)
+    await loadConversations()
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to send message')
+  } finally {
+    setSending(false)
+  }
+}
+
+async function syncActiveConversationReadState() {
+  if (!connection) return
+
+  const activeConversationId = activeConversationIdRef.current
+
+  if (!activeConversationId) return
+  if (document.hidden) return
+
+  try {
+    await markAsRead(connection, activeConversationId)
+
+    setConversations(prev =>
+      prev.map(item =>
+        item.id === activeConversationId
+          ? { ...item, unreadCount: 0 }
+          : item
       )
-    } finally {
-      setSending(false)
+    )
+
+    await loadConversations()
+    window.dispatchEvent(new CustomEvent('notifications-visual-refresh'))
+  } catch (err) {
+    console.error('Failed to sync read state', err)
+  }
+}
+useEffect(() => {
+  const container = messagesContainerRef.current
+  if (!container) return
+
+  function handleScroll() {
+    if (!container) return
+    if (container.scrollTop <= 80) {
+      void loadOlderMessages()
     }
   }
 
-  async function syncActiveConversationReadState() {
-    if (!connection) return
-    if (!activeConversationIdRef.current) return
-    if (document.hidden) return
+  container.addEventListener('scroll', handleScroll)
 
-    try {
-      await markAsRead(connection, activeConversationIdRef.current)
-
-      setConversations(prev =>
-        prev.map(item =>
-          item.id === activeConversationIdRef.current
-            ? { ...item, unreadCount: 0 }
-            : item
-        )
-      )
-
-      await loadConversations()
-    } catch (err) {
-      console.error('Failed to sync read state', err)
-    }
+  return () => {
+    container.removeEventListener('scroll', handleScroll)
   }
+}, [loadingOlderMessages, hasMoreMessages, messagesOffset, currentUserId])
+
 
   useEffect(() => {
     messagesRef.current = messages
@@ -303,269 +323,231 @@ async function handleCreateDirectConversation() {
     }
   }, [connection])
 
- useEffect(() => {
-  if (!connection || !currentUserId) return
+  useEffect(() => {
+    if (!connection || !currentUserId) return
 
-  async function reloadConversations() {
-    try {
-      const data = await getConversations(currentUserId!)
-      setConversations(data)
-      publishUnreadCount(data)
-    } catch (err) {
-      console.error('Failed to reload conversations', err)
-    }
-  }
+    async function reloadConversations() {
 
-  const handleMessageReceived = (message: ChatMessageDto) => {
-    console.log('MessageReceived', message)
-
-    const isActive = message.conversationId === activeConversationIdRef.current
-    const isMine = message.senderId === currentUserId
-
-    if (isMine) {
-      return
+   if (!currentUserId) return
+        try {
+        const data = await getConversations(currentUserId)
+        setConversations(data)
+        publishUnreadCount(data)
+      } catch (err) {
+        console.error('Failed to reload conversations', err)
+      }
     }
 
-    void markAsDelivered(
-      connection,
-      message.messageId,
-      message.conversationId,
-      message.senderId
-    ).catch(err => console.error('Failed to mark as delivered', err))
+    const handleMessageReceived = (message: ChatMessageDto) => {
+      const isActive = message.conversationId === activeConversationIdRef.current
+      const isMine = message.senderId === currentUserId
 
-    if (isActive) {
-      setMessages(prev => {
-        const exists = prev.some(item => item.messageId === message.messageId)
-        if (exists) return prev
-        return [...prev, message]
-      })
-    }
+      if (isMine) return
 
-    if (isActive && !document.hidden) {
-      void markAsRead(connection, message.conversationId)
-        .then(() => reloadConversations())
+      void markAsDelivered(
+        connection,
+        message.messageId,
+        message.conversationId,
+        message.senderId
+      ).catch(err => console.error('Failed to mark as delivered', err))
+
+      if (isActive) {
+        shouldScrollToBottomRef.current = true
+
+        setMessages(prev => {
+          const exists = prev.some(item => item.messageId === message.messageId)
+          if (exists) return prev
+          return [...prev, message]
+        })
+      }
+
+      if (isActive && !document.hidden) {
+        void markAsRead(connection, message.conversationId)
+          .then(async () => {
+            await markConversationNotificationsAsRead(message.conversationId)
+            await reloadConversations()
+            window.dispatchEvent(new CustomEvent('notifications-visual-refresh'))
+          })
         .catch(err => console.error('Failed to mark as read after receiving message', err))
-    } else {
-      void reloadConversations()
-    }
-  }
-
-  const handleMessageAck = (ack: MessageAckDto) => {
-    console.log('MessageAck', ack)
-
-    setMessages(prev =>
-      prev.map(message =>
-        message.clientMessageId === ack.clientMessageId
-          ? {
-              ...message,
-              messageId: ack.messageId,
-              createdAt: ack.createdAt,
-            }
-          : message
-      )
-    )
-  }
-
-  const handleMessageDelivered = (payload: MessageDeliveredDto) => {
-    console.log('MessageDelivered', payload)
-
-    const isMyMessage = messagesRef.current.some(
-      item => item.messageId === payload.messageId && item.senderId === currentUserId
-    )
-
-    if (!isMyMessage) return
-
-    setDeliveredMessageIds(prev => {
-      if (prev.includes(payload.messageId)) return prev
-      return [...prev, payload.messageId]
-    })
-  }
-
-  const handleConversationsChanged = () => {
-    void reloadConversations()
-  }
-
-  const handleNotificationReceived = (notification: NotificationDto) => {
-    console.log('NotificationReceived', notification)
-
-    const message = notification.payload
-    const isMyOwnMessage = message.senderId === currentUserId
-    const isActiveConversation = message.conversationId === activeConversationIdRef.current
-
-    if (isMyOwnMessage) return
-
-    if (!isActiveConversation || document.hidden) {
-      playSystemBeep()
+      } else {
+        void reloadConversations()
+      }
     }
 
-    void reloadConversations()
-  }
-
-  const handleMessageRead = (payload: MessageReadDto) => {
-    console.log('MessageRead', payload)
-
-    if (payload.conversationId === activeConversationIdRef.current) {
+    const handleMessageAck = (ack: MessageAckDto) => {
       setMessages(prev =>
-        prev.map(item =>
-          item.messageId === payload.messageId && item.senderId === currentUserId
-            ? { ...item, isReadByOthers: true }
-            : item
+        prev.map(message =>
+          message.clientMessageId === ack.clientMessageId
+            ? {
+                ...message,
+                messageId: ack.messageId,
+                createdAt: ack.createdAt,
+              }
+            : message
         )
       )
     }
-  }
 
-  const handleOnlineUsersSnapshot = (users: string[]) => {
-    console.log('OnlineUsersSnapshot', users)
-    setOnlineUserIds(users)
-  }
+const handleMessageDelivered = (payload: MessageDeliveredDto) => {
+  console.log('MessageDelivered', payload)
 
-  const handleUserOnline = (payload: { userId: string }) => {
-    console.log('UserOnLine', payload)
+  setDeliveredMessageIds(prev => {
+    if (prev.includes(payload.messageId)) return prev
+    return [...prev, payload.messageId]
+  })
+}
 
-    const userId = payload.userId
-
-    setOnlineUserIds(prev => {
-      if (prev.includes(userId)) return prev
-      return [...prev, userId]
-    })
-  }
-
-  const handleUserOffline = (payload: { userId: string }) => {
-    console.log('UserOffLine', payload)
-
-    const userId = payload.userId
-
-    setOnlineUserIds(prev => prev.filter(id => id !== userId))
-  }
-
-  const handleReconnected = async () => {
-    try {
-      if (activeConversationIdRef.current) {
-        await joinConversation(connection, activeConversationIdRef.current)
-      }
-      await reloadConversations()
-    } catch (err) {
-      console.error('Failed after reconnect', err)
+    const handleConversationsChanged = () => {
+      void reloadConversations()
     }
-  }
 
-  const handleClose = () => {
-    console.log('Chat connection closed')
-    setOnlineUserIds([])
-  }
+    const handleMessageRead = (payload: MessageReadDto) => {
+      if (payload.conversationId === activeConversationIdRef.current) {
+        setMessages(prev =>
+          prev.map(item =>
+            item.messageId === payload.messageId && item.senderId === currentUserId
+              ? { ...item, isReadByOthers: true }
+              : item
+          )
+        )
+      }
+    }
 
-  connection.on('MessageReceived', handleMessageReceived)
-  connection.on('MessageAck', handleMessageAck)
-  connection.on('MessageDelivered', handleMessageDelivered)
-  connection.on('ConversationsChanged', handleConversationsChanged)
-  connection.on('NotificationReceived', handleNotificationReceived)
-  connection.on('MessageRead', handleMessageRead)
-  connection.on('OnlineUsersSnapshot', handleOnlineUsersSnapshot)
-  connection.on('UserOnLine', handleUserOnline)
-  connection.on('UserOffLine', handleUserOffline)
-  connection.onreconnected(handleReconnected)
-  connection.onclose(handleClose)
+    const handleReconnected = async () => {
+      try {
+        const activeConversationId = activeConversationIdRef.current
 
-  return () => {
-    connection.off('MessageReceived', handleMessageReceived)
-    connection.off('MessageAck', handleMessageAck)
-    connection.off('MessageDelivered', handleMessageDelivered)
-    connection.off('ConversationsChanged', handleConversationsChanged)
-    connection.off('NotificationReceived', handleNotificationReceived)
-    connection.off('MessageRead', handleMessageRead)
-    connection.off('OnlineUsersSnapshot', handleOnlineUsersSnapshot)
-    connection.off('UserOnLine', handleUserOnline)
-    connection.off('UserOffLine', handleUserOffline)
-  }
-}, [connection, currentUserId])
+        if (activeConversationId) {
+          await joinConversation(connection, activeConversationId)
+          await loadConversationMessages(activeConversationId)
+        }
 
+        await reloadConversations()
+      } catch (err) {
+        console.error('Failed after reconnect', err)
+      }
+    }
+
+    connection.on('MessageReceived', handleMessageReceived)
+    connection.on('MessageAck', handleMessageAck)
+    connection.on('MessageDelivered', handleMessageDelivered)
+    connection.on('ConversationsChanged', handleConversationsChanged)
+    connection.on('MessageRead', handleMessageRead)
+    connection.onreconnected(handleReconnected)
+
+    return () => {
+      connection.off('MessageReceived', handleMessageReceived)
+      connection.off('MessageAck', handleMessageAck)
+      connection.off('MessageDelivered', handleMessageDelivered)
+      connection.off('ConversationsChanged', handleConversationsChanged)
+      connection.off('MessageRead', handleMessageRead)
+    }
+  }, [connection, currentUserId])
+
+function openDraftConversation(targetUserId: string, username: string) {
+  activeConversationIdRef.current = null
+  setActiveConversationId(null)
+
+  setDraftTargetUserId(targetUserId)
+  setDraftTargetUserName(username)
+
+  setMessages([])
+  setDeliveredMessageIds([])
+  setMessagesOffset(0)
+  setHasMoreMessages(false)
+
+  setSearch('')
+  setSearchResults([])
+}
+
+  useEffect(() => {
+    if (!currentUserId || !connection || !isConnected) return
+
+    let isMounted = true
+
+    async function init() {
+        if (!currentUserId) return
+      try {
+        setError(null)
+
+        const list = await getConversations(currentUserId)
+        if (!isMounted) return
+
+        setConversations(list)
+        publishUnreadCount(list)
+
+        if (list.length > 0) {
+          await openConversation(list[0].id)
+        } else {
+          setActiveConversationId(null)
+          activeConversationIdRef.current = null
+          setMessages([])
+        }
+      } catch (err) {
+        if (!isMounted) return
+        setError(err instanceof Error ? err.message : 'Failed to initialize chat')
+      }
+    }
+
+    void init()
+    return () => {
+      isMounted = false
+    }
+  }, [currentUserId, connection, isConnected])
+
+  useEffect(() => {
+    if (!search.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        const results = await searchUsers({
+          query: search,
+          take: 20,
+          cursor: null,
+        })
+
+        setSearchResults(results)
+      } catch (err) {
+        console.error('Search failed', err)
+        setSearchResults([])
+      }
+    }, 300)
+
+    return () => clearTimeout(timeout)
+  }, [search])
 
 useEffect(() => {
-  if (!currentUserId || !connection || !isConnected) return
+  if (!shouldScrollToBottomRef.current) return
 
-  let isMounted = true
+  messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  shouldScrollToBottomRef.current = false
+}, [messages])
 
-  async function init() {
-    try {
-      setLoadingChats(true)
-      setError(null)
-
-      const list = await getConversations(currentUserId!)
-      if (!isMounted) return
-
-      setConversations(list)
-      publishUnreadCount(list)
-
-      if (list.length > 0) {
-        await openConversation(list[0].id)
-      } else {
-        setActiveConversationId(null)
-        activeConversationIdRef.current = null
-        setMessages([])
-      }
-    } catch (err) {
-      if (!isMounted) return
-      setError(err instanceof Error ? err.message : 'Failed to initialize chat')
-    } finally {
-      if (isMounted) {
-        setLoadingChats(false)
-      }
+  useEffect(() => {
+    return () => {
+      window.dispatchEvent(
+        new CustomEvent('active-chat-changed', {
+          detail: { conversationId: null },
+        })
+      )
     }
-  }
-
-  void init()
-
-  return () => {
-    isMounted = false
-  }
-}, [currentUserId, connection, isConnected])
- 
-useEffect(() => {
-  // Проверяем, есть ли запрос
-  if (!search.trim()) {
-    setSearchResults([])
-    return
-  }
-
-  const timeout = setTimeout(async () => {
-    try {
-      // ПЕРЕДАЕМ ОБЪЕКТ
-      const results = await searchUsers({
-        query: search,
-        take: 20,
-        cursor: null
-      })
-      
-      setSearchResults(results)
-    } catch (err) {
-      console.error('Search failed', err)
-      setSearchResults([]) // Очищаем результаты при ошибке
-    }
-  }, 300)
-
-  return () => clearTimeout(timeout)
-}, [search]) // currentUserId здесь больше не нужен, если api.get сам шлет токены
-
-  useEffect(() => {     
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
+  }, [])  
   const { t } = useTranslation()
+const isDraftTargetOnline =
+  draftTargetUserId !== null && onlineUserIds.includes(draftTargetUserId)
+return (
+  
+  <div className="flex h-[calc(100dvh-250px)] items-center justify-center bg-white p-4">
+    <div className="mx-auto h-full w-full max-w-8xl py-6">
+      <div className="panel flex h-[85%] w-full gap-4">
+        <aside className="w-l bg-gray-300 rounded-2xl flex flex-col p-3">
+          <h2 className="text-base font-bold text-text mb-2">
+            {t('chat.chats')}
+          </h2>
 
-  return (
-      //  <div className="h-[calc(100dvh-250px)] overflow-hidden bg-white">
-      // {/* <main className="mx-auto h-full max-w-2xl px-4 py-6"> */}
-      //   {/* <div className="panel flex h-[85%] flex-col overflow-hidden"> */}
-
-    <div className="flex h-[calc(100dvh-250px)] items-center justify-center bg-white p-4">
-  <div className="mx-auto h-full w-full max-w-8xl py-6">
-    <div className="panel flex h-[85%] w-full gap-4">
-        {/* Sidebar Panel */}
-        <aside className="w-l bg-gray-300 rounded-2xl flex flex-col">
-          <h2 className="text-base font-bold text-text mb-2">{t('chat.chats')}</h2>
-          
-          {/* Search Input */}
           <div className="relative mb-2">
             <input
               value={search}
@@ -574,32 +556,77 @@ useEffect(() => {
               className="input w-full text-xs"
             />
 
-            {/* Search Results Dropdown */}
             {searchResults.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg max-h-32 overflow-y-auto">
-                {searchResults.map(user => (
+                {searchResults.map(userItem => (
                   <button
-                    key={user.id}
-                    onClick={() => void handleCreateDirectConversationFromSearch(user.id)}
+                    key={userItem.id}
+                    type="button"
+                    onMouseDown={e => {
+                      e.preventDefault()
+                      openDraftConversation(userItem.id, userItem.username)
+                    }}
                     className="block w-full text-left px-2 py-1 border-b border-gray-100 hover:bg-gray-100 transition-colors text-xs"
                   >
-                    <div className="font-medium text-gray-900">{user.username}</div>
+                    <div className="font-medium text-gray-900">
+                      {userItem.username}
+                    </div>
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Error Message */}
-          {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-xs mb-2">
+              {error}
+            </p>
+          )}
 
-          {/* Conversations List */}
           <div className="space-y-0.5 flex-1 min-h-0 overflow-y-auto">
-            {conversations.length === 0 ? (
-              <p className="text-gray-600 text-center py-2 text-xs">{t('chat.selectConversation')}</p>
+
+            {draftTargetUserId && (
+              <button
+                type="button"
+                className="w-full text-left p-1.5 rounded-lg transition-all bg-gray-400 border border-gray-500 mb-0.5"
+              >
+                <div className="flex items-center gap-1.5">
+                  <img
+                    src="https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg"
+                    alt={draftTargetUserName ?? 'New chat'}
+                    className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                  />
+
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 truncate text-xs">
+                      {draftTargetUserName}
+                    </div>
+
+                    <div className="text-xs text-gray-600 truncate">
+                      New chat
+                    </div>
+                  </div>
+
+                 <span
+                    className={`inline-block w-2.5 h-2.5 rounded-full ring-1 ring-gray-300 ${
+                      isDraftTargetOnline ? 'bg-green-500' : 'bg-gray-400'
+                    }`}
+                  />
+                </div>
+              </button>
+            )}
+
+            {conversations.length === 0 && !draftTargetUserId ? (
+              <p className="text-gray-600 text-center py-2 text-xs">
+                {t('chat.selectConversation')}
+              </p>
             ) : (
               conversations.map(conversation => {
                 const isOnline = onlineUserIds.includes(conversation.targetUserId)
+
+                const avatarSrc = conversation.targetUserAvatarUrl
+                  ? `${import.meta.env.VITE_API_BASE_URL}${conversation.targetUserAvatarUrl}`
+                  : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
 
                 return (
                   <button
@@ -608,26 +635,37 @@ useEffect(() => {
                     className={`w-full text-left p-1.5 rounded-lg transition-all ${
                       conversation.id === activeConversationId
                         ? 'bg-gray-400 border border-gray-500'
-                        : 'bg-gray-200 hover:bg-gray-250'
+                        : 'bg-gray-200 hover:bg-gray-100'
                     }`}
                   >
-                    {/* User with avatar */}
                     <div className="flex items-center gap-1.5">
                       <img
-                        src={
-                          conversation?.targetUserAvatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${conversation.targetUserAvatarUrl}` : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
-                        }
-                        onError={(event) => {
-                          event.currentTarget.src = 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
+                        src={avatarSrc}
+                        onError={event => {
+                          event.currentTarget.src =
+                            'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
                         }}
                         alt={conversation.targetUserName}
                         className="w-5 h-5 rounded-full object-cover flex-shrink-0"
                       />
+
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 truncate text-xs">{conversation.targetUserName}</div>
-                        <div className="text-xs text-gray-600 truncate">{conversation.lastMessage || t('chat.noMessagesYet')}</div>
+                        <div className="font-medium text-gray-900 truncate text-xs">
+                          {conversation.targetUserName}
+                        </div>
+
+                        <div className="text-xs text-gray-600 truncate">
+                          {conversation.lastMessage || t('chat.noMessagesYet')}
+                        </div>
                       </div>
+
                       <div className="flex items-center gap-1 flex-shrink-0">
+                        {conversation.unreadCount > 0 && (
+                          <span className="min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
+                            {conversation.unreadCount}
+                          </span>
+                        )}
+
                         <span
                           className={`inline-block w-2.5 h-2.5 rounded-full ring-1 ring-gray-300 ${
                             isOnline ? 'bg-green-500' : 'bg-gray-400'
@@ -642,20 +680,33 @@ useEffect(() => {
           </div>
         </aside>
 
-        {/* Main Chat Area Panel */}
         <main className="flex-1 flex flex-col bg-gray-300 rounded-2xl p-3 min-h-0">
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-2 space-y-0.5 min-h-0 bg-white rounded-lg mb-1.5">
-            {loadingChats && (
-              <div className="text-center py-2 text-gray-500 text-xs">{t('common.loading')}</div>
-            )}
+          <div
+            ref={messagesContainerRef}
+            className="flex-1 overflow-y-auto p-2 space-y-0.5 min-h-0 bg-white rounded-lg mb-1.5"
+          >
+              {!activeConversationId && !draftTargetUserId && !loadingMessages && (
+                <div className="text-center py-2 text-gray-500 text-xs">
+                  {t('chat.selectConversation')}
+                </div>
+              )}
 
-            {!activeConversationId && !loadingChats && (
-              <div className="text-center py-2 text-gray-500 text-xs">{t('chat.selectConversation')}</div>
-            )}
+              {draftTargetUserId && (
+                <div className="text-center py-2 text-gray-500 text-xs">
+                  New chat with {draftTargetUserName}
+                </div>
+              )}
 
             {loadingMessages && (
-              <div className="text-center py-2 text-gray-500 text-xs">{t('chat.loadingMessages')}</div>
+              <div className="text-center py-2 text-gray-500 text-xs">
+                {t('chat.loadingMessages')}
+              </div>
+            )}
+
+            {loadingOlderMessages && (
+              <div className="text-center py-2 text-gray-500 text-xs">
+                {t('chat.loadingMessages')}
+              </div>
             )}
 
             {!loadingMessages &&
@@ -676,7 +727,11 @@ useEffect(() => {
                     >
                       <div>{message.content}</div>
 
-                      <div className={`text-xs mt-0.5 ${isMine ? 'text-blue-100' : 'text-gray-600'}`}>
+                      <div
+                        className={`text-xs mt-0.5 ${
+                          isMine ? 'text-blue-100' : 'text-gray-600'
+                        }`}
+                      >
                         {new Date(message.createdAt).toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -684,7 +739,7 @@ useEffect(() => {
                       </div>
 
                       {isMine && (
-                        <div className={`text-xs mt-0.5 ${isMine ? 'text-blue-100' : 'text-gray-600'}`}>
+                        <div className="text-xs mt-0.5 text-blue-100">
                           {message.isReadByOthers
                             ? t('chat.read')
                             : deliveredMessageIds.includes(message.messageId)
@@ -700,13 +755,12 @@ useEffect(() => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
           <div className="bg-white rounded-lg p-1.5 flex-shrink-0">
             <div className="flex gap-1">
               <input
                 value={text}
                 onChange={e => setText(e.target.value)}
-                onKeyPress={e => {
+                onKeyDown={e => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault()
                     void handleSend()
@@ -715,6 +769,7 @@ useEffect(() => {
                 placeholder={t('chat.typeMessage')}
                 className="input flex-1 text-xs"
               />
+
               <button
                 onClick={() => void handleSend()}
                 disabled={sending || !text.trim() || !currentUserId}
@@ -729,6 +784,6 @@ useEffect(() => {
 
       <BottomNav active="messages" />
     </div>
-    </div>
-  )
+  </div>
+)
 }
