@@ -28,17 +28,31 @@ const USER_KEY = 'the-social.user'
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-function isJwtExpired(token: string): boolean {
+const decodeBase64Url = (base64Url: string): string => {
+  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+
+  while (base64.length % 4 !== 0) {
+    base64 += '='
+  }
+
+  return atob(base64)
+}
+
+export const isJwtExpired = (token: string): boolean => {
   try {
-    const payloadBase64 = token.split('.')[1]
-    if (!payloadBase64) return true
+    const payloadSegment = token.split('.')[1]
 
-    const payload = JSON.parse(atob(payloadBase64))
-    const exp = payload.exp
+    if (!payloadSegment) {
+      return true
+    }
 
-    if (typeof exp !== 'number') return true
+    const payload = JSON.parse(decodeBase64Url(payloadSegment))
 
-    return Date.now() >= exp * 1000
+    if (!payload.exp) {
+      return true
+    }
+
+    return Date.now() >= payload.exp * 1000
   } catch {
     return true
   }
