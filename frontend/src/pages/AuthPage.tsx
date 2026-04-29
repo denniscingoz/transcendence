@@ -102,7 +102,11 @@ export function AuthPage() {
             {/* Dropdown */}
             <LanguageDropdown
               value={i18n.language as 'en' | 'fr' | 'es'}
-              onChange={(lang) => setLanguage(lang)}
+              onChange={(lang) => {
+                if (lang === i18n.language) return
+                setLanguage(lang)
+                window.location.reload()
+              }}
             />
         </div>
         
@@ -172,9 +176,8 @@ export function AuthPage() {
           
           {/* Signup with Google */}
           <GoogleOAuthProvider
-            key={i18n.language}
             clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
-            locale={i18n.language}
+              locale={i18n.language}
           >
             <div className="flex justify-center">
               <GoogleLogin
