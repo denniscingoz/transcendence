@@ -1,12 +1,5 @@
 namespace Transcendence.Application.Chat.DTOs;
-
-public enum NotificationType
-{
-    NewMessage = 1,
-    FriendRequest = 2,
-    FriendRequestAccepted = 3,
-    FriendRequestDeclined = 4
-}
+using Transcendence.Domain.Notifications;
 public sealed class NotificationDto
 {
     public Guid Id { get; init; }

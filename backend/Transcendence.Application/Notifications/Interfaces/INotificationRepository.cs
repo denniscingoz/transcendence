@@ -9,5 +9,10 @@ public interface INotificationRepository
     Task MarkAllAsReadAsync(Guid userId, CancellationToken ct);
     Task SaveChangesAsync(CancellationToken ct);
     Task MarkConversationAsReadAsync(Guid userId, Guid conversationId, CancellationToken ct);
-    
+    Task MarkNotificationAsReadAsync(
+    Guid userId,
+    Guid notificationId,
+    CancellationToken ct);
+    Task MarkChatNotificationsAsReadAsync(Guid userId, CancellationToken ct);
+
 }

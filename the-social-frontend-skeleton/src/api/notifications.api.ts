@@ -44,6 +44,14 @@ export async function markConversationNotificationsAsRead(conversationId: string
   await api.post(`/notifications/conversations/${conversationId}/read`)
 }
 
+export async function markChatNotificationsAsRead(): Promise<void> {
+    await api.post(`/notifications/chat-read`)
+
+}
+export async function markNotificationAsRead(notificationId: string): Promise<void> {
+  await api.post(`/notifications/${notificationId}/read`)
+}
+
 export async function markAllNotificationsAsRead(): Promise<void> {
   await api.post('/notifications/read-all')
 }
