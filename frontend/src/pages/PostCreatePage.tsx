@@ -210,7 +210,7 @@ export function PostCreatePage() {
                 {t('createpost.writecaption')}
               </label>
               <textarea
-                id="Caption"
+                id="caption"
                 value={postForm.caption}
                 onChange={(e) =>
                   setPostForm((prev) => ({ ...prev, caption: e.target.value }))
