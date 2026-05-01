@@ -171,7 +171,17 @@ public class NotificationService : INotificationService
             .Groups(groups)
             .ConversationsChanged();
     }
+    public async Task NotifyConversationsChanged(IEnumerable<Guid> userIds)
+    {
+        var groups = userIds
+            .Distinct()
+            .Select(GroupNames.User)
+            .ToList();
 
+        await _hub.Clients
+            .Groups(groups)
+            .ConversationsChanged();
+    }
     private async Task<FriendshipRequestEventDto> BuildFriendshipRequestEventDto(
         FriendshipRequestDto request,
         FriendshipRequestStatus status)
@@ -217,5 +227,20 @@ public class NotificationService : INotificationService
         await _notificationRepository.AddAsync(notification, CancellationToken.None);
         await _notificationRepository.SaveChangesAsync(CancellationToken.None);
     }
+    public async Task NotifyConversationDeleted(
+        IEnumerable<Guid> participantIds,
+        Guid conversationId)
+    {
+        var groups = participantIds
+            .Distinct()
+            .Select(GroupNames.User)
+            .ToList();
 
+        await _hub.Clients
+            .Groups(groups)
+            .ConversationDeleted(new ConversationDeletedDto
+            {
+                ConversationId = conversationId
+            });
+    }
 }

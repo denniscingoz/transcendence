@@ -17,17 +17,20 @@ public class ChatService : IChatService
     private readonly IConversationRepository _coversationRepository;
     private readonly IMessageRepository _messageRepository;
     private readonly IUserRepository _userRepository;
+    private readonly INotificationService _notificationService;
+
 
 
     public ChatService(
         IConversationRepository conversationRepository,
         IMessageRepository messageRepository,
-        IUserRepository userRepository
-        )
+        IUserRepository userRepository,
+        INotificationService notificationService)
     {
         _coversationRepository = conversationRepository;
         _messageRepository = messageRepository;
         _userRepository = userRepository;
+        _notificationService = notificationService;
     }
 
     private ChatMessageDto MapToDto(Message message, Guid currentUserId, DateTimeOffset readByUser,  DateTimeOffset readByOthers)
@@ -115,7 +118,7 @@ public class ChatService : IChatService
         await _coversationRepository.AddAsync(conversation);
         await _coversationRepository.SaveChangesAsync();
         
-
+        await _notificationService.NotifyConversationCreated(userA, userB, conversation.Id);
         return new CreateOrGetConversationResult
         {
             ConversationId = conversation.Id,
@@ -234,7 +237,30 @@ public async Task DeleteMessageAsync(Guid userId, Guid messageId)
     message.Delete(DateTime.UtcNow);
 
   
-}
+    }
+    public async Task DeleteConversationAsync(
+        Guid userId,
+        Guid conversationId)
+    {
+        var conversation = await _coversationRepository.GetByIdAsync(conversationId);
+
+        if (conversation is null)
+            throw new NotFoundException("Conversation not found");
+
+        if (!conversation.HasParticipant(userId))
+            throw new ForbiddenException("User is not a participant");
+
+        var participantIds = conversation.Participants
+            .Select(p => p.UserId)
+            .ToList();
+
+        await _coversationRepository.DeleteConversationWithDataAsync(conversationId);
+
+        await _notificationService.NotifyConversationDeleted(
+            participantIds,
+            conversationId);
+    }
+
 }
  
  /*

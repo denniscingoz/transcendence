@@ -19,4 +19,6 @@ public interface INotificationService
     Task NotifyFriendRequestDeclined(Guid targetUserId, FriendshipRequestDto request);
 
     Task NotifyConversationCreated(Guid userA, Guid userB, Guid conversationId);
+    Task NotifyConversationDeleted(IEnumerable <Guid> participantIds, Guid conversationId);
+    Task NotifyConversationsChanged(IEnumerable<Guid> userIds);
 }

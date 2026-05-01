@@ -17,4 +17,5 @@ public interface IRealtimeClient
     Task OnlineUsersSnapshot(IEnumerable<string> users);
     Task UserOnLine(object payload);
     Task UserOffLine(object payload);
+    Task ConversationDeleted(ConversationDeletedDto dto);
 }

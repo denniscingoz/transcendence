@@ -46,6 +46,13 @@ public class ConversationsController : ControllerBase
         await _chatService.DeleteMessageAsync(currentUserId, messageId);
         return NoContent();
     }
+    [HttpDelete("{conversationId:guid}")]
+    public async Task<IActionResult> DeletConversation(Guid conversationId, CancellationToken ct)
+    {
+        var currentUserId = GetUserId();
+        await _chatService.DeleteConversationAsync(currentUserId, conversationId);
+        return NoContent();
+    }
     [HttpPost("direct")]
     public async Task<ActionResult<ApiResponse<CreateOrGetConversationResult>>> CreateDirectConversation(
         [FromBody] CreateDirectConversationDto dto)

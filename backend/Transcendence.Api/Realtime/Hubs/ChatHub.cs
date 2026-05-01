@@ -34,14 +34,13 @@ public sealed class ChatHub : Hub<IRealtimeClient>
 
     Console.WriteLine($"OnConnectedAsync fired. ConnectionId={Context.ConnectionId}, UserId={userId}");
 
-    await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.User(userId));
 
-       await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.User(userId)); // add connId to user's collection of connections  
-        Console.WriteLine($"User {userId} joined group user:{userId}");
-        
-        var userConversations = await _chatService.GetUserConversationsIds(userId);
-        foreach (var c in userConversations)
-            await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(c)); // add connection to conversation groups (group names are based on DB conversation IDs)
+    await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.User(userId)); // add connId to user's collection of connections  
+    Console.WriteLine($"User {userId} joined group user:{userId}");
+    
+    var userConversations = await _chatService.GetUserConversationsIds(userId);
+    foreach (var c in userConversations)
+        await Groups.AddToGroupAsync(Context.ConnectionId, GroupNames.Conversation(c)); // add connection to conversation groups (group names are based on DB conversation IDs)
 
     var becameOnline = _presenceService.AddConnection(userId, Context.ConnectionId);
 
@@ -150,6 +149,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
         var receivers = await _chatService.GetParticipantsIds(dto.ConversationId);
 
         await _notificationService.NotifyNewMessage(receivers, senderId, messageDto);
+        await _notificationService.NotifyConversationsChanged(receivers);
         
         await Clients.Caller.MessageAck(new MessageAckDto  
         {
