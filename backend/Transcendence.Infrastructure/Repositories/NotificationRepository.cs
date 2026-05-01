@@ -61,14 +61,14 @@ public sealed class NotificationRepository : INotificationRepository
     {
         await _db.SaveChangesAsync(ct);
     }
-    public async Task MarkChatNotificationsAsReadAsync(
+    public async Task MarkSeenNotificationsAsReadAsync(
         Guid userId,
         CancellationToken ct)
     {
         var notifications = await _db.Notifications
             .Where(n =>
                 n.UserId == userId &&
-                n.Type == (int)NotificationType.NewMessage &&
+                n.Type != (int)NotificationType.FriendRequest &&
                 !n.IsRead)
             .ToListAsync(ct);
 

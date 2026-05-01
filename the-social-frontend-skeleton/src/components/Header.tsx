@@ -15,7 +15,7 @@ import {
 import {
   getNotifications,
   markNotificationAsRead,
-  markChatNotificationsAsRead,  
+  markSeenNotificationsAsRead,  
   type NotificationListItemDto,
 } from '../api/notifications.api'
 import { NotificationsModal } from './modals/NotificationsModal'
@@ -162,10 +162,10 @@ export function Header({ showNotification = true }: HeaderProps) {
 
 async function handleCloseNotifications() {
   try {
-    await markChatNotificationsAsRead()
+    await markSeenNotificationsAsRead()
 
     setNotifications(prev =>
-      prev.filter(item => item.kind !== 'unread_message')
+      prev.filter(item => item.kind === 'friend_request')
     )
 
     await loadHeaderSummary()
@@ -188,8 +188,7 @@ async function handleCloseNotifications() {
           prev.filter(item => item.id !== notificationId)
         )
 
-        await markChatNotificationsAsRead()
-
+        await loadHeaderSummary()
       } catch (err) {
         console.error('Failed to accept friend request', err)
       }
@@ -208,7 +207,8 @@ async function handleCloseNotifications() {
         prev.filter(item => item.id !== notificationId)
       )
       
-            await markChatNotificationsAsRead()
+      await loadHeaderSummary()
+
 
     } catch (err) {
       console.error('Failed to decline friend request', err)

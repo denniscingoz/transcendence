@@ -12,7 +12,7 @@ public interface INotificationsService
         Guid notificationId,
         CancellationToken ct);
 
-    Task MarkChatNotificationsAsReadAsync(
+    Task MarkSeenNotificationsAsReadAsync(
         Guid userId,
         CancellationToken ct);
     Task MarkConversationAsReadAsync(Guid userId, Guid conversationId, CancellationToken ct);

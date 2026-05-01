@@ -74,11 +74,11 @@ public sealed class NotificationsController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("chat-read")]
-    public async Task<IActionResult> MarkChatNotificationAsRead(CancellationToken ct)
+    [HttpPost("seen-read")]
+    public async Task<IActionResult> MarkSeenNotificationAsRead(CancellationToken ct)
     {
         var userId = GetUserId();
-        await _notificationsService.MarkChatNotificationsAsReadAsync(userId, ct);
+        await _notificationsService.MarkSeenNotificationsAsReadAsync(userId, ct);
         return NoContent();
     }
 

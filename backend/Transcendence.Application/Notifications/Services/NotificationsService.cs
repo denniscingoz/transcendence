@@ -61,11 +61,11 @@ public sealed class NotificationsService : INotificationsService
 
             await _notificationRepository.SaveChangesAsync(ct);
         }
-        public async Task MarkChatNotificationsAsReadAsync(
+        public async Task MarkSeenNotificationsAsReadAsync(
             Guid userId,
             CancellationToken ct)
         {
-            await _notificationRepository.MarkChatNotificationsAsReadAsync(userId, ct);
+            await _notificationRepository.MarkSeenNotificationsAsReadAsync(userId, ct);
             await _notificationRepository.SaveChangesAsync(ct);
         }
 

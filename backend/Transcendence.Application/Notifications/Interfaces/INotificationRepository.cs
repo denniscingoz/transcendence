@@ -13,6 +13,6 @@ public interface INotificationRepository
     Guid userId,
     Guid notificationId,
     CancellationToken ct);
-    Task MarkChatNotificationsAsReadAsync(Guid userId, CancellationToken ct);
+    Task MarkSeenNotificationsAsReadAsync(Guid userId, CancellationToken ct);
 
 }
