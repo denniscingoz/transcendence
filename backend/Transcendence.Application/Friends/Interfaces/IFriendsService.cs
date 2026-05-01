@@ -1,4 +1,5 @@
 using Transcendence.Application.Friends.DTOs;
+using Transcendence.Application.Common.DTOs;
 
 namespace Transcendence.Application.Friends.Interfaces;
 
@@ -20,6 +21,6 @@ public interface IFriendsService // use-case (Command)
 	Task RemoveFriendAsync(Guid currentUserId, Guid friendUserId, CancellationToken ct);
 	// DELETE friends/{friendUserId}
 
-	Task<IReadOnlyList<FriendDto>> GetFriendsListAsync(Guid userId, CancellationToken ct);
+	Task<CursorPageDto<FriendDto>> GetFriendsListAsync(Guid userId, int take, string? cursor, CancellationToken ct);
 	// GET friends/list
 }

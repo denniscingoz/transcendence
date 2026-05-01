@@ -1,4 +1,6 @@
+using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Transcendence.Application.Common.DTOs;
 using Transcendence.Application.Friends.DTOs;
 using Transcendence.Application.Friends.Queries;
 using Transcendence.Infrastructure.Persistence;
@@ -12,16 +14,34 @@ public sealed class FriendsQuery : IFriendsQuery
     public FriendsQuery(TranscendenceDbContext db)
         => _db = db;
 
-    public async Task<IReadOnlyList<FriendDto>> ListFriendsAsync(Guid userId, CancellationToken ct)
+    public async Task<CursorPageDto<FriendDto>> ListFriendsAsync(
+        Guid userId, int take, string? cursor, CancellationToken ct)
     {
-        // Friendships are stored normalized: (User1Id < User2Id).
-        // For a given user, friend is the "other" side.
-        var friendIds = await _db.Friendships
-            .Where(f => f.User1Id == userId || f.User2Id == userId)
-            .Select(f => f.User1Id == userId ? f.User2Id : f.User1Id)
-            .ToListAsync(ct);
+        // Decode cursor: base64 of "username|guid".
+        // Invalid cursor → start from the beginning (don't 400 the client).
+        string? cursorUsername = null;
+        Guid?   cursorUserId   = null;
+        if (!string.IsNullOrWhiteSpace(cursor))
+        {
+            try
+            {
+                var decoded = Encoding.UTF8.GetString(Convert.FromBase64String(cursor));
+                var parts   = decoded.Split('|', 2);
+                if (parts.Length == 2 && Guid.TryParse(parts[1], out var parsedId))
+                {
+                    cursorUsername = parts[0];
+                    cursorUserId   = parsedId;
+                }
+            }
+            catch { /* fall through, paginate from start */ }
+        }
 
-        var users = await _db.Users
+        // Friend ids for this user (normalized table: User1Id < User2Id).
+        var friendIds =
+            from f in _db.Friendships
+            where f.User1Id == userId || f.User2Id == userId
+            select f.User1Id == userId ? f.User2Id : f.User1Id;
+        var query = _db.Users
             .Where(u => friendIds.Contains(u.Id))
             .Select(u => new
             {
@@ -29,25 +49,49 @@ public sealed class FriendsQuery : IFriendsQuery
                 u.Username,
                 u.FullName,
                 u.AvatarFileId
-            })
+            });        // Keyset filter: rows strictly after the cursor in (Username, Id) order.
+        if (cursorUsername is not null && cursorUserId is not null)
+        {
+            var cu  = cursorUsername;
+            var cid = cursorUserId.Value;
+            query = query.Where(u =>
+                string.Compare(u.Username, cu) > 0
+                || (u.Username == cu && u.Id.CompareTo(cid) > 0));
+        }
+
+        var rows = await query
+            .OrderBy(u => u.Username)
+            .ThenBy(u => u.Id)
+            .Take(take + 1)            // +1 sentinel to detect "has more"
             .ToListAsync(ct);
 
-        var friends = users
+        string? nextCursor = null;
+        if (rows.Count > take)
+        {
+            var last = rows[take - 1];
+            var raw  = $"{last.Username}|{last.Id}";
+            nextCursor = Convert.ToBase64String(Encoding.UTF8.GetBytes(raw));
+            rows = rows.Take(take).ToList();
+        }
+
+        var items = rows
             .Select(u => new FriendDto
             {
-                Id = u.Id,
-                Username = u.Username,
-                FullName = u.FullName,
-                AvatarUrl = u.AvatarFileId.HasValue ? $"/files/avatar/{u.AvatarFileId.Value}" : null
+                Id        = u.Id,
+                Username  = u.Username,
+                FullName  = u.FullName,
+                AvatarUrl = u.AvatarFileId.HasValue
+                    ? $"/files/avatar/{u.AvatarFileId.Value}"
+                    : null
             })
             .ToList();
 
-        return friends;
+        return new CursorPageDto<FriendDto> { Items = items, NextCursor = nextCursor };
     }
 
-    public async Task<IReadOnlyList<FriendshipRequestDto>> ListFriendshipRequestsAsync(Guid userId, CancellationToken ct)
+    public async Task<IReadOnlyList<FriendshipRequestDto>> ListFriendshipRequestsAsync(
+        Guid userId, CancellationToken ct)
     {
-        // Requests *to* me: I’m TargetUserId and somebody else requested me.
         var requests = await _db.FriendshipRequests
             .Where(r => r.TargetUserId == userId)
             .OrderByDescending(r => r.CreatedAt)

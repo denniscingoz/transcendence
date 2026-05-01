@@ -10,8 +10,22 @@ export type FriendshipRequestDto = {
   requesterAvatarUrl?: string | null
 }
 
-export async function listFriends(): Promise<FriendDto[]> {
-  const response = await api.get<ApiResponse<FriendDto[]>>('/friends/list')
+export type CursorPage<T> = {
+  items: T[]
+  nextCursor: string | null
+}
+
+export async function listFriends(params?: {
+  take?: number
+  cursor?: string | null
+}): Promise<CursorPage<FriendDto>> {
+  const query: Record<string, string> = { take: String(params?.take ?? 20) }
+  if (params?.cursor) query.cursor = params.cursor
+
+  const response = await api.get<ApiResponse<CursorPage<FriendDto>>>(
+    '/friends/list',
+    { params: query },
+  )
 
   if (!response.data.isSuccess || !response.data.data) {
     throw new Error(response.data.errors?.[0] ?? 'Failed to load friends.')
