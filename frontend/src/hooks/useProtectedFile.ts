@@ -6,13 +6,15 @@ export function useProtectedFile(fileUrl?: string | null) {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (!fileUrl) {
-      setResolvedUrl(null)
-      return
-    }
-
     let objectUrl: string | null = null
     let cancelled = false
+
+    setResolvedUrl(null)
+
+    if (!fileUrl) {
+      setIsLoading(false)
+      return
+    }
 
     const loadFile = async () => {
       try {
@@ -25,7 +27,9 @@ export function useProtectedFile(fileUrl?: string | null) {
         objectUrl = URL.createObjectURL(blob)
         setResolvedUrl(objectUrl)
       } catch {
-        setResolvedUrl(null)
+        if (!cancelled) {
+          setResolvedUrl(null)
+        }
       } finally {
         if (!cancelled) {
           setIsLoading(false)
@@ -37,6 +41,7 @@ export function useProtectedFile(fileUrl?: string | null) {
 
     return () => {
       cancelled = true
+
       if (objectUrl) {
         URL.revokeObjectURL(objectUrl)
       }

@@ -28,13 +28,60 @@ const USER_KEY = 'the-social.user'
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
+const decodeBase64Url = (base64Url: string): string => {
+  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+
+  while (base64.length % 4 !== 0) {
+    base64 += '='
+  }
+
+  return atob(base64)
+}
+
+export const isJwtExpired = (token: string): boolean => {
+  try {
+    const parts = token.split('.')
+
+    if (parts.length !== 3) {
+      return true
+    }
+
+    const payload = JSON.parse(decodeBase64Url(parts[1]))
+
+    if (!payload.exp) {
+      return true
+    }
+
+    return Date.now() >= payload.exp * 1000
+  } catch {
+    return true
+  }
+}
+
 function loadToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY)
+  const token = localStorage.getItem(TOKEN_KEY)
+
+  if (!token || token === 'null' || token === 'undefined') {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(USER_KEY)
+    return null
+  }
+
+  if (isJwtExpired(token)) {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(USER_KEY)
+    return null
+  }
+
+  return token
 }
 
 function loadUser(): AuthUser | null {
   const raw = localStorage.getItem(USER_KEY)
-  if (!raw) return null
+
+  if (!raw || raw === 'null' || raw === 'undefined') {
+    return null
+  }
 
   try {
     return JSON.parse(raw) as AuthUser
@@ -58,27 +105,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user: loadUser(),
   }))
 
-  // const setAuth = useCallback((token: string | null, user: AuthUser | null) => {
-  //   persistAuth(token, user)
-  //   setState({ token, user })
-  // }, [])
 const setAuth = useCallback((token: string | null, user: AuthUser | null) => {
-  console.log('SET_AUTH called', { token, user })
-
   persistAuth(token, user)
-
-  console.log('LOCAL token after persist', localStorage.getItem(TOKEN_KEY))
-  console.log('LOCAL user after persist', localStorage.getItem(USER_KEY))
-
   setState({ token, user })
 }, [])
 
 const signIn = useCallback(async (req: SignInRequestDto) => {
-  console.log('SIGN_IN start', req)
-
   const res = await signInApi(req)
-  console.log('SIGN_IN response', res)
-
   setAuth(res.token, res.user)
 }, [setAuth])
 
@@ -104,7 +137,7 @@ const signIn = useCallback(async (req: SignInRequestDto) => {
     logout,
     setAuth,
   }), [state.token, state.user, signIn, signup, googleSignIn, logout, setAuth])
-  console.log('AUTH PROVIDER state', state)
+
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -1,10 +1,10 @@
 FROM node:20-alpine AS webbuild
 WORKDIR /web
 
-COPY the-social-frontend-skeleton/package*.json ./
+COPY frontend/package*.json ./
 RUN npm ci
 
-COPY the-social-frontend-skeleton/ ./
+COPY frontend/ ./
 RUN npm run build
 
 FROM nginx:alpine

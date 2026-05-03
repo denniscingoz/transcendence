@@ -24,7 +24,9 @@
   "addFriend": "Ajouter un ami",
   "requested": "Demandé",
   "accept": "Accepter la demande",
-  "decline": "Refuser la demande"
+  "decline": "Refuser la demande",
+  "loadMore": "Charger plus",
+  "loading": "Chargement…"
   },
   "chat": {
     "title": "Chat",

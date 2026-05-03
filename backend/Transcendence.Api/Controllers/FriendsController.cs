@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Transcendence.Application.Common.Responses;
 using Transcendence.Api.Common.Extensions;
+using Transcendence.Application.Common.DTOs;
 using Transcendence.Application.Users.DTOs;
 using Transcendence.Application.Users.Interfaces;
 using Transcendence.Application.Users.Services;
@@ -21,13 +22,16 @@ public sealed class FriendsController : ControllerBase
     private readonly IFriendsService _friendsService;
     public FriendsController(IFriendsService friendsService) {_friendsService = friendsService;}
 
-	//GET /friends/list
+	//GET /friends/list?take=20&cursor=<nextCursor>
 	[HttpGet("list")]
-	public async Task<ActionResult<ApiResponse<IReadOnlyList<FriendDto>>>> GetFriendsList(CancellationToken ct)
+	public async Task<ActionResult<ApiResponse<CursorPageDto<FriendDto>>>> GetFriendsList(
+		[FromQuery] int take = 20,
+		[FromQuery] string? cursor = null,
+		CancellationToken ct = default)
 	{
-		Guid userId = GetUserId(); //todo auth
-		var friendsList = await _friendsService.GetFriendsListAsync(userId, ct);
-		return this.OkResponse(friendsList);
+		Guid userId = GetUserId();
+		var page = await _friendsService.GetFriendsListAsync(userId, take, cursor, ct);
+		return this.OkResponse(page);
 	}
 
 	//POST /friends/{friendUserId}

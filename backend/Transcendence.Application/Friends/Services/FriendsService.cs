@@ -1,4 +1,5 @@
 using Transcendence.Application.Common.Exceptions;
+using Transcendence.Application.Common.DTOs;
 using Transcendence.Application.Friends.DTOs;
 using Transcendence.Application.Friends.Exceptions;
 using Transcendence.Application.Friends.Interfaces;
@@ -166,13 +167,19 @@ public sealed class FriendsService : IFriendsService
         await _friendshipRepository.SaveChangesAsync(ct);
     }
 
-    // GET friends/list
-    public async Task<IReadOnlyList<FriendDto>> GetFriendsListAsync(Guid userId, CancellationToken ct)
+    private const int DefaultTake = 20;
+    private const int MaxTake = 50;
+
+    // GET friends/list?take=20&cursor=<nextCursor>
+    public async Task<CursorPageDto<FriendDto>> GetFriendsListAsync(
+        Guid userId, int take, string? cursor, CancellationToken ct)
     {
         _ = await _userRepository.GetByIdAsync(userId, ct)
             ?? throw new NotFoundException("User not found.");
 
-        var list = await _friendsQuery.ListFriendsAsync(userId, ct);
-        return list;
+        if (take <= 0) take = DefaultTake;
+        if (take > MaxTake) take = MaxTake;
+
+        return await _friendsQuery.ListFriendsAsync(userId, take, cursor, ct);
     }
 }
