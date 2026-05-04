@@ -18,11 +18,15 @@ public class ConversationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IReadOnlyList<ConversationDto>>>> GetConversations()
+
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<ConversationDto>>>> GetConversations(
+        [FromQuery] int offset = 0,
+        [FromQuery] int limit = 20
+    )
     {
         var userId = GetUserId();
 
-        var conversations = await _chatService.GetConversations(userId);
+        var conversations = await _chatService.GetConversations(userId, offset, limit);
 
         return this.OkResponse(conversations);
     }
@@ -39,7 +43,20 @@ public class ConversationsController : ControllerBase
 
         return this.OkResponse(messages);
     }
-
+    [HttpDelete("messages/{messageId:guid}")]
+    public async Task<IActionResult> DeleteMessage(Guid messageId, CancellationToken ct)
+    {
+        var currentUserId = GetUserId();
+        await _chatService.DeleteMessageAsync(currentUserId, messageId);
+        return NoContent();
+    }
+    [HttpDelete("{conversationId:guid}")]
+    public async Task<IActionResult> DeletConversation(Guid conversationId, CancellationToken ct)
+    {
+        var currentUserId = GetUserId();
+        await _chatService.DeleteConversationAsync(currentUserId, conversationId);
+        return NoContent();
+    }
     [HttpPost("direct")]
     public async Task<ActionResult<ApiResponse<CreateOrGetConversationResult>>> CreateDirectConversation(
         [FromBody] CreateDirectConversationDto dto)
@@ -51,7 +68,7 @@ public class ConversationsController : ControllerBase
 
         return this.OkResponse(conversation);
     }
-
+ 
     private Guid GetUserId()
     {
         var claimValue =

@@ -24,6 +24,7 @@ export type ChatMessageDto = {
   content: string
   isReadByOthers: boolean
   createdAt: string
+  isDeleted: boolean
 }
 
 export type ConversationDto = {
@@ -110,20 +111,67 @@ async function apiFetch<T>(
   return json.data
 }
 
-export async function getConversations(userId: string): Promise<ConversationDto[]> {
-  return apiFetch<ConversationDto[]>(userId, `${API_BASE_URL}/conversations`)
+export async function getConversations(
+  userId: string,
+  offset = 0,
+  limit = 20
+): Promise<ConversationDto[]> {
+  return apiFetch<ConversationDto[]>(userId, `${API_BASE_URL}/conversations?offset=${offset}&limit=${limit}`)
 }
 
 export async function createDirectConversation(
   userId: string,
   targetUserId: string
 ): Promise<CreateOrGetConversationResult> {
-  return apiFetch<CreateOrGetConversationResult>(userId, `${API_BASE_URL}/conversations/direct`, {
-    method: 'POST',
-    body: JSON.stringify({ targetUserId }),
-  })
+  return apiFetch<CreateOrGetConversationResult>(
+    userId,
+    `${API_BASE_URL}/conversations/direct`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ targetUserId }),
+    }
+  )
 }
+export async function deleteMessage(
+  userId: string,
+  messageId: string
+): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/conversations/messages/${messageId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Dev-UserId': userId,
+      },
+    }
+  )
 
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || `HTTP ${response.status}`)
+  }
+}
+export async function deleteConversation(
+    userId: string,
+    conversationId: string
+): Promise<void> {
+    const response = await fetch(
+      `${API_BASE_URL}/conversations/${conversationId}/`,
+      {
+        method: 'DELETE',
+        headers: {
+        'Content-Type': 'application/json',
+        'X-Dev-UserId': userId,
+        }
+      }
+    )
+    if (!response.ok) {
+      const text = await response.text()
+          throw new Error(text || `HTTP ${response.status}`)
+
+    }
+}
 export async function getMessages(
   userId: string,
   conversationId: string,

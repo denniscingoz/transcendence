@@ -45,8 +45,28 @@ public sealed class NotificationsService : INotificationsService
         await _notificationRepository.SaveChangesAsync(ct);
     } 
     public async Task MarkConversationAsReadAsync(Guid userId, Guid conversationId, CancellationToken ct)
-{
-    await _notificationRepository.MarkConversationAsReadAsync(userId, conversationId, ct);
-    await _notificationRepository.SaveChangesAsync(ct);
-}
+    {
+        await _notificationRepository.MarkConversationAsReadAsync(userId, conversationId, ct);
+        await _notificationRepository.SaveChangesAsync(ct);
+    }
+        public async Task MarkNotificationAsReadAsync(
+            Guid userId,
+            Guid notificationId,
+            CancellationToken ct)
+        {
+            await _notificationRepository.MarkNotificationAsReadAsync(
+                userId,
+                notificationId,
+                ct);
+
+            await _notificationRepository.SaveChangesAsync(ct);
+        }
+        public async Task MarkSeenNotificationsAsReadAsync(
+            Guid userId,
+            CancellationToken ct)
+        {
+            await _notificationRepository.MarkSeenNotificationsAsReadAsync(userId, ct);
+            await _notificationRepository.SaveChangesAsync(ct);
+        }
+
 }

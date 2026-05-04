@@ -45,7 +45,12 @@ public sealed class  MessageRepository : IMessageRepository
             .Select(m => m.Id)
             .FirstOrDefaultAsync();
     }
-    public async Task<int> GetUnreadCount(Guid conversationId, Guid userId, DateTimeOffset? lastRead)
+    public async Task <Message?> GetByIdAsync(Guid messageId )
+    {
+        return await _db.Messages
+            .SingleOrDefaultAsync(m => m.Id ==  messageId);
+    }
+        public async Task<int> GetUnreadCount(Guid conversationId, Guid userId, DateTimeOffset? lastRead)
     {
        var querry =  _db.Messages.Where(m=> m.ConversationId == conversationId)
                                 .Where(m => m.SenderId != userId);
@@ -53,6 +58,10 @@ public sealed class  MessageRepository : IMessageRepository
         if (lastRead.HasValue)
             querry = querry.Where(m => m.CreatedAt > lastRead);
         return  await querry.CountAsync();
+    }
+    public async Task SaveChangesAsync()
+    {
+        await _db.SaveChangesAsync();
     }
 }
 

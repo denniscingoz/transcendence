@@ -1,12 +1,7 @@
 namespace Transcendence.Application.Chat.DTOs;
+using Transcendence.Application.Posts.DTOs;
 
-public enum NotificationType
-{
-    NewMessage = 1,
-    FriendRequest = 2,
-    FriendRequestAccepted = 3,
-    FriendRequestDeclined = 4
-}
+using Transcendence.Domain.Notifications;
 public sealed class NotificationDto
 {
     public Guid Id { get; init; }
@@ -56,5 +51,27 @@ public sealed class NotificationDto
             CreatedAt = DateTimeOffset.UtcNow
         };
     }
+    public static NotificationDto PostCommented(CommentPreviewDto dto)
+    {
+        return new NotificationDto
+        {
+            Id = Guid.NewGuid(),
+            Type = NotificationType.PostCommented,
+            Payload = dto,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+    }
+
+    public static NotificationDto PostLiked(PostLikeNotificationDto dto)
+    {
+        return new NotificationDto
+        {
+            Id = Guid.NewGuid(),
+            Type = NotificationType.PostLiked,
+            Payload = dto,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+    }
+ 
 }
  

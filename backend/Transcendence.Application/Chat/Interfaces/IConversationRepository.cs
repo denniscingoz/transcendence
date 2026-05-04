@@ -13,5 +13,11 @@ public interface IConversationRepository
      Task <IReadOnlyList<ConversationParticipant>>  GetConversationParticipants( Guid conversationId);
      Task <ConversationParticipant>  GetParticipant(Guid userId, Guid conversationId);
     // Task <IReadOnlyList<ConversationParticipant>>  GetOtherParticipants(Guid userId, Guid conversationId);
-     Task <IReadOnlyList<Conversation>> GetConversations(Guid userId);
+     
+    Task DeleteConversationWithDataAsync(Guid conversationId);
+    Task<IReadOnlyList<Conversation>> GetConversations(
+    Guid userId,
+    int offset,
+    int limit);
+
 } 
