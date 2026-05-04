@@ -49,13 +49,25 @@ public sealed class ConversationRepository : IConversationRepository
                         .ToListAsync();
        
     }
+   public async Task DeleteConversationWithDataAsync(Guid conversationId)
+{
+    var conversation = await GetByIdAsync(conversationId)
+        ?? throw new Exception("Conversation not found");
 
-    // public async Task <IReadOnlyList<ConversationParticipant>>  GetOtherParticipants(Guid userId, Guid conversationId)
-    // {
-    //     return await  _db.ConversationParticipants
-    //                     .Where(p => p.ConversationId == conversationId && p.UserId != userId).ToListAsync();
-       
-    // }
+    var messages = await _db.Messages
+        .Where(m => m.ConversationId == conversationId)
+        .ToListAsync();
+
+    var participants = await _db.ConversationParticipants
+        .Where(p => p.ConversationId == conversationId)
+        .ToListAsync();
+
+    _db.Messages.RemoveRange(messages);
+    _db.ConversationParticipants.RemoveRange(participants);
+    _db.Conversations.Remove(conversation);
+
+    await SaveChangesAsync();
+}
     public async Task <IReadOnlyList<ConversationParticipant>>  GetConversationParticipants( Guid conversationId)
     {
         return await  _db.ConversationParticipants
@@ -70,11 +82,19 @@ public sealed class ConversationRepository : IConversationRepository
                              p.UserId == userId);
     }
 
-    public async Task <IReadOnlyList<Conversation>> GetConversations(Guid userId)
-    {
-        return await _db.Conversations.Include(c => c.Participants).Where(c => c.Participants.Any(p => p.UserId == userId)).ToListAsync();
-    }
-
+public async Task<IReadOnlyList<Conversation>> GetConversations(
+    Guid userId,
+    int offset,
+    int limit)
+{
+    return await _db.Conversations
+        .Include(c => c.Participants)
+        .Where(c => c.Participants.Any(p => p.UserId == userId))
+        .OrderByDescending(c => c.LastMessageAt ?? c.CreatedAt)
+        .Skip(offset)
+        .Take(limit)
+        .ToListAsync();
+}
     //  public async Task <IReadOnlyList<Guid>>  GetUserInterlocutors(Guid userId)
     // {
     //         return await _db.ConversationParticipants

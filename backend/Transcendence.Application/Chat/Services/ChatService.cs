@@ -14,20 +14,23 @@ namespace Transcendence.Application.Chat.Services;
 
 public class ChatService : IChatService
 { 
-    private readonly IConversationRepository _coversationRepository;
+    private readonly IConversationRepository _conversationRepository;
     private readonly IMessageRepository _messageRepository;
     private readonly IUserRepository _userRepository;
+    private readonly INotificationService _notificationService;
+
 
 
     public ChatService(
         IConversationRepository conversationRepository,
         IMessageRepository messageRepository,
-        IUserRepository userRepository
-        )
+        IUserRepository userRepository,
+        INotificationService notificationService)
     {
-        _coversationRepository = conversationRepository;
+        _conversationRepository = conversationRepository;
         _messageRepository = messageRepository;
         _userRepository = userRepository;
+        _notificationService = notificationService;
     }
 
     private ChatMessageDto MapToDto(Message message, Guid currentUserId, DateTimeOffset readByUser,  DateTimeOffset readByOthers)
@@ -38,6 +41,7 @@ public class ChatService : IChatService
             Content = message.Content,
             SenderId = message.SenderId,
             CreatedAt = message.CreatedAt,
+            IsDeleted = message.IsDeleted,
             IsReadByUser = message.SenderId == currentUserId || message.CreatedAt <= readByUser,
             IsReadByOthers =  message.CreatedAt <= readByOthers && message.SenderId == currentUserId
         };
@@ -51,7 +55,7 @@ public class ChatService : IChatService
 
     public async Task <ReadTime> GetReadTime(Guid userId, Guid conversationId)
     {   
-        var participants = await _coversationRepository
+        var participants = await _conversationRepository
                             .GetConversationParticipants(conversationId);           
         var me = participants.FirstOrDefault(p => p.UserId == userId)
            ?? throw new Exception("Participant not found");
@@ -79,7 +83,7 @@ public class ChatService : IChatService
         if (string.IsNullOrWhiteSpace(content))
             throw new DomainValidationException("Message content is empty");
   
-        var conversation = await _coversationRepository.GetByIdAsync(conversationId) 
+        var conversation = await _conversationRepository.GetByIdAsync(conversationId) 
             ?? throw new NotFoundException("No such conversation");
 
         if (!conversation.HasParticipant(senderId))
@@ -91,7 +95,7 @@ public class ChatService : IChatService
         await _messageRepository.AddAsync(message);
         conversation.UpdateLastMessage(message.Content, message.CreatedAt);
         
-        await _coversationRepository.SaveChangesAsync();
+        await _conversationRepository.SaveChangesAsync();
         return MapToDto(message, senderId,  readTime.ByMe, readTime.ByOthers);
     }
 
@@ -100,7 +104,7 @@ public class ChatService : IChatService
         if (userA == userB)
             throw new DomainValidationException("Cannot write to himself");
 
-        var existing = await _coversationRepository.GetDirectConversation(userA, userB);
+        var existing = await _conversationRepository.GetDirectConversation(userA, userB);
         if (existing is not null)
         {
             return new CreateOrGetConversationResult
@@ -112,10 +116,10 @@ public class ChatService : IChatService
 
         var conversation = new Conversation(type: ConversationType.Direct, new[] { userA, userB });
 
-        await _coversationRepository.AddAsync(conversation);
-        await _coversationRepository.SaveChangesAsync();
+        await _conversationRepository.AddAsync(conversation);
+        await _conversationRepository.SaveChangesAsync();
         
-
+        await _notificationService.NotifyConversationCreated(userA, userB, conversation.Id);
         return new CreateOrGetConversationResult
         {
             ConversationId = conversation.Id,
@@ -132,7 +136,7 @@ public class ChatService : IChatService
         if (limit <= 0 || limit >= 100)
             throw new DomainValidationException("Invalid input");
 
-        var conversation = await _coversationRepository.GetByIdAsync(conversationId) 
+        var conversation = await _conversationRepository.GetByIdAsync(conversationId) 
             ?? throw new NotFoundException("No such conversation");
 
         if (!conversation.HasParticipant(userId))
@@ -147,7 +151,7 @@ public class ChatService : IChatService
     }
     public async Task AssertUserIsParticipant(Guid conversationId, Guid UserId) {//? GetUserConversations?
         
-        var conversation = await _coversationRepository.GetByIdAsync(conversationId) 
+        var conversation = await _conversationRepository.GetByIdAsync(conversationId) 
             ?? throw new NotFoundException("No such conversation");
 
         if (!conversation.HasParticipant(UserId))
@@ -155,21 +159,21 @@ public class ChatService : IChatService
     }
     public async Task <IReadOnlyList<Guid>>  GetUserConversationsIds(Guid userId)
     {
-        return await _coversationRepository.GetUserConversationsIds(userId);
+        return await _conversationRepository.GetUserConversationsIds(userId);
     }
  
     public async Task <IReadOnlyList<Guid>>  GetParticipantsIds(Guid conversationId)
     {
-        return await _coversationRepository.GetParticipantsIds(conversationId);
+        return await _conversationRepository.GetParticipantsIds(conversationId);
     }
     public async Task MarkConversationAsRead(Guid userId, Guid conversationId)
     {
-        var participant = await _coversationRepository.GetParticipant(userId, conversationId);
+        var participant = await _conversationRepository.GetParticipant(userId, conversationId);
 
         if (participant is not null)
         {
             participant.LastReadAt = DateTimeOffset.UtcNow;
-            await _coversationRepository.SaveChangesAsync();
+            await _conversationRepository.SaveChangesAsync();
         }
     }
     public async Task<Guid?> GetLastMessageId(Guid conversationId)
@@ -178,9 +182,12 @@ public class ChatService : IChatService
 
         }
 
-public async Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId)
+public async Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId,  int offset, int limit )
 {
-    var conversations = await _coversationRepository.GetConversations(userId);
+    if (limit <= 0 || limit >= 100)
+            throw new DomainValidationException("Invalid input");
+
+    var conversations = await _conversationRepository.GetConversations(userId, offset, limit);
     // conversations = conversations.Where(c => c.LastMessageAt != null).ToList();
 
     var targetUserIds = conversations
@@ -222,7 +229,41 @@ public async Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId)
 
     return dtos;
     
+    }
+public async Task DeleteMessageAsync(Guid userId, Guid messageId)
+{
+    var message = await _messageRepository.GetByIdAsync(messageId)
+        ?? throw new NotFoundException("Message not found.");
+
+    if (message.SenderId != userId)
+        throw new ForbiddenException("You can delete only your own messages.");
+
+    message.Delete(DateTime.UtcNow);
+    
+    await _messageRepository.SaveChangesAsync();
 }
+    public async Task DeleteConversationAsync(
+        Guid userId,
+        Guid conversationId)
+    {
+        var conversation = await _conversationRepository.GetByIdAsync(conversationId);
+
+        if (conversation is null)
+            throw new NotFoundException("Conversation not found");
+
+        if (!conversation.HasParticipant(userId))
+            throw new ForbiddenException("User is not a participant");
+
+        var participantIds = conversation.Participants
+            .Select(p => p.UserId)
+            .ToList();
+
+        await _conversationRepository.DeleteConversationWithDataAsync(conversationId);
+
+        await _notificationService.NotifyConversationDeleted(
+            participantIds,
+            conversationId);
+    }
 
 }
  

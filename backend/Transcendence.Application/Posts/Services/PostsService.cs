@@ -10,6 +10,7 @@ using Transcendence.Application.Posts.Interfaces;
 
 using Transcendence.Application.Users.Interfaces;
 using System.Diagnostics.Eventing.Reader;
+using Transcendence.Application.Realtime.Contracts;
 
 
 namespace Transcendence.Application.Posts.Services;
@@ -20,17 +21,21 @@ public class PostsService : IPostsService
 	private readonly IUserRepository _userRepository;
 	private readonly IFilesRepository _filesRepository;
 	private readonly IFilesService _filesService;
+	private readonly INotificationService _notificationService;
+
 	public PostsService(IPostsRepository postRepository,
 						IFriendshipRepository friendshipRepository,
 						IUserRepository userRepository,
 						IFilesRepository filesRepository,
-						IFilesService filesService)
+						IFilesService filesService,
+						INotificationService notificationService)
 	{
 		_postRepository = postRepository;
 		_friendshipRepository = friendshipRepository;
 		_userRepository = userRepository;
 		_filesRepository = filesRepository;
 		_filesService = filesService;
+		_notificationService = notificationService;
 	}
 
 	// GET /posts/{postId}
@@ -153,6 +158,15 @@ public class PostsService : IPostsService
 		
 		await _postRepository.AddLikeAsync(postId, currentUserId, ct);
 		await _postRepository.SaveChangesAsync(ct);
+
+		if (post.AuthorId != currentUserId)
+		{
+			await _notificationService.NotifyPostLiked(
+				targetUserId: post.AuthorId,
+				actorUserId: currentUserId,
+				postId: post.Id
+			);
+		}
 	}
 
 
@@ -192,13 +206,26 @@ public class PostsService : IPostsService
 		var comment = new Comment(commentId, postId, currentUserId, content);
 		await _postRepository.AddCommentAsync(comment, ct);
 		await _postRepository.SaveChangesAsync(ct);
-		return new CommentPreviewDto
-		{
+
+		
+		var   dto = new CommentPreviewDto
+ 		{
 			Id = comment.Id,
 			AuthorId = comment.AuthorId,
 			Content = comment.Content,
 			CreatedAtUtc = comment.CreatedAtUtc
 		};
+		if (post.AuthorId != currentUserId)
+		{
+			await _notificationService.NotifyComment(
+				targetUserId: post.AuthorId,
+				actorUserId: currentUserId,
+				postId: post.Id,
+				dto: dto
+			);
+
+		}
+		return dto;
 	}
 
 	// DELETE /posts/{postId}/comment/{commentId}

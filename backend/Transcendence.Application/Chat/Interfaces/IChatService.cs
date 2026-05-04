@@ -20,13 +20,16 @@ public interface IChatService
     Task <IReadOnlyList<Guid>>  GetParticipantsIds(Guid conversationId);
 
 
-    Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId);
+    Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId, int offset, int limit);
+
 
 	Task MarkConversationAsRead(Guid userId, Guid conversationId);
 
     Task<Guid?> GetLastMessageId(Guid conversationId);
+    Task   DeleteMessageAsync(Guid userId, Guid messageId); 
+    Task DeleteConversationAsync(Guid currentUserId, Guid conversationId);
 
-};
+}   
 
 /*
 ChatService is where business logic starts.

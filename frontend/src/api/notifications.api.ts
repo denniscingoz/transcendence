@@ -6,6 +6,8 @@ export enum NotificationType {
   FriendRequest = 2,
   FriendRequestAccepted = 3,
   FriendRequestDeclined = 4,
+  Comment = 5,
+  Post = 6
 }
 
 export type NotificationListItemDto = {
@@ -42,6 +44,14 @@ export async function getUnreadNotificationCount(): Promise<number> {
 
 export async function markConversationNotificationsAsRead(conversationId: string): Promise<void> {
   await api.post(`/notifications/conversations/${conversationId}/read`)
+}
+
+export async function markSeenNotificationsAsRead(): Promise<void> {
+    await api.post(`/notifications/seen-read`)
+
+}
+export async function markNotificationAsRead(notificationId: string): Promise<void> {
+  await api.post(`/notifications/${notificationId}/read`)
 }
 
 export async function markAllNotificationsAsRead(): Promise<void> {

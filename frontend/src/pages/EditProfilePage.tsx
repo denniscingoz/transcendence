@@ -254,14 +254,14 @@ async function handleChangePassword(e: React.FormEvent) {
 
   if (isProfileLoading) {
     return (
-      <div className="h-[calc(100dvh-250px)] bg-bg px-4 py-8">
+      <div className="min-h-[calc(100dvh-250px)] bg-bg px-4 py-8 pb-32">
         <div className="mx-auto max-w-3xl text-text">Loading profile...</div>
       </div>
     )
   }
 
   return (
-    <div className="h-[calc(100dvh-250px)] bg-bg px-4 py-8">
+    <div className="min-h-[calc(100dvh-250px)] bg-bg px-4 py-8 pb-32">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         {/* {Form with Bio, Name, Username, AvatarUrl && and includes close x with Edit header} */}
         <form

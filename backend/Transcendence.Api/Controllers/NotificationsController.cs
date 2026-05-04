@@ -64,5 +64,22 @@ public sealed class NotificationsController : ControllerBase
 
         return NoContent();
     }
+    [HttpPost("{notificationId:guid}/read")]
+    public async Task<IActionResult> MarkNotificationAsRead(Guid notificationId, CancellationToken ct )
+    {
+        var userId = GetUserId();
+
+        await _notificationsService.MarkNotificationAsReadAsync(userId, notificationId, ct);
+
+        return NoContent();
+    }
+
+    [HttpPost("seen-read")]
+    public async Task<IActionResult> MarkSeenNotificationAsRead(CancellationToken ct)
+    {
+        var userId = GetUserId();
+        await _notificationsService.MarkSeenNotificationsAsReadAsync(userId, ct);
+        return NoContent();
+    }
 
 }

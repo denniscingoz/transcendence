@@ -24,7 +24,9 @@
     "addFriend": "Add Friend",
     "requested": "Requested",
     "accept": "Accept Request",
-    "decline": "Decline Request"
+    "decline": "Decline Request",
+    "loadMore": "Load more",
+    "loading": "Loading…"
   },
   "chat": {
     "title": "Chat",

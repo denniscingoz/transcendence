@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useAddFriend, useFriends, useRemoveFriend } from '../hooks/useFriends'
 import { useTranslation } from 'react-i18next'
 import { BottomNav } from '../components/BottomNav'
@@ -8,30 +8,37 @@ type FriendshipStatus = 'friends' | 'requested' | 'none'
 
 export function FriendsPage() {
   const { t } = useTranslation()
-  const { data: apIData, isLoading, error } = useFriends()
+  const navigate = useNavigate()
   const add = useAddFriend()
   const remove = useRemoveFriend()
-  const navigate = useNavigate()
+  
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useFriends()
 
-  const friends = apIData ?? []
+  // Memoize so the array reference is stable across renders that don't change pages
+  const friends = useMemo(
+    () => data?.pages.flatMap((p) => p.items) ?? [],
+    [data],
+  )
 
   const [friendshipState, setFriendshipState] = useState<Record<string, FriendshipStatus>>({})
 
   useEffect(() => {
-    if (!apIData) return
-
+    if (friends.length === 0) return
     setFriendshipState((prev) => {
       const next = { ...prev }
-
-      for (const friend of apIData) {
-        if (!(friend.id in next)) {
-          next[friend.id] = 'friends'
-        }
+      for (const friend of friends) {
+        if (!(friend.id in next)) next[friend.id] = 'friends'
       }
-
       return next
     })
-  }, [apIData])
+  }, [friends])
 
   function handleClose() {
     navigate(-1)
@@ -44,8 +51,8 @@ export function FriendsPage() {
       try {
         await remove.mutateAsync(id)
         setFriendshipState((prev) => ({ ...prev, [id]: 'none' }))
-      } catch (error) {
-        console.error('Failed to remove friend:', error)
+      } catch (e) {
+        console.error('Failed to remove friend:', e)
       }
       return
     }
@@ -54,15 +61,14 @@ export function FriendsPage() {
       try {
         await add.mutateAsync(id)
         setFriendshipState((prev) => ({ ...prev, [id]: 'requested' }))
-      } catch (error) {
-        console.error('Failed to send friend request:', error)
+      } catch (e) {
+        console.error('Failed to send friend request:', e)
       }
       return
     }
 
-    if (currentStatus === 'requested') {
-      return
-    }
+    if (isLoading) return <div className="p-8">Loading…</div>
+    if (error) return <div className="p-8">Error: {error.message}</div>
   }
 
   return (
@@ -115,7 +121,7 @@ export function FriendsPage() {
                   
                   <button
                     type="button"
-                    onClick={e => {
+                    onClick={(e) => {
                       e.stopPropagation()
                       toggleFriendship(friend.id)
                     }}
@@ -137,6 +143,18 @@ export function FriendsPage() {
                 </div>
               )
             })}
+            {hasNextPage && (
+              <button
+                type="button"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="mx-auto mt-2 block rounded-full bg-gray-200 px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 disabled:opacity-50"
+              >
+                {isFetchingNextPage
+                  ? t('friends.loading') ?? 'Loading…'
+                  : t('friends.loadMore') ?? 'Load more'}
+              </button>
+            )}
           </div>
         </div>
       </main>

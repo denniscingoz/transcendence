@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 using Transcendence.Api.Realtime.Hubs;
 using Transcendence.Application.Chat.DTOs;
 using Transcendence.Application.Friends.DTOs;
+using Transcendence.Application.Posts.DTOs;
 using Transcendence.Application.Realtime.Contracts;
 using Transcendence.Application.Users.Interfaces;
 using Transcendence.Application.Notifications.Interfaces;
@@ -93,6 +94,69 @@ public class NotificationService : INotificationService
 
         await NotifyChange(targetUserId);
     }
+   public async Task NotifyComment(
+    Guid targetUserId,
+    Guid actorUserId,
+    Guid postId,
+    CommentPreviewDto dto)
+{
+    var actor = await _userRepository.GetByIdAsync(actorUserId, CancellationToken.None);
+
+    var actorUsername = actor?.Username ?? actorUserId.ToString();
+    var actorAvatarUrl = actor?.AvatarFileId.HasValue == true
+        ? $"/files/avatar/{actor.AvatarFileId.Value}"
+        : null;
+
+    await SaveNotificationAsync(
+        userId: targetUserId,
+        type: NotificationType.PostCommented,
+        text: $"{actorUsername} commented on your post",
+        actorUserId: actorUserId,
+        actorUsername: actorUsername,
+        actorAvatarUrl: actorAvatarUrl
+    );
+
+    await _hub.Clients
+        .Group(GroupNames.User(targetUserId))
+        .NotificationReceived(NotificationDto.PostCommented(dto));
+
+    await NotifyChange(targetUserId);
+}
+public async Task NotifyPostLiked(
+    Guid targetUserId,
+    Guid actorUserId,
+    Guid postId)
+{
+    var actor = await _userRepository.GetByIdAsync(actorUserId, CancellationToken.None);
+
+    var actorUsername = actor?.Username ?? actorUserId.ToString();
+    var actorAvatarUrl = actor?.AvatarFileId.HasValue == true
+        ? $"/files/avatar/{actor.AvatarFileId.Value}"
+        : null;
+
+    var dto = new PostLikeNotificationDto
+    {
+        PostId = postId,
+        ActorUserId = actorUserId,
+        ActorUsername = actorUsername,
+        ActorAvatarUrl = actorAvatarUrl
+    };
+
+    await SaveNotificationAsync(
+        userId: targetUserId,
+        type: NotificationType.PostLiked,
+        text: $"{actorUsername} liked your post",
+        actorUserId: actorUserId,
+        actorUsername: actorUsername,
+        actorAvatarUrl: actorAvatarUrl
+    );
+
+    await _hub.Clients
+        .Group(GroupNames.User(targetUserId))
+        .NotificationReceived(NotificationDto.PostLiked(dto));
+
+    await NotifyChange(targetUserId);
+}
     public async Task NotifyFriendRequestAccepted(Guid targetUserId, FriendshipRequestDto request)
     {
         var accepter = await _userRepository.GetByIdAsync(request.TargetUserId, CancellationToken.None);
@@ -171,7 +235,17 @@ public class NotificationService : INotificationService
             .Groups(groups)
             .ConversationsChanged();
     }
+    public async Task NotifyConversationsChanged(IEnumerable<Guid> userIds)
+    {
+        var groups = userIds
+            .Distinct()
+            .Select(GroupNames.User)
+            .ToList();
 
+        await _hub.Clients
+            .Groups(groups)
+            .ConversationsChanged();
+    }
     private async Task<FriendshipRequestEventDto> BuildFriendshipRequestEventDto(
         FriendshipRequestDto request,
         FriendshipRequestStatus status)
@@ -217,5 +291,22 @@ public class NotificationService : INotificationService
         await _notificationRepository.AddAsync(notification, CancellationToken.None);
         await _notificationRepository.SaveChangesAsync(CancellationToken.None);
     }
+    public async Task NotifyConversationDeleted(
+        IEnumerable<Guid> participantIds,
+        Guid conversationId)
+    {
+        var groups = participantIds
+            .Distinct()
+            .Select(GroupNames.User)
+            .ToList();
+
+        await _hub.Clients
+            .Groups(groups)
+            .ConversationDeleted(new ConversationDeletedDto
+            {
+                ConversationId = conversationId
+            });
+    }
+
 
 }
