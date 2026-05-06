@@ -41,7 +41,11 @@
     "sent": "Sent",
     "unread": "Unread",
     "noMessagesYet": "No messages yet",
-    "typeMessage": "Type a message..."
+    "typeMessage": "Type a message...",
+    "deleteMessage": "Delete message",
+    "areYouSure": "Are you Sure?",
+    "delete": "Delete",
+    "cancel": "Cancel"
   },
   "common": {
     "loading": "Loading...",

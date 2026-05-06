@@ -1,5 +1,5 @@
 using Transcendence.Application.Friends.DTOs;
-using Transcendence.Application.Common.DTOs;
+using Transcendence.Application.Posts.DTOs;
 
 namespace Transcendence.Application.Friends.Interfaces;
 

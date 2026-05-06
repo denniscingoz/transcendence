@@ -9,6 +9,7 @@ import { ProtectedPostThumbPreview } from '../components/ui/ProtectedPostThumb'
 import { useAddFriend, useRemoveFriend } from '../hooks/useFriends'
 import { FriendshipStatus } from '../types/api'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
+import { useQueryClient } from '@tanstack/react-query'
 
 
 
@@ -74,19 +75,31 @@ export function OtherProfilePage() {
     onLoadMore: loadMore,
   })
 
-  
+  const queryClient = useQueryClient()
   const toggleFriendship = async (id: string) => {
     const currentStatus = friendshipState[id] 
 
-     console.log('toggle ')
+    console.log('toggle ')
     if (currentStatus === 'friends') {
       try {
-          console.log('remove ')
         await remove.mutateAsync(id)
+      
         setFriendshipState((prev) => ({ ...prev, [id]: 'none' }))
+      
+        // Clear posts data so it doesn't display anymore (prevents refetch when query disables)
+        queryClient.setQueryData(['posts', id, 20], { pages: [], pageParams: [null] })
+        
+        await Promise.all([
+           queryClient.invalidateQueries({ queryKey: ['posts', 'feed'], refetchType: 'all' }),
+          // queryClient.invalidateQueries({ queryKey: ['posts'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['profile', id] }),
+          queryClient.invalidateQueries({ queryKey: ['profile', 'me'] }),
+          queryClient.invalidateQueries({ queryKey: ['friends'] }),
+        ])
       } catch (error) {
         console.error('Failed to remove friend:', error)
       }
+    
       return
     }
  
@@ -116,6 +129,7 @@ export function OtherProfilePage() {
     ...prev,
     [profileId]: 'friends',
   }))
+  window.location.reload()
 }
 
 const declineFriendRequest = async (profileId: string) => {

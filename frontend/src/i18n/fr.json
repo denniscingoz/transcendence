@@ -41,7 +41,11 @@
     "sent": "Envoyé",
     "unread": "Non lu",
     "noMessagesYet": "Aucun message pour le moment",
-    "typeMessage": "Écrivez un message..."
+    "typeMessage": "Écrivez un message...",
+    "deleteMessage": "Supprimer le message",
+    "areYouSure": "Êtes-vous sûr ?",
+    "delete": "Supprimer",
+    "cancel": "Annuler"
   },
   "common": {
     "loading": "Chargement...",

@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Transcendence.Application.Common.Responses;
 using Transcendence.Api.Common.Extensions;
-using Transcendence.Application.Common.DTOs;
-using Transcendence.Application.Users.DTOs;
-using Transcendence.Application.Users.Interfaces;
-using Transcendence.Application.Users.Services;
+using Transcendence.Application.Common.Responses;
 using Transcendence.Application.Friends.DTOs;
 using Transcendence.Application.Friends.Interfaces;
 using Transcendence.Application.Friends.Services;
+using Transcendence.Application.Posts.DTOs;
+using Transcendence.Application.Users.DTOs;
+using Transcendence.Application.Users.Interfaces;
+using Transcendence.Application.Users.Services;
 
 namespace Transcendence.Api.Controllers;
 
@@ -25,13 +25,18 @@ public sealed class FriendsController : ControllerBase
 	//GET /friends/list?take=20&cursor=<nextCursor>
 	[HttpGet("list")]
 	public async Task<ActionResult<ApiResponse<CursorPageDto<FriendDto>>>> GetFriendsList(
-		[FromQuery] int take = 20,
-		[FromQuery] string? cursor = null,
-		CancellationToken ct = default)
+	[FromQuery] int take = 20,
+	[FromQuery] string? cursor = null,
+	CancellationToken ct = default)
 	{
-		Guid userId = GetUserId();
-		var page = await _friendsService.GetFriendsListAsync(userId, take, cursor, ct);
-		return this.OkResponse(page);
+		// Get the currently authenticated user's id from the JWT.
+		var userId = GetUserId();
+
+		// Service handles take validation and passes take/cursor to repository.
+		var friendsList = await _friendsService.GetFriendsListAsync(userId, take, cursor, ct);
+
+		// Return standard API response wrapper.
+		return this.OkResponse(friendsList);
 	}
 
 	//POST /friends/{friendUserId}

@@ -42,7 +42,11 @@
     "sent": "Enviado",
     "unread": "No leído",
     "noMessagesYet": "Sin mensajes aún",
-    "typeMessage": "Escribe un mensaje..."
+    "typeMessage": "Escribe un mensaje...",
+    "deleteMessage": "Eliminar mensaje",
+    "areYouSure": "¿Estás seguro?",
+    "delete": "Eliminar",
+    "cancel": "Cancelar"
   },
   "common": {
     "loading": "Cargando...",

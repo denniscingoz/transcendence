@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext'
 import { useRealtime } from '../realtime/RealtimeProvider'
 import { useTranslation } from 'react-i18next'
 import { BottomNav } from '../components/BottomNav'
+import { Modal } from '../components/Modal'
 import { markConversationNotificationsAsRead } from '../api/notifications.api'
 
 import {
@@ -71,6 +72,8 @@ export function ChatPage() {
 
   const [draftTargetUserId, setDraftTargetUserId] = useState<string | null>(null)
   const [draftTargetUserName, setDraftTargetUserName] = useState<string | null>(null)
+  const [pendingDeleteMessageId, setPendingDeleteMessageId] = useState<string | null>(null)
+  const [pendingDeleteConversationId, setPendingDeleteConversationId] = useState<string | null>(null)
 
   const shouldShowDraft =
     draftTargetUserId &&
@@ -353,13 +356,17 @@ export function ChatPage() {
   }
 
   async function handleDeleteMessage(messageId: string) {
+    setPendingDeleteMessageId(messageId)
+  }
+
+  async function confirmDeleteMessage() {
+    const messageId = pendingDeleteMessageId
+    if (!messageId) return
     if (!currentUserId) return
     if (!activeConversationIdRef.current) return
     if (deletingMessageIds.includes(messageId)) return
 
-    const confirmed = window.confirm('Delete this message?')
-    if (!confirmed) return
-
+    setPendingDeleteMessageId(null)
     setDeletingMessageIds(prev => [...prev, messageId])
     setError(null)
 
@@ -382,13 +389,21 @@ export function ChatPage() {
     }
   }
 
+  function cancelDeleteMessage() {
+    setPendingDeleteMessageId(null)
+  }
+
   async function handleDeleteConversation(conversationId: string) {
+    setPendingDeleteConversationId(conversationId)
+  }
+
+  async function confirmDeleteConversation() {
+    const conversationId = pendingDeleteConversationId
+    if (!conversationId) return
     if (!currentUserId) return
     if (deletingConversationIds.includes(conversationId)) return
 
-    const confirmed = window.confirm('Delete this conversation?')
-    if (!confirmed) return
-
+    setPendingDeleteConversationId(null)
     const wasActive = activeConversationIdRef.current === conversationId
 
     setDeletingConversationIds(prev => [...prev, conversationId])
@@ -435,6 +450,10 @@ export function ChatPage() {
     } finally {
       setDeletingConversationIds(prev => prev.filter(id => id !== conversationId))
     }
+  }
+
+  function cancelDeleteConversation() {
+    setPendingDeleteConversationId(null)
   }
 
   function openDraftConversation(targetUserId: string, username: string) {
@@ -1099,6 +1118,60 @@ export function ChatPage() {
 
         <BottomNav active="messages" />
       </div>
+
+      {pendingDeleteMessageId && (
+        <Modal
+          title={t('chat.deleteMessage')}
+          onClose={cancelDeleteMessage}
+        >
+          <p className="mb-6 text-gray-700">
+            {t('chat.areYouSure')}
+          </p>
+          <div className="flex gap-3 justify-end">
+            <button
+              type="button"
+              onClick={cancelDeleteMessage}
+              className="px-4 py-2 rounded-lg bg-gray-200 text-gray-900 hover:bg-gray-300 transition-colors"
+            >
+              {t('chat.cancel')}
+            </button>
+            <button
+              type="button"
+              onClick={() => void confirmDeleteMessage()}
+              className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+            >
+              {t('chat.delete')}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {pendingDeleteConversationId && (
+        <Modal
+          title={t('chat.deleteConversation')}
+          onClose={cancelDeleteConversation}
+        >
+          <p className="mb-6 text-gray-700">
+            {t('chat.areYouSure')}
+          </p>
+          <div className="flex gap-3 justify-end">
+            <button
+              type="button"
+              onClick={cancelDeleteConversation}
+              className="px-4 py-2 rounded-lg bg-gray-200 text-gray-900 hover:bg-gray-300 transition-colors"
+            >
+              {t('chat.cancel')}
+            </button>
+            <button
+              type="button"
+              onClick={() => void confirmDeleteConversation()}
+              className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+            >
+              {t('chat.delete')}
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

@@ -6,5 +6,5 @@ export async function acceptFriendRequestApi(targetUserId: string) {
 }
 
 export async function declineFriendRequestApi(targetUserId: string) {
-  await api.delete(`/friends/requests/${targetUserId}/decline`)
+  await api.post(`/friends/requests/${targetUserId}/decline`)
 }
