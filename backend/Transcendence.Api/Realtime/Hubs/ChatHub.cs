@@ -13,6 +13,7 @@ using  Transcendence.Api.Realtime.Hubs;
 using System.Text.Json;
 using System.IO.IsolatedStorage;
 using System.Collections.Specialized;
+using Transcendence.Domain.Users;
 
 namespace Transcendence.Api.Realtime.Hubs;
 
@@ -199,7 +200,8 @@ public sealed class ChatHub : Hub<IRealtimeClient>
                 ReaderId = userId,
                 MessageId = lastMessageId ?? Guid.Empty
             });
-    }  
+    } 
+   
      private Guid GetUserId()
     {
         var claimValue =
@@ -220,6 +222,21 @@ public sealed class ChatHub : Hub<IRealtimeClient>
             return headerUserId;
 
         throw new UnauthorizedAccessException("Invalid token.");
+    }
+    public async Task MarkAllIncomingAsDelivered()
+    {
+        var userId = GetUserId();
+        var messages = await _chatService.GetUnreadMessagesAsync(userId);
+        foreach(var m in messages)
+        {
+               await Clients
+                .Group(GroupNames.User(m.SenderId))  
+                .MessageDelivered(new MessageDeliveredDto //send delivery event to all sender's active connections (multi-device support
+                {
+                    ReaderId = userId,
+                    MessageId = m.MessageId             
+                });
+        }
     }
 
     private Guid? TryGetCurrentUserId()

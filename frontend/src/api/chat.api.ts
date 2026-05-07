@@ -2,19 +2,7 @@ import * as signalR from '@microsoft/signalr'
 import type {   CursorPageDto, OtherProfileDto  } from '../types/api'
 import api from './axios'
 
-export enum NotificationType {
-  NewMessage = 1,
-  FriendRequest = 2,
-  FriendRequestAccepted = 3,
-  FriendRequestDeclined = 4,
-}
 
-export type RealtimeNotificationDto = {
-  id: string
-  type: NotificationType
-  payload: unknown
-  createdAt: string
-}
 export type ChatMessageDto = {
   messageId: string
   clientMessageId?: string
@@ -45,6 +33,7 @@ export type MessageAckDto = {
 
 export type MessageDeliveredDto = {
   readerId: string
+  senderId: string
   messageId: string
 }
 
@@ -52,22 +41,6 @@ export type MessageReadDto = {
   conversationId: string
   readerId: string
   messageId: string
-}
- 
-export enum FriendshipRequestStatus {
-  Pending = 1,
-  Accepted = 2,
-  Declined = 3,
-}
-
-export type FriendshipRequestEventDto = {
-  requestId: string
-  requesterId: string
-  targetUserId: string
-  status: FriendshipRequestStatus
-  createdAt: string
-  requesterUsername: string
-  requesterAvatarUrl?: string | null
 }
  
 export type SendMessageCommandDto = {
@@ -171,6 +144,15 @@ export async function deleteConversation(
           throw new Error(text || `HTTP ${response.status}`)
 
     }
+}
+export async function markAllIncomingAsDelivered(
+  connection: signalR.HubConnection
+) {
+  if (connection.state !== signalR.HubConnectionState.Connected) {
+    return
+  }
+
+  await connection.invoke('MarkAllIncomingAsDelivered')
 }
 export async function getMessages(
   userId: string,

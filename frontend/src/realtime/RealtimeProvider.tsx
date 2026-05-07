@@ -2,7 +2,11 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import type { HubConnection } from '@microsoft/signalr'
 import React from 'react'
 import { useAuth } from '../auth/AuthContext'
-import { createChatConnection, startConnection } from '../api/chat.api'
+import {
+  createChatConnection,
+  startConnection,
+  markAllIncomingAsDelivered,
+} from '../api/chat.api'
 
 type RealtimeContextValue = {
   connection: HubConnection | null
@@ -66,13 +70,15 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         setOnlineUserIds([])
       })
 
-        connection.onreconnected(() => {
+      connection.onreconnected(() => {
+        setIsConnected(true)
 
-          setIsConnected(true)
-          void connection.invoke('RequestPresenceSnapshot')
-            .catch(err => console.error('Failed to request presence snapshot after reconnect', err))
+        void connection.invoke('RequestPresenceSnapshot')
+          .catch(err => console.error('Failed to request presence snapshot after reconnect', err))
 
-        })
+        void markAllIncomingAsDelivered(connection)
+          .catch(err => console.error('Failed to mark incoming messages as delivered after reconnect', err))
+      })
 
       try {
         await startConnection(connection)
@@ -82,7 +88,8 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
         await connection.invoke('RequestPresenceSnapshot')
           .catch(err => console.error('Failed to request presence snapshot', err))
-
+        await markAllIncomingAsDelivered(connection)
+          .catch(err => console.error('Failed to mark incoming messages as delivered', err))
       } catch (err) {
         console.error('Failed to start realtime connection', err)
         setIsConnected(false)

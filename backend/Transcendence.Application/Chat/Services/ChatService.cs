@@ -264,7 +264,13 @@ public async Task DeleteMessageAsync(Guid userId, Guid messageId)
             participantIds,
             conversationId);
     }
+    public async Task<IReadOnlyList<MessageDeliveredDto>> GetUnreadMessagesAsync(     Guid userId)
+    {
 
+
+        return await _messageRepository.getUnreadMessagesAsync(userId) ;
+
+     } 
 }
  
  /*
