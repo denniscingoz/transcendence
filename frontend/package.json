@@ -4,11 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "predev": "node -e \"const fs=require('fs'); if (!fs.existsSync('.env')) { console.error('Error: frontend/.env file not found.'); console.error('Create it from .env.example first:'); console.error('  cp .env.example .env'); process.exit(1); }\"",
     "dev": "vite",
-    "prebuild": "node -e \"const fs=require('fs'); if (!fs.existsSync('.env')) { console.error('Error: frontend/.env file not found.'); console.error('Create it from .env.example first:'); console.error('  cp .env.example .env'); process.exit(1); }\"",
     "build": "tsc -b && vite build",
-    "prepreview": "node -e \"const fs=require('fs'); if (!fs.existsSync('.env')) { console.error('Error: frontend/.env file not found.'); console.error('Create it from .env.example first:'); console.error('  cp .env.example .env'); process.exit(1); }\"",
     "preview": "vite preview",
     "lint": "eslint ."
   },

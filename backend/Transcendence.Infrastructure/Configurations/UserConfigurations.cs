@@ -15,7 +15,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 				"CK_users_auth_method",
 				"\"PasswordHash\" IS NOT NULL OR \"GoogleId\" IS NOT NULL");
 		});
-		builder.HasKey(x => x.Id);//Primanry key is implicitly NOT NULL and UNIQUE
+		builder.HasKey(x => x.Id);
 		builder.Property(x => x.Username)
 			.IsRequired()
 			.HasMaxLength(50);

@@ -17,7 +17,7 @@ clean:
 	$(COMPOSE) down --remove-orphans
 
 fclean:
-	$(COMPOSE) down -v --remove-orphans --rmi all
+	$(COMPOSE) down -v --remove-orphans
 	rm -f docker/nginx/certs/dev.crt docker/nginx/certs/dev.key
 	rm -rf uploads/*
 	mkdir -p uploads

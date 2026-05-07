@@ -1,6 +1,6 @@
 Project Transcendence {
   database_type: "PostgreSQL"
-  Note: "Generated from EF Core ModelSnapshot. Default schema: app."
+  Note: "Generated from EF Core ModelSnapshot. Default schema: app"
 }
 
 Table app.users {
@@ -25,8 +25,8 @@ Table app.users {
 
 Table app.files {
   Id uuid [pk]
-  ContentType varchar(100) [not null]
   OwnerId uuid [not null]
+  ContentType varchar(100) [not null]
   SizeBytes bigint [not null]
   StoragePath varchar(500) [not null, unique]
   UploadedAtUtc timestamptz [not null]
@@ -57,8 +57,6 @@ Table app.likes {
   PostId uuid [not null]
 
   Indexes {
-    AuthorId
-    PostId
     (PostId, AuthorId) [unique]
   }
 }
@@ -84,8 +82,6 @@ Table app.Messages {
   Content varchar(4000) [not null]
   ConversationId uuid [not null]
   CreatedAt timestamptz [not null]
-  DeletedAt timestamptz [null]
-  IsDeleted boolean [not null]
   SenderId uuid [not null]
 
   Indexes {
@@ -93,18 +89,13 @@ Table app.Messages {
     (SenderId, ClientMessageId) [unique]
   }
 
-  Note: "SenderId exists but no FK to users appears in the snapshot."
+  Note: "SenderId exists, but no FK to users is present in the snapshot"
 }
 
 Table app.Friendships {
   User1Id uuid [pk]
   User2Id uuid [pk]
   CreatedAt timestamptz [not null]
-
-  Indexes {
-    User1Id
-    User2Id
-  }
 
   Note: "Check: User1Id < User2Id"
 }
@@ -124,22 +115,6 @@ Table app.FriendshipRequests {
   }
 
   Note: "Check: RequesterId <> TargetUserId"
-}
-
-Table app.Notifications {
-  Id uuid [pk]
-  ActorAvatarUrl text [null]
-  ActorUserId uuid [null]
-  ActorUsername text [null]
-  CreatedAt timestamptz [not null]
-  IsRead boolean [not null]
-  RelatedConversationId uuid [null]
-  RelatedRequestId uuid [null]
-  Text text [not null]
-  Type int [not null]
-  UserId uuid [not null]
-
-  Note: "No FK relations for notification fields appear in the snapshot."
 }
 
 Ref: app.files.OwnerId > app.users.Id [delete: cascade]
