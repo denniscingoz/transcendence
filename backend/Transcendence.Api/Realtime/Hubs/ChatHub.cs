@@ -177,28 +177,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
                 .Group(GroupNames.User(senderId))  
                 .MessageDelivered(deliveredDto);
     }
-/*
-    public  async Task MarkAsRead(Guid conversationId)
-    {
-        var  userId = GetUserId(); 
-
-        await _chatService.MarkConversationAsRead(userId, conversationId);
-        await _notificationService.NotifyChange(userId);
-
-
-        var lastMessageId = await _chatService.GetLastMessageId(conversationId);
-
-       await Clients
-            .OthersInGroup(GroupNames.Conversation(conversationId))
-            .MessageRead(new MessageReadDto
-            {
-                ConversationId = conversationId,
-                ReaderId = userId,
-                MessageId = lastMessageId ?? Guid.Empty
-            });
-    } 
-
-    */
+  
     public async Task MarkAsRead(Guid conversationId)
 {
     var userId = GetUserId();
@@ -256,7 +235,21 @@ public sealed class ChatHub : Hub<IRealtimeClient>
                 .MessageDelivered(m);
         }
     }
+    public async Task DeleteMessage(Guid messageId)
+{
+    var userId = GetUserId();
 
+    var deleted = await _chatService.DeleteMessageAsync(userId, messageId);
+
+    var participantIds = await _chatService.GetParticipantsIds(deleted.ConversationId);
+
+    foreach (var participantId in participantIds)
+    {
+        await Clients
+            .Group(GroupNames.User(participantId))
+            .MessageDeleted(deleted);
+    }
+}
     private Guid? TryGetCurrentUserId()
     {
         var claimValue =

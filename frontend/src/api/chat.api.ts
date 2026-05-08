@@ -107,26 +107,18 @@ export async function createDirectConversation(
     }
   )
 }
-export async function deleteMessage(
-  userId: string,
-  messageId: string
-): Promise<void> {
-  const response = await fetch(
-    `${API_BASE_URL}/conversations/messages/${messageId}`,
-    {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Dev-UserId': userId,
-      },
-    }
-  )
 
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(text || `HTTP ${response.status}`)
+export async function deleteMessage(
+  connection: signalR.HubConnection,
+  messageId: string
+) {
+  if (connection.state !== signalR.HubConnectionState.Connected) {
+    throw new Error('Cannot delete message if connection is not connected.')
   }
+
+  await connection.invoke('DeleteMessage', messageId)
 }
+
 export async function deleteConversation(
     userId: string,
     conversationId: string

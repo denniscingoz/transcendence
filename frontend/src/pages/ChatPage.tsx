@@ -382,6 +382,7 @@ export function ChatPage() {
   }
 
   async function confirmDeleteMessage() {
+    if (!connection) return;
     const messageId = pendingDeleteMessageId;
     if (!messageId) return;
     if (!currentUserId) return;
@@ -405,8 +406,7 @@ export function ChatPage() {
         ),
       );
 
-      await deleteMessage(currentUserId, messageId);
-      await refreshLoadedConversations();
+      await deleteMessage(connection, messageId);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete message");
       await loadConversationMessages(activeConversationIdRef.current);

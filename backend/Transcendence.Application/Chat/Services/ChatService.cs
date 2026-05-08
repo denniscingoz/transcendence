@@ -227,7 +227,7 @@ public async Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId, 
     return dtos;
     
     }
-public async Task DeleteMessageAsync(Guid userId, Guid messageId)
+public async Task<MessageDeletedDto> DeleteMessageAsync(Guid userId, Guid messageId)
 {
     var message = await _messageRepository.GetByIdAsync(messageId)
         ?? throw new NotFoundException("Message not found.");
@@ -236,8 +236,14 @@ public async Task DeleteMessageAsync(Guid userId, Guid messageId)
         throw new ForbiddenException("You can delete only your own messages.");
 
     message.Delete(DateTime.UtcNow);
-    
+
     await _messageRepository.SaveChangesAsync();
+
+    return new MessageDeletedDto
+    {
+        MessageId = message.Id,
+        ConversationId = message.ConversationId
+    };
 }
     public async Task DeleteConversationAsync(
         Guid userId,

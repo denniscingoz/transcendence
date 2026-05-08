@@ -43,13 +43,7 @@ public class ConversationsController : ControllerBase
 
         return this.OkResponse(messages);
     }
-    [HttpDelete("messages/{messageId:guid}")]
-    public async Task<IActionResult> DeleteMessage(Guid messageId, CancellationToken ct)
-    {
-        var currentUserId = GetUserId();
-        await _chatService.DeleteMessageAsync(currentUserId, messageId);
-        return NoContent();
-    }
+ 
     [HttpDelete("{conversationId:guid}")]
     public async Task<IActionResult> DeletConversation(Guid conversationId, CancellationToken ct)
     {
