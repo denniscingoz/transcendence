@@ -1,5 +1,6 @@
 import { Modal } from '../Modal'
 import type { UiNotification } from '../Header'
+import { UnknownProfileAvatar } from '../icons/UnknownProfileAvatar'
 
 type NotificationsModalProps = {
   onClose: () => void
@@ -23,15 +24,15 @@ export function NotificationsModal({
           ) : (
             notifications.map(item => (
               <div key={item.id} className="card flex items-center gap-4 p-4">
-                <img
+                {
+                  item.avatarUrl ?
+                  <img
                   className="h-12 w-12 rounded-full border object-cover"
-                  src={
-                    item.avatarUrl
-                      ? `${import.meta.env.VITE_API_BASE_URL}${item.avatarUrl}`
-                      : 'https://placehold.co/96x96'
-                  }
+                  src={`${import.meta.env.VITE_API_BASE_URL}${item.avatarUrl}`}
                   alt=""
                 />
+                 : (<UnknownProfileAvatar className="h-12 w-12 rounded-full border object-cover"/>)
+                }
 
                 <div className="min-w-0 flex-1">
                   <div className="font-normal truncate">

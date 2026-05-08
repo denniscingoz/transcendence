@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { BottomNav } from '../components/BottomNav'
 import { Modal } from '../components/Modal'
 import { markConversationNotificationsAsRead } from '../api/notifications.api'
+import { UnknownProfileAvatar } from '../components/icons/UnknownProfileAvatar'
 
 import {
   createDirectConversation,
@@ -74,6 +75,8 @@ export function ChatPage() {
   const [draftTargetUserName, setDraftTargetUserName] = useState<string | null>(null)
   const [pendingDeleteMessageId, setPendingDeleteMessageId] = useState<string | null>(null)
   const [pendingDeleteConversationId, setPendingDeleteConversationId] = useState<string | null>(null)
+
+  const [failedAvatarIds, setFailedAvatarIds] = useState<Set<string>>(new Set())
 
   const shouldShowDraft =
     draftTargetUserId &&
@@ -861,10 +864,9 @@ export function ChatPage() {
                   className="w-full text-left p-1.5 rounded-lg transition-all bg-gray-400 border border-gray-500"
                 >
                   <div className="flex items-center gap-1.5">
-                    <img
-                      src="https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg"
-                      alt={draftTargetUserName ?? 'New chat'}
-                      className="w-5 h-5 rounded-full object-cover flex-shrink-0"
+                    {/* Instead of URL, we are using now a component for Unkown Avatar */}
+                    <UnknownProfileAvatar
+                      className="w-5 h-5 rounded-full flex-shrink-0"
                     />
 
                     <div className="flex-1 min-w-0">
@@ -898,8 +900,8 @@ export function ChatPage() {
 
                     const avatarSrc = conversation.targetUserAvatarUrl
                       ? `${import.meta.env.VITE_API_BASE_URL}${conversation.targetUserAvatarUrl}`
-                      : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
-
+                      : null
+                    const avatarFailed = failedAvatarIds.has(conversation.id)
                     return (
                       <div
                         key={conversation.id}
@@ -915,16 +917,18 @@ export function ChatPage() {
                           className="flex-1 text-left p-1.5 min-w-0"
                         >
                           <div className="flex items-center gap-1.5">
-                            <img
+                            {avatarSrc && !avatarFailed ? (
+                              <img
                               src={avatarSrc}
-                              onError={event => {
-                                event.currentTarget.src =
-                                  'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
+                              onError={() => {
+                                  setFailedAvatarIds((prev) => new Set(prev).add(conversation.id))
+
                               }}
                               alt={conversation.targetUserName}
-                              className="w-5 h-5 rounded-full object-cover flex-shrink-0"
-                            />
+                              className="w-5 h-5 rounded-full object-cover flex-shrink-0"/>
+                              ) : ( <UnknownProfileAvatar className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
 
+                            )}
                             <div className="flex-1 min-w-0">
                               <div className="font-medium text-gray-900 truncate text-xs">
                                 {conversation.targetUserName}

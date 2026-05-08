@@ -1,3 +1,5 @@
+import { XIcon } from '../components/icons/XIcon'
+
 interface ConfirmDialogProps {
   isOpen: boolean
   title?: string
@@ -66,13 +68,5 @@ export function ConfirmDialog({
         </div>
       </div>
     </div>
-  )
-}
-
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-      <path d="M18 6 6 18M6 6l12 12" />
-    </svg>
   )
 }
