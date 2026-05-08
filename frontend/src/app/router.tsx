@@ -22,6 +22,7 @@ import { PostCreatePage } from '../pages/PostCreatePage'
 import { OtherProfilePage } from '../pages/OtherProfilePage'
 import { PrivacyPolicyPage } from '../pages/PrivacyPolicyPage'
 import { TermsOfServicePage } from '../pages/TermsOfServicePage'
+import { useLayoutEffect } from 'react'
 // import { PostDetailPage } from '../pages/PostDetailPage'
 // import { SearchPage } from '../pages/SearchPage'
 
@@ -34,11 +35,21 @@ import { TermsOfServicePage } from '../pages/TermsOfServicePage'
 
   When that happens, it scrolls the browser window back to the top.
 */
+// function ScrollToTop() {
+//   const { pathname } = useLocation()
+
+//   useEffect(() => {
+//     window.scrollTo(0, 0)
+//   }, [pathname])
+
+//   return null
+// }
+
 function ScrollToTop() {
   const { pathname } = useLocation()
 
-  useEffect(() => {
-    window.scrollTo(0, 0)
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
   }, [pathname])
 
   return null
