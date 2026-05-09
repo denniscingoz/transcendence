@@ -11,7 +11,8 @@ export type UploadProgressHandler = (percent: number) => void
 
 export type UploadPostFileInput = {
   file: File
-  onProgress?: UploadProgressHandler
+  onProgress?: UploadProgressHandler,
+  signal?: AbortSignal 
 }
 
 
@@ -61,6 +62,8 @@ export async function getPostLikes(
 export async function uploadPostFile(input: UploadPostFileInput | File) {
   const file = input instanceof File ? input : input.file
   const onProgress = input instanceof File ? undefined : input.onProgress
+  const signal = input instanceof File ? undefined : input.signal
+
 
   const formData = new FormData()
   formData.append('file', file)
@@ -69,6 +72,7 @@ export async function uploadPostFile(input: UploadPostFileInput | File) {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    signal,
     onUploadProgress: (event) => {
       if (!onProgress || !event.total) {
         return
