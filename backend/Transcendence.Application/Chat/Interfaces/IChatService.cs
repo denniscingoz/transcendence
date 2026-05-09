@@ -26,9 +26,12 @@ public interface IChatService
 	Task MarkConversationAsRead(Guid userId, Guid conversationId);
 
     Task<Guid?> GetLastMessageId(Guid conversationId);
-    Task   DeleteMessageAsync(Guid userId, Guid messageId); 
+    Task<MessageDeletedDto> DeleteMessageAsync(Guid userId, Guid messageId);
     Task DeleteConversationAsync(Guid currentUserId, Guid conversationId);
-
+    Task <IReadOnlyList<MessageDeliveredDto>> GetUnreadMessagesAsync(Guid userId);
+    Task<MessageDeliveredDto> MarkMessageAsDeliveredAsync(
+        Guid readerId,
+        Guid messageId);
 }   
 
 /*

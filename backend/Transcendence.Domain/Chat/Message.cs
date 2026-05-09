@@ -11,6 +11,7 @@ public class Message
     public DateTimeOffset CreatedAt { get; private set; }
     public  string Content {get; private set;} = null!;
     public bool IsDeleted { get; private set; }
+    public bool IsDelivered { get; private set; }
     public DateTime? DeletedAt { get; private set; }
 
     private Message () {} //EF
@@ -26,6 +27,7 @@ public Message(Guid conversationId, Guid userId, Guid clientMessageId, string co
     ClientMessageId = clientMessageId;
     CreatedAt = DateTimeOffset.UtcNow;
     IsDeleted = false;
+    IsDelivered = false;
     DeletedAt = null;
 }
 
@@ -36,6 +38,13 @@ public Message(Guid conversationId, Guid userId, Guid clientMessageId, string co
         IsDeleted = true;
         DeletedAt = deletedAt;
         Content = "🚫This message was deleted";
+    }
+        public void setDelivered()
+    {
+        if (IsDelivered) return;
+
+        IsDelivered = true;
+ 
     }
 }
 

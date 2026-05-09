@@ -7,14 +7,14 @@ import { TheSocialLogo } from './icons/TheSocialLogo'
 
 import {
   type ChatMessageDto,
-  type RealtimeNotificationDto,
-  NotificationType,
 } from '../api/chat.api'
 import {
   acceptFriendshipRequest,
   declineFriendshipRequest,
 } from '../api/friends.api'
 import {
+  type RealtimeNotificationDto,
+  NotificationType,
   getNotifications,
   markNotificationAsRead,
   markSeenNotificationsAsRead,  
@@ -244,10 +244,12 @@ async function handleCloseNotifications() {
     }
   }, [currentUserId, isNotificationsOpen])
 
-  useEffect(() => {
-    if (!currentUserId) return
-    void refreshNotificationsUi()
-  }, [currentUserId])
+    useEffect(() => {
+      if (!currentUserId) return
+      if (!isConnected) return
+
+      void refreshNotificationsUi()
+    }, [currentUserId, isConnected])
 
   useEffect(() => {
     if (!connection || !currentUserId || !isConnected) return

@@ -2,19 +2,7 @@ import * as signalR from '@microsoft/signalr'
 import type {   CursorPageDto, OtherProfileDto  } from '../types/api'
 import api from './axios'
 
-export enum NotificationType {
-  NewMessage = 1,
-  FriendRequest = 2,
-  FriendRequestAccepted = 3,
-  FriendRequestDeclined = 4,
-}
 
-export type RealtimeNotificationDto = {
-  id: string
-  type: NotificationType
-  payload: unknown
-  createdAt: string
-}
 export type ChatMessageDto = {
   messageId: string
   clientMessageId?: string
@@ -25,6 +13,8 @@ export type ChatMessageDto = {
   isReadByOthers: boolean
   createdAt: string
   isDeleted: boolean
+  isDelivered: boolean
+
 }
 
 export type ConversationDto = {
@@ -45,6 +35,7 @@ export type MessageAckDto = {
 
 export type MessageDeliveredDto = {
   readerId: string
+  senderId: string
   messageId: string
 }
 
@@ -52,22 +43,6 @@ export type MessageReadDto = {
   conversationId: string
   readerId: string
   messageId: string
-}
- 
-export enum FriendshipRequestStatus {
-  Pending = 1,
-  Accepted = 2,
-  Declined = 3,
-}
-
-export type FriendshipRequestEventDto = {
-  requestId: string
-  requesterId: string
-  targetUserId: string
-  status: FriendshipRequestStatus
-  createdAt: string
-  requesterUsername: string
-  requesterAvatarUrl?: string | null
 }
  
 export type SendMessageCommandDto = {
@@ -132,26 +107,18 @@ export async function createDirectConversation(
     }
   )
 }
-export async function deleteMessage(
-  userId: string,
-  messageId: string
-): Promise<void> {
-  const response = await fetch(
-    `${API_BASE_URL}/conversations/messages/${messageId}`,
-    {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Dev-UserId': userId,
-      },
-    }
-  )
 
-  if (!response.ok) {
-    const text = await response.text()
-    throw new Error(text || `HTTP ${response.status}`)
+export async function deleteMessage(
+  connection: signalR.HubConnection,
+  messageId: string
+) {
+  if (connection.state !== signalR.HubConnectionState.Connected) {
+    throw new Error('Cannot delete message if connection is not connected.')
   }
+
+  await connection.invoke('DeleteMessage', messageId)
 }
+
 export async function deleteConversation(
     userId: string,
     conversationId: string
@@ -171,6 +138,15 @@ export async function deleteConversation(
           throw new Error(text || `HTTP ${response.status}`)
 
     }
+}
+export async function markAllIncomingAsDelivered(
+  connection: signalR.HubConnection
+) {
+  if (connection.state !== signalR.HubConnectionState.Connected) {
+    return
+  }
+
+  await connection.invoke('MarkAllIncomingAsDelivered')
 }
 export async function getMessages(
   userId: string,

@@ -18,4 +18,5 @@ public interface IRealtimeClient
     Task UserOnLine(object payload);
     Task UserOffLine(object payload);
     Task ConversationDeleted(ConversationDeletedDto dto);
+    Task MessageDeleted(MessageDeletedDto message);
 }

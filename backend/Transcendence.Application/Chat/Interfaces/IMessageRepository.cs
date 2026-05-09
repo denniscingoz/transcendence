@@ -1,4 +1,5 @@
 using Transcendence.Domain.Chat;
+using Transcendence.Application.Chat.DTOs;
 
 public interface IMessageRepository
 {
@@ -15,6 +16,7 @@ public interface IMessageRepository
     Task<int> GetUnreadCount(Guid conversationId, Guid userId, DateTimeOffset? LastRead);
      Task SaveChangesAsync();
      
+        Task<IReadOnlyList<Message>> GetUndeliveredIncomingMessagesAsync(Guid userId);
 }
 
 /*

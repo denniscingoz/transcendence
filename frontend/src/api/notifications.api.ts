@@ -9,6 +9,12 @@ export enum NotificationType {
   Comment = 5,
   Post = 6
 }
+export type RealtimeNotificationDto = {
+  id: string
+  type: NotificationType
+  payload: unknown
+  createdAt: string
+}
 
 export type NotificationListItemDto = {
   id: string
