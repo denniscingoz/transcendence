@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { useAuth } from "../auth/AuthContext";
-import { useRealtime } from "../realtime/RealtimeProvider";
-import { useTranslation } from "react-i18next";
-import { BottomNav } from "../components/BottomNav";
-import { Modal } from "../components/Modal";
-import { markConversationNotificationsAsRead } from "../api/notifications.api";
+import { useEffect, useRef, useState } from 'react'
+import { useAuth } from '../auth/AuthContext'
+import { useRealtime } from '../realtime/RealtimeProvider'
+import { useTranslation } from 'react-i18next'
+import { BottomNav } from '../components/BottomNav'
+import { Modal } from '../components/Modal'
+import { markConversationNotificationsAsRead } from '../api/notifications.api'
+import { UnknownProfileAvatar } from '../components/icons/UnknownProfileAvatar'
 
 import {
   createDirectConversation,
@@ -89,6 +90,8 @@ export function ChatPage() {
   >(null);
   const [pendingDeleteConversationId, setPendingDeleteConversationId] =
     useState<string | null>(null);
+
+  const [failedAvatarIds, setFailedAvatarIds] = useState<Set<string>>(new Set())
 
   const shouldShowDraft =
     draftTargetUserId &&
@@ -868,7 +871,7 @@ export function ChatPage() {
       : false;
 
 return (
-  <div className="h-[calc(100dvh-136px)] bg-white overflow-hidden md:h-[calc(100dvh-170px)]">
+  <div className="h-[calc(100dvh-136px)] overflow-hidden bg-white md:h-[calc(100dvh-170px)]">
     <div className="mx-auto flex h-full w-full max-w-8xl flex-col overflow-hidden md:px-4 md:py-6">
       <div className="panel flex min-h-0 flex-1 overflow-hidden rounded-none bg-gray-100 md:gap-4 md:rounded-2xl md:bg-transparent">
         <aside
@@ -942,9 +945,7 @@ return (
                 className="mb-1 w-full rounded-xl border border-gray-500 bg-gray-400 p-3 text-left transition-all md:p-1.5"
               >
                 <div className="flex items-center gap-3 md:gap-1.5">
-                  <img
-                    src="https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg"
-                    alt={draftTargetUserName ?? t("chat.newChat")}
+                  <UnknownProfileAvatar
                     className="h-11 w-11 flex-shrink-0 rounded-full object-cover md:h-5 md:w-5"
                   />
 
@@ -977,12 +978,15 @@ return (
                   const isOnline = onlineUserIds.includes(
                     conversation.targetUserId,
                   );
+
                   const isDeletingConversation =
                     deletingConversationIds.includes(conversation.id);
 
                   const avatarSrc = conversation.targetUserAvatarUrl
                     ? `${import.meta.env.VITE_API_BASE_URL}${conversation.targetUserAvatarUrl}`
-                    : "https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg";
+                    : null;
+
+                  const avatarFailed = failedAvatarIds.has(conversation.id);
 
                   return (
                     <div
@@ -999,15 +1003,24 @@ return (
                         className="min-w-0 flex-1 p-3 text-left md:p-1.5"
                       >
                         <div className="flex items-center gap-3 md:gap-1.5">
-                          <img
-                            src={avatarSrc}
-                            onError={(event) => {
-                              event.currentTarget.src =
-                                "https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg";
-                            }}
-                            alt={conversation.targetUserName}
-                            className="h-11 w-11 flex-shrink-0 rounded-full object-cover md:h-5 md:w-5"
-                          />
+                          {avatarSrc && !avatarFailed ? (
+                            <img
+                              src={avatarSrc}
+                              onError={() => {
+                                setFailedAvatarIds((prev) => {
+                                  const next = new Set(prev);
+                                  next.add(conversation.id);
+                                  return next;
+                                });
+                              }}
+                              alt={conversation.targetUserName}
+                              className="h-11 w-11 flex-shrink-0 rounded-full object-cover md:h-5 md:w-5"
+                            />
+                          ) : (
+                            <UnknownProfileAvatar
+                              className="h-11 w-11 flex-shrink-0 rounded-full object-cover md:h-5 md:w-5"
+                            />
+                          )}
 
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-sm font-semibold text-gray-900 md:text-xs">
@@ -1094,20 +1107,24 @@ return (
               ‹
             </button>
 
-            <img
-              src={activeAvatarSrc}
-              onError={(event) => {
-                event.currentTarget.src =
-                  "https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg";
-              }}
-              alt={activeTitle ?? t("chat.chats")}
-              className="h-10 w-10 rounded-full object-cover"
-            />
+            {activeAvatarSrc ? (
+              <img
+                src={activeAvatarSrc}
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                }}
+                alt={activeTitle ?? t("chat.chats")}
+                className="h-10 w-10 rounded-full object-cover"
+              />
+            ) : (
+              <UnknownProfileAvatar className="h-10 w-10 rounded-full object-cover" />
+            )}
 
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-semibold text-gray-900">
                 {activeTitle}
               </div>
+
               <div className="text-xs text-gray-500">
                 {isActiveUserOnline ? t("chat.online") : t("chat.offline")}
               </div>
@@ -1118,13 +1135,11 @@ return (
             ref={messagesContainerRef}
             className="min-h-0 flex-1 space-y-1 overflow-y-auto bg-white p-3 md:mb-1.5 md:rounded-lg md:p-2"
           >
-            {!activeConversationId &&
-              !shouldShowDraft &&
-              !loadingMessages && (
-                <div className="py-6 text-center text-sm text-gray-500 md:py-2 md:text-xs">
-                  {t("chat.selectConversation")}
-                </div>
-              )}
+            {!activeConversationId && !shouldShowDraft && !loadingMessages && (
+              <div className="py-6 text-center text-sm text-gray-500 md:py-2 md:text-xs">
+                {t("chat.selectConversation")}
+              </div>
+            )}
 
             {shouldShowDraft && (
               <div className="py-3 text-center text-xs text-gray-500">
@@ -1151,12 +1166,15 @@ return (
                   message.messageId,
                 );
                 const isDeleted = message.isDeleted;
+
                 const messageBubbleClass = isMine
                   ? "bg-blue-500 text-white rounded-br-sm"
                   : "bg-gray-200 text-gray-900 rounded-bl-sm";
+
                 const messageDeletedClass = isDeleted
                   ? "opacity-70 italic"
                   : "";
+
                 const messageMetaClass = isMine
                   ? "text-blue-100"
                   : "text-gray-600";
@@ -1248,6 +1266,7 @@ return (
                   className="flex h-11 min-w-11 items-center justify-center rounded-full bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:bg-gray-200 disabled:text-gray-400 md:ml-auto md:h-[40px] md:min-w-[140px] md:rounded-xl"
                 >
                   <span className="md:hidden">➤</span>
+
                   <span className="hidden md:inline">
                     {sending ? t("common.loading") : t("chat.send")}
                   </span>
@@ -1266,6 +1285,7 @@ return (
     {pendingDeleteMessageId && (
       <Modal title={t("chat.deleteMessage")} onClose={cancelDeleteMessage}>
         <p className="mb-6 text-gray-700">{t("chat.areYouSure")}</p>
+
         <div className="flex justify-end gap-3">
           <button
             type="button"
@@ -1274,6 +1294,7 @@ return (
           >
             {t("chat.cancel")}
           </button>
+
           <button
             type="button"
             onClick={() => void confirmDeleteMessage()}
@@ -1291,6 +1312,7 @@ return (
         onClose={cancelDeleteConversation}
       >
         <p className="mb-6 text-gray-700">{t("chat.areYouSure")}</p>
+
         <div className="flex justify-end gap-3">
           <button
             type="button"
@@ -1299,6 +1321,7 @@ return (
           >
             {t("chat.cancel")}
           </button>
+
           <button
             type="button"
             onClick={() => void confirmDeleteConversation()}

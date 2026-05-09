@@ -7,7 +7,7 @@ import { PostDetailModal } from '../components/modals/PostDetailModal'
 import { useNavigate } from 'react-router-dom'
 import { ProtectedPostThumbPreview } from '../components/ui/ProtectedPostThumb'
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
-
+import { UnknownProfileAvatar } from '../components/icons/UnknownProfileAvatar'
 
 export function ProfilePage() {
   const { t } = useTranslation()
@@ -57,14 +57,15 @@ export function ProfilePage() {
         <div className="flex flex-col md:flex-row gap-6 md:gap-4 items-start md:items-center mb-8">
           {/* Avatar with ring */}
           <div className="relative">
-            <img
+            { data?.avatarUrl ? <img
               src={
                     previewUrl ??
-                    (data?.avatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${data.avatarUrl}` : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg')
+                    (`${import.meta.env.VITE_API_BASE_URL}${data.avatarUrl}`)
                   }
               alt={data?.fullName ?? 'Profile Avatar Failed to Load'}
               className="w-32 h-32 rounded-full object-cover ring-2 ring-gray-300 ring-offset-4"
             />
+            : (<UnknownProfileAvatar className="w-32 h-32 rounded-full object-cover ring-2 ring-gray-300 ring-offset-4" /> )}
           </div>
 
           {/* Profile info */}

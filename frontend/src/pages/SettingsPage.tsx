@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth/AuthContext'
 import {deleteAccountApi} from '../api/auth.api'
 import { LanguageDropdown } from '../components/language/LanguageDropdown'
+import { XCircleIcon } from '../components/icons/XCircleIcon'
 
 function NavItem({ to, label }: { to: string; label: string }) {
   return (
@@ -36,21 +37,23 @@ export function SettingsPage() {
     logout()
   }
 
+  //       className="fixed top-0 left-0 right-0 bottom-20 z-50 flex items-center justify-center bg-black/50 p-4"
   return (
-    <div className="h-[calc(100dvh-250px)] bg-bg px-4 py-8">
+
+    <div className="min-h-[calc(100dvh-250px)] overflow-y-auto bg-bg px-4 py-8 pb-28">
       <div className="panel mx-auto max-w-2xl rounded-2xl border border-panel bg-white p-6 shadow-sm">
         
        { /*settings header and close x*/}
         <div className="mb-8 flex items-start justify-between">
           <h1 className="text-2xl font-semibold text-text">{t('settings.Settings')}</h1>
-          <button
-            type="button"
-            onClick={handleClose}
-            className="btn-ghost flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-text hover:bg-gray-100"
-            aria-label="Close settings"
-          >
-            ×
-          </button>
+        <button 
+          type="button"
+          onClick={handleClose}
+          className="group flex items-center justify-center rounded-full"
+          aria-label="Close Edit Profile"
+        >
+          <XCircleIcon className="h-12 w-12" />
+        </button>
         </div>
 
         <div className="space-y-8">

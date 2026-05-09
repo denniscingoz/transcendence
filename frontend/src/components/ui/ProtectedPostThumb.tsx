@@ -5,7 +5,7 @@ type ProtectedPostThumbProps = {
   contentType?: string | null 
 }
 
-
+// Shows image/video thumbnail, video is non-interactive
 export function ProtectedPostThumb({ fileUrl, contentType }: ProtectedPostThumbProps) {
   const { resolvedUrl, isLoading } = useProtectedFile(fileUrl)
 
@@ -37,7 +37,7 @@ export function ProtectedPostThumb({ fileUrl, contentType }: ProtectedPostThumbP
   return <div className="w-full h-full bg-gray-200" />
 }
 
-
+// Same as thumbnail, but adds a play icon over videos
 export function ProtectedPostThumbPreview({ fileUrl, contentType }: ProtectedPostThumbProps) {
   const { resolvedUrl, isLoading } = useProtectedFile(fileUrl)
 
@@ -75,6 +75,8 @@ export function ProtectedPostThumbPreview({ fileUrl, contentType }: ProtectedPos
   return <div className="w-full h-full bg-gray-200" />
 }
 
+
+//Shows full media, video has controls
 export function ProtectedPostThumbContent({ fileUrl, contentType }: ProtectedPostThumbProps) {
   const { resolvedUrl, isLoading } = useProtectedFile(fileUrl)
 
