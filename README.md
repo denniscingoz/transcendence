@@ -342,6 +342,18 @@ erDiagram
     }
 ```
 
+Project Transcendence is a social platform whose database is organized around five domains: identity, social feed, friendships, chat, and notifications. All tables live in PostgreSQL under the app schema and are managed via EF Core migrations applied automatically at API startup.
+
+Identity is the foundation: every users row supports either password or Google SSO authentication (enforced by a check constraint requiring at least one to be set), and links optionally to an avatar in the files table. files itself is a generic blob registry — every uploaded asset gets a row, owned by a user, with cascade deletion when that user is removed.
+
+The social feed is a classic posts/comments/likes triangle. A post must carry an image (the FK to files uses RESTRICT so you can't orphan a post by deleting its image), and the likes table has a unique index on (PostId, AuthorId) so a user can only like a given post once.
+
+Friendships use a pair-normalization trick: both Friendships and FriendshipRequests enforce User1Id < User2Id so each pair exists exactly once in canonical order. This makes "are A and B friends?" a single index lookup instead of an OR query, and it makes A→B and B→A friend requests collide on a unique index — you can't have two pending requests between the same two users. The original direction of a request is preserved separately via RequesterId and TargetUserId.
+
+Chat supports both direct (1-to-1) and group conversations via a Type discriminator. Participation is a join table with per-user LastReadAt for cheap unread-count queries. Messages carry a client-generated ClientMessageId so retries are idempotent — the unique index on (SenderId, ClientMessageId) means the second copy of a retried send collides on insert and the original is returned, instead of producing duplicates. Deleted messages are soft-deleted to keep threading and read pointers consistent.
+
+Notifications denormalize actor metadata (ActorUsername, ActorAvatarUrl) directly onto each row so the feed renders without joins, and a typed Type column distinguishes the six notification kinds (new message, friend request, accepted, declined, post liked, post commented).
+
 ---
 
 ## Individual contributions
