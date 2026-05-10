@@ -86,6 +86,7 @@ Table app.Messages {
   CreatedAt timestamptz [not null]
   DeletedAt timestamptz [null]
   IsDeleted boolean [not null]
+  IsDelivered boolean [not null]
   SenderId uuid [not null]
 
   Indexes {
