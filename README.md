@@ -716,7 +716,7 @@ Third-party libraries used in this project remain under their respective license
 
 ---
 
-**Credits and acknowledgements
+**Credits and acknowledgements**
 
 ### Team
 
