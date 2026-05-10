@@ -37,36 +37,35 @@ Transcendence is a private social application that brings together authenticatio
 | **School** | 42 Vienna |
 | **Project** | ft_transcendence |
 | **Team size** | 4 |
-| **Total points** | 15 |
+| **Total points** | 14 |
 | **Live demo** | https://localhost:8443 |
 
 ## Team
 
 | Member | Role | GitHub | Primary focus |
 |---|---|---|---|
-| **Deniz** | **Product Owner (PO)** | **Project Manager (PM)** [@handle](https://github.com/denniscingoz) | Vision, scope, acceptance criteria | Sprint planning, coordination, delivery |
-| **Daria** | **Tech Lead** | [@handle](https://github.com/grignetta) | Architecture, code review, technical direction |
-| **Valerii** | **Backend Developer** | [@handle](https://github.com/Vbezhevets) | Backend / domain / persistence |
-| **Michaela** | **Frontend Developer** | [@handle](https://github.com/michaela811) | Frontend application + design system |
+| **Deniz** | **Product Owner (PO) & Project Manager (PM)** [@denniscingoz](https://github.com/denniscingoz) | Vision, scope, acceptance criteria | Design | Planning, coordination, delivery |
+| **Daria** | **Tech Lead** | [@grignetta](https://github.com/grignetta) | Architecture, code review, technical direction, database |
+| **Valerii** | **Backend Developer** | [@Vbezhevets](https://github.com/Vbezhevets) | Realtime features with SignalR |
+| **Michaela** | **Frontend Developer** | [@michaela811](https://github.com/michaela811) | Frontend application |
 
-> _Roles were assigned at kickoff and remained stable through the project. All members contributed to code; the role headings indicate primary responsibility, not exclusive ownership._
+> _Roles were assigned at kickoff and remained stable through the project. All members contributed to code, and everyone tested the system and fixed bugs across the codebase; the role headings indicate primary responsibility, not exclusive ownership._
 
 ---
 
 ## Project management
 
-We organised the work as a lightweight **Scrum-inspired** process tailored to a small team and a fixed academic deadline.
+Given the small team size and fixed academic deadline, we kept coordination deliberately lightweight. Day-to-day communication happened in a shared WhatsApp group, with occasional calls for deeper discussions or design decisions. Roles were assigned at kickoff and everyone contributed to code, testing, and bug fixing.
 
 ### How work was organised
 
 - **Discovery phase (week 1).** Requirements walk-through, scope agreement, module selection, and a target point total. Wireframes and a domain model were produced before any code was written.
 - **API-first contract.** Backend and frontend agreed on endpoint shapes, payloads, and auth flows **before** parallel implementation began. This single decision unblocked nearly all parallel work.
-- **Documentation discipline.** `docs/` is split by audience — `api/`, `back end/`, `front/`, `db_schema/`, and `minor/` (one folder per Minor module). Cross-module dependencies were tracked in `Dependency map.pages` so we always knew the impact radius of a change.
-- **Planning artefacts.** A living product backlog and a sprint board ( GitHub Projects issues ).
-- **Sprint cadence.** One-week sprints, each ending with a short demo and retro. Definition of Done required: passing CI, code review by at least one other developer, and a merged feature branch.
-- **Branching strategy.** Trunk-based development with short-lived feature branches, pull requests into `main`, and merges to keep history readable.
-- **Communication.** Daily/weekly async standups in chat (blockers, plans, asks); a weekly synchronous meeting for design discussions and demos.
-- **Quality gates.** Pre-commit linting on the frontend, EF Core migrations reviewed by the Tech Lead, and a smoke-test checklist run before each demo.
+- **Documentation discipline.** `docs/` is split by audience - `api/`, `back end/`, `front/`, `db_schema/`, and `minor/`. Cross-module dependencies were tracked in `Dependency map.pages` so we always knew the impact radius of a change.
+- **Task tracking.** Work items were captured as GitHub issues against the repo and assigned at kickoff, then reallocated as scope shifted. We did not run formal sprints, coordination was continuous rather than time-boxed.
+- **Branching strategy.** Trunk-based development with short-lived feature branches, pull requests into `main`, and review before merge to keep history readable.
+- **Communication.** Async-first via a shared WhatsApp group for day-to-day coordination: blockers, asks, progress updates, supplemented by occasional calls for design discussions and harder problem solving. This kept overhead low and let each member work in long uninterrupted blocks.
+- **Quality gates.** Pre-commit linting on the frontend, EF Core migrations reviewed by the Tech Lead or Project owner before merge, and code review on every pull request. All members contributed to testing and bug fixing across the codebase.
 - **Deployment workflow.** Local development through Docker Compose; production-like environment behind Nginx with self-signed TLS for end-to-end testing of the SignalR chat layer.
 
 ### Tooling
@@ -482,14 +481,14 @@ VITE_API_BASE_URL=/api
 
 ```text
 .
-├── **backend** /
+├── backend/
 │   ├── Transcendence.Api/              # HTTP API, controllers, SignalR hubs
 │   ├── Transcendence.Application/      # Use cases, service contracts
 │   ├── Transcendence.Domain/           # Entities, core models, business rules
 │   ├── Transcendence.Infrastructure/   # EF Core, repositories, persistence, storage
 │   └── Transcendence.sln
-├── **backups** /                            # DB dumps (git-ignored)
-├── **docker **/
+├── backups/                            # DB dumps (git-ignored)
+├── docker/
 │   ├── nginx/
 │   │   ├── certs/                      # Local development TLS certificates
 │   │   ├── default.conf                # Reverse proxy + WebSocket upgrade rules
@@ -499,7 +498,7 @@ VITE_API_BASE_URL=/api
 │       ├── generate-certs.sh           # Issues local self-signed certs
 │       ├── backup-db.sh                # pg_dump wrapper
 │       └── restore-db.sh               # pg_restore wrapper
-├── **docs** /
+├── docs/
 │   ├── api/                            # Endpoint contracts, payload shapes
 │   │   ├── auth/
 │   │   ├── chats/
@@ -520,7 +519,7 @@ VITE_API_BASE_URL=/api
 │   ├── en.subject_Transcendence.pdf    # 42 subject reference
 │   ├── SOCIAL MEDIA Features.jpg
 │   └── User scenarios.md
-├── **frontend** /
+├── frontend/
 │   ├── public/                         # Static assets
 │   ├── src/
 │   │   ├── api/
@@ -546,7 +545,7 @@ VITE_API_BASE_URL=/api
 │   ├── tsconfig.json
 │   ├── tsconfig.node.json
 │   └── vite.config.ts
-├── **uploads **/                       # Locally uploaded files (git-ignored)
+├── uploads/                            # Locally uploaded files (git-ignored)
 ├── .dockerignore
 ├── .env.example
 ├── .gitignore
