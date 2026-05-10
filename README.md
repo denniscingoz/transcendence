@@ -23,7 +23,6 @@ Transcendence is a private social application that brings together authenticatio
 13. [Database operations](#database-operations)
 14. [API overview](#api-overview)
 15. [Frontend notes](#frontend-notes)
-16. [Security considerations](#security-considerations)
 17. [Troubleshooting](#troubleshooting)
 18. [Credits and license](#credits-and-license)
 
@@ -78,34 +77,36 @@ Given the small team size and fixed academic deadline, we kept coordination deli
 
 ---
 
-## Selected modules and point calculation
+## Selected modules
 
-ft_transcendence requires **14 points minimum** to pass, where:
+ft_transcendence is scored in **module-credits**:
 
-- **1 Major module = 2 point**
-- **2 Minor modules = 1 point**
+- **1 Major module = 2 module-credit**
+- **1 Minor module = 1 module-credits**
 
-We selected **4 Major** and **7 Minor** modules for a total of **15 points**.
+We selected **4 Major** and **6 Minor** modules for a total of **8 module-credits = 15 points TOTAL**.
 
-### Major modules (4 × 2 = 8.0 points)
+### Major modules (4 × 1.0 = 4.0 module-credits)
 
 | # | Module | How we satisfied it |
 |---|---|---|
 | **M1** | **Use a framework for both frontend and backend** | React + Vite + TypeScript on the frontend; ASP.NET Core Web API on the backend. Both go beyond minimal usage (routing, dependency injection, middleware, custom hooks). |
-| **M2** | **Real-time features (WebSockets / similar)** | **SignalR** powers the chat hub at `/hubs/chat`, with graceful reconnection, typing indicators, and presence updates broadcast efficiently to relevant clients only. |
-| **M3** | **Users can interact with each other** | Chat (1:1 conversations), profile pages (own + others), and a complete friends system (request, accept/decline, remove, online status). |
-| **M4** | **Standard user management and authentication** | JWT-based auth, profile editing, avatar upload (with a default fallback), online status, friend management, and a public profile page per user. |
+| **M2** | **Real-time features (WebSockets / similar)** | **SignalR** powers the chat hub at `/hubs/chat`, with graceful connect/disconnect handling, automatic reconnection on the client, and group-based broadcasting that targets only the participants of each conversation. |
+| **M3** | **Users can interact with other users** | Chat (1:1 conversations with message history), profile pages (own + others), and a complete friends system (send / accept / decline / remove requests). |
+| **M4** | **Standard user management and authentication** | Email + password sign-up and sign-in with JWT, profile editing, avatar upload with a default fallback, friends with live online status, and a public profile page per user. |
 
-### Minor modules (6 × 1 = 6.0 points)
+### Minor modules (7 × 1.0 = 7.0 module-credits)
 
 | # | Module | How we satisfied it |
 |---|---|---|
-| **m1** | **Complete notification system** | Notifications generated for create/update/delete actions across friends, posts, comments, likes, and chat. Includes an unread counter and a mark-as-read endpoint. |
-| **m2** | **File upload and management** | Multi-type upload (images, documents), client-side **and** server-side validation (type, size, format), secure storage with access control, image previews, upload progress, and deletion. |
-| **m3** | **Multi-language support (≥ 3)** | i18next-powered i18n with **3 complete translations** EN, ES, FR, a UI language switcher, and 100% coverage of user-facing strings. |
+| **m1** | **Complete notification system** | Notifications generated for friend requests, friend request accept/decline, post likes, post comments, and new chat messages. Persisted in the database, pushed in real time via SignalR, with an unread counter and mark-as-read endpoints (single, all, by conversation). |
+| **m2** | **File upload and management** | Multi-type upload (images and videos), client-side **and** server-side validation (MIME type, size, magic-byte check), friends-only access control, in-app preview for both images and videos, upload progress overlay, and deletion. |
+| **m3** | **Multi-language support (≥ 3)** | i18next-powered i18n with three complete translations (EN, ES, FR), a UI language switcher, and full coverage of user-facing strings. |
 | **m4** | **Remote authentication (OAuth 2.0)** | Google sign-in via OAuth 2.0, integrated with the JWT issuance flow so federated and local accounts share a single identity model. |
-| **m5** | **Custom-made design system** | A reusable component library with a defined colour palette, typography scale, and icon set. **≥ 10 reusable components** (Button, Input, Modal, Card, Avatar, Toast, Tabs, Dropdown, Spinner, Badge, …) built on Tailwind tokens. |
+| **m5** | **Custom-made design system** | A reusable UI layer built on Tailwind tokens: layout components (`Layout`, `Header`, `BottomNav`), generic widgets (`Modal`, `Field`, `LanguageDropdown`, `UploadProgressOverlay`, `ProtectedPostThumb`), and domain modals (`PostDetailModal`, `LikesModal`, `NotificationsModal`, `SearchModal`, `SettingsModal`) — plus a shared CSS utility layer in `index.css` (`.btn-*`, `.input`, `.card`, `.panel`, `.divider`, `.message-*`). |
 | **m6** | **Use an ORM** | **Entity Framework Core** with code-first migrations, applied automatically on API startup. |
+| **m7** | **Support for additional browsers** | The app is tested and verified to work in **Chrome, Firefox, Safari** with consistent UI/UX. All features (chat, real-time presence, file upload, OAuth popup, i18n) function identically across browsers. Any browser-specific limitations are documented in `docs/browser-support.md`. |
+
 
 ---
 
@@ -394,44 +395,45 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 
 ## Individual contributions
 
-### Michaelaela — Frontend Developer
-
-Sole owner of the frontend application end-to-end.
+### Michaela — Frontend Developer
 
 - **Application shell & routing.** Set up the Vite + React + TypeScript project, the routing tree, the `RequireAuth` protected-route wrapper, and the `RealtimeProvider` that mounts the SignalR client at the right point in the lifecycle.
-- **API integration layer.** Built every typed API client under `src/api/`, the Axios instance with token attachment and centralised error handling, and the TanStack Query hooks that consume them.
-- **Authentication flows.** Email/password sign-in, Google OAuth 2.0 sign-in, sign-out, JWT handling, and session restoration on reload.
-- **Custom design system.** Built the reusable component library (Button, Input, Modal, Card, Avatar, Toast, Tabs, Dropdown, Spinner, Badge, …) on top of Tailwind tokens — directly satisfying the **custom design system** Minor module.
+- **Custom design system.** Built the reusable UI layer on Tailwind tokens — layout components (`Layout`, `Header`, `BottomNav`), generic widgets (`Modal`, `Field`, `LanguageDropdown`, `UploadProgressOverlay`, `ProtectedPostThumb`), and domain modals (`PostDetailModal`, `LikesModal`, `NotificationsModal`, `SearchModal`, `SettingsModal`) — together with a shared CSS utility layer in `index.css` (`.btn-*`, `.input`, `.card`, `.panel`, `.divider`, `.message-*`). Satisfies the **custom design system** Minor module.
 - **Feature pages.** Feed, post creation, post detail, comments, likes, profile (own + others), edit profile, settings, friends, friend requests, and online status indicators.
 - **Real-time chat UI.** Conversation list, message thread, send/receive, reconnection handling, and presence integration with the SignalR client.
 - **Notifications UI.** Inbox, unread counter, mark-as-read, and surface integration across the app.
-- **File uploads.** Client-side validation (type/size/format), upload progress, image preview, and deletion flows for the **file upload and management** Minor module.
-- **Internationalisation.** Wired i18next, structured the translation namespaces, produced the EN / ES / FR translation files, and built the language switcher — covering the **multi-language** Minor module.
+- **Internationalisation.** Wired i18next with three complete translations (EN, ES, FR) and built the language switcher — covering the **multi-language** Minor module.
 - **Mock-mode harness.** Set up MSW so the frontend could run end-to-end without the backend, which unblocked parallel work and gave us a reliable demo fallback.
-- **Tooling.** ESLint config, Tailwind tokens, TypeScript strict-mode setup, and the `frontend/.env` contract.
+- **Tooling.** ESLint config, Tailwind setup, TypeScript strict-mode, and the `frontend/.env` contract.
 
-### Deniz — Product Owner | Project Manager
+### Deniz — Product Owner & Backend Developer
 
-- **Major contributions:**
-  - _[e.g. "Designed the friends-graph data model and authored migrations `2025_01_03_AddFriendships` … `2025_01_22_AddFriendBlockList`."]_
-  - _[e.g. "Implemented the SignalR chat hub including reconnection logic and typing indicators."]_
-- **Key PRs:** `#12`, `#34`, `#56`
-- **Cross-cutting work:** Code review, scope arbitration, demo prep.
+- **Application layer.** Implemented the services that drive the user-facing features: `AuthService`, `ProfileService`, `PostsService`, `PostsFeedService`, `PostsProfileService`, `FriendsService`, and `FilesService`.
+- **Domain rules and invariants.** Encoded the rules that keep the data consistent — no self-friendships, no duplicate friend requests, friends-only file access, idempotent like/unlike, and the soft-delete semantics for posts and comments.
+- **Auth flow (server side).** Email/password sign-up and sign-in (with `Microsoft.AspNetCore.Identity.PasswordHasher`), Google OAuth verification (`Google.Apis.Auth`), and integration with the JWT issuance pipeline so federated and local accounts share a single identity model.
+- **DTO and validation layer.** All request and response DTOs, and the validation rules that sit in front of every endpoint.
+- **API surface.** Controller actions for `auth`, `profile`, `posts`, `friends`, and `files`, including the cursor-based pagination contract used throughout.
+- **Cross-cutting (PO).** Scope arbitration, sprint planning, demo prep, code review, and stakeholder communication.
+- **File uploads.** Client-side validation (type/size), upload progress overlay, image and video preview, and deletion flows for the **file upload and management** Minor module.
+- **API integration layer.** Built the typed API clients under `src/api/`, the Axios instance with token attachment and 401 handling, and the TanStack Query hooks that consume them across the app.
+- **Authentication flows.** Email/password sign-in, Google OAuth 2.0 sign-in, sign-out, JWT handling, and session restoration on reload.
 
-### Daria — Tech Lead
+### Daria — Tech Lead & Backend Foundation
 
-- **Major contributions:**
-  - _[e.g. "Established the layered architecture (Api / Application / Domain / Infrastructure) and wrote the initial EF Core configuration."]_
-  - _[e.g. "Implemented JWT issuance and the Google OAuth integration."]_
-- **Key PRs:** `#3`, `#5`, `#28`
-- **Cross-cutting work:** Architecture decisions, performance review, code-review backbone.
+- **Architecture.** Established the four-project layout (`Transcendence.Api` / `Application` / `Domain` / `Infrastructure`) and the dependency-direction rules between them.
+- **Database & ORM.** Designed the schema, wrote the initial `TranscendenceDbContext`, the per-entity EF Core configurations, and every migration in `Transcendence.Infrastructure/Migrations`.
+- **Repository layer.** Implemented the persistence side of every `I*Repository` interface defined in Application — `UserRepository`, `PostsRepository`, `FriendsRepository`, `MessageRepository`, `NotificationRepository`, and the rest.
+- **Infrastructure & deployment.** Built the Docker Compose stack (db + api + nginx), the Nginx reverse-proxy config including TLS termination and the WebSocket upgrade for SignalR, the self-signed cert generation script, the DB backup/restore scripts, and the Makefile that ties it all together.
+- **CI.** Backend build pipeline (`dotnet build` on Ubuntu) so every PR is verified before merge.
+- **Cross-cutting (Tech Lead).** Architecture reviews, performance review, and the code-review backbone for the backend.
 
-### Valerii — Backend Developer
+### Valeriy — Backend Developer (Realtime & Notifications)
 
-- **Major contributions:**
-  - _[e.g. "Built the full file upload and management module: client validation, multipart endpoints, secure storage, and the deletion flow."]_
-  - _[e.g. "Implemented the notifications pipeline end-to-end."]_
-- **Key PRs:** `#22`, `#33`, `#48`
+- **SignalR hubs.** Designed and implemented the `ChatHub` and the connection lifecycle around it — auth handshake, group join on conversation open, and graceful disconnection.
+- **Chat message flow.** End-to-end persistence-and-broadcast pipeline: store the message, target the right group, deliver to participants, and ack back to the sender. Includes read/delivery receipts and soft-delete semantics for messages and conversations.
+- **Presence service.** Online-users tracking with a `PresenceService` and `OnlineUsersSnapshot`, broadcasting connect/disconnect events to friends and conversation participants.
+- **Notification pipeline.** End-to-end notifications: domain events for friend requests, friend request accept/decline, post likes, post comments, and chat messages — persisted via `NotificationRepository` and pushed in real time over SignalR (`NotificationReceived`, `NotificationsChanged`, `ConversationsChanged`).
+- **Reconnection handling.** Server-side bookkeeping that lets clients reconnect cleanly after transient drops without losing presence or unread state.
 
 ---
 
@@ -589,6 +591,8 @@ This will:
 Useful targets:
 
 ```bash
+make             # starts containers
+make up          # starts containers
 make down        # stop containers
 make build       # rebuild services
 make clean       # stop and remove orphan containers
@@ -596,7 +600,7 @@ make fclean      # remove containers, volumes, certs, and uploads
 make re          # clean and start again, keeping the DB volume
 ```
 
-The API runs behind Nginx. PostgreSQL 16 is exposed locally on port `5432`.
+The API runs behind Nginx.
 
 ### Frontend only (Vite dev server)
 
@@ -626,7 +630,6 @@ Helper commands:
 make backup-db
 make restore-db
 make db-up
-make restore-up
 ```
 
 Backups land in `backups/`. **Never commit real database dumps or uploaded media.**
@@ -690,28 +693,34 @@ VITE_USE_MOCKS=true
 
 ---
 
-## Security considerations
-
-- **Transport.** All traffic is served over HTTPS in development (self-signed) and is expected to be over HTTPS in any deployment.
-- **Authentication.** JWT is signed with a high-entropy key from `JWT_KEY`. Tokens have a short lifetime (`JWT_EXPIRY_MINUTES`) and are never stored in `localStorage`-exposed positions; refresh handling is centralised in the Axios interceptor.
-- **Authorization.** All non-public API routes require a bearer token. SignalR hubs reuse the same auth pipeline.
-- **OAuth.** Google sign-in is verified server-side; we never trust client-supplied identity claims.
-- **File uploads.** Validated on both client and server (MIME, size, extension). Files are stored outside the web root and served through an authenticated endpoint.
-- **Database.** Parameterised queries via EF Core; no raw SQL on user input. Migrations are reviewed.
-- **Secrets.** All credentials live in `.env` files which are git-ignored. `.env.example` is the only committed template.
-- **CORS.** Configured to allow only the frontend origin in production.
-
----
-
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `make up` fails complaining about missing certs | First run on a new machine | Re-run `make up`; the cert script generates them automatically |
-| API container restarts on startup | DB not yet ready when the API tries to migrate | Wait ~10 seconds; otherwise `docker compose logs api` to see the actual error |
-| Google sign-in shows "redirect_uri_mismatch" | OAuth client config doesn't list your local URL | Add `https://localhost` (and the port) as an authorised redirect URI in Google Cloud Console |
+| `make` fails complaining about missing certs | First run on a new machine | Re-run `make`; the cert script generates them automatically |
+| API container restarts on startup | DB not yet ready when the API tries to migrate | Wait ~10 seconds; otherwise `docker compose logs` to see the actual error |
 | Chat connects but messages don't broadcast | Nginx not upgrading WebSockets | Confirm `Upgrade` / `Connection` headers in `docker/nginx/*.conf` |
-| `npm run dev` proxy errors | Backend not running, or `VITE_API_BASE_URL` wrong | Start the API (`make up`) and verify `frontend/.env` |
-| Migrations fail with "relation does not exist" | DB volume out of sync after a schema reset | `make fclean && make up` (destroys local data) |
+| `npm run dev` proxy errors | Backend not running, or `VITE_API_BASE_URL` wrong | Start the API (`make`) and verify `frontend/.env` |
 
 ---
+
+## Credits and license
+
+**License**
+
+This project was developed as part of the **ft_transcendence** curriculum at **42 Vienna**. The source code is provided for educational and review purposes.
+
+You may study, fork, and reference this repository freely. Redistribution as part of another 42 student's submission, or any commercial use, is not permitted.
+
+Third-party libraries used in this project remain under their respective licenses.
+
+---
+
+**Credits and acknowledgements
+
+### Team
+
+- **Daria Padenkova** ([@grignetta](https://github.com/grignetta))
+- **Deniz Cingoz** ([@denniscingoz](https://github.com/denniscingoz))
+- **Valeriy Bezhevets** ([@Vbezhevets](https://github.com/Vbezhevets))
+- **Michaela Masarova** ([@michaela811](https://github.com/michaela811))
