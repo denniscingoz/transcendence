@@ -85,7 +85,7 @@ ft_transcendence is scored in **module-credits**:
 
 We selected **4 Major** and **6 Minor** modules for a total of **8 module-credits = 15 points TOTAL**.
 
-### Major modules (4 × 1.0 = 4.0 module-credits)
+### Major modules (4 × 2.0 = 8.0 module-credits)
 
 | # | Module | How we satisfied it |
 |---|---|---|
