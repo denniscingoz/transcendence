@@ -25,10 +25,7 @@ Transcendence is a private social application that brings together authenticatio
 15. [Frontend notes](#frontend-notes)
 16. [Security considerations](#security-considerations)
 17. [Troubleshooting](#troubleshooting)
-<<<<<<< HEAD
-=======
 18. [Credits and license](#credits-and-license)
->>>>>>> main
 
 ---
 
@@ -41,11 +38,7 @@ Transcendence is a private social application that brings together authenticatio
 | **Project** | ft_transcendence |
 | **Team size** | 4 |
 | **Total points** | 15 |
-<<<<<<< HEAD
-| **Local-only** | https://localhost:8443 |
-=======
 | **Live demo** | https://localhost:8443 |
->>>>>>> main
 
 ## Team
 
@@ -110,11 +103,7 @@ We selected **4 Major** and **7 Minor** modules for a total of **15 points**.
 |---|---|---|
 | **m1** | **Complete notification system** | Notifications generated for create/update/delete actions across friends, posts, comments, likes, and chat. Includes an unread counter and a mark-as-read endpoint. |
 | **m2** | **File upload and management** | Multi-type upload (images, documents), client-side **and** server-side validation (type, size, format), secure storage with access control, image previews, upload progress, and deletion. |
-<<<<<<< HEAD
-| **m3** | **Multi-language support (≥ 3)** | i18next-powered i18n with **3 complete translations** (_[EN, ES, FR]_), a UI language switcher, and 100% coverage of user-facing strings. |
-=======
 | **m3** | **Multi-language support (≥ 3)** | i18next-powered i18n with **3 complete translations** (_[EN, DE, FR — adjust as needed]_), a UI language switcher, and 100% coverage of user-facing strings. |
->>>>>>> main
 | **m4** | **Remote authentication (OAuth 2.0)** | Google sign-in via OAuth 2.0, integrated with the JWT issuance flow so federated and local accounts share a single identity model. |
 | **m5** | **Two-Factor Authentication (2FA)** | _[**VERIFY**: confirm 2FA was actually implemented. If not, remove this row — your total becomes 7.0 points (4 Majors + 6 Minors).]_ |
 | **m6** | **Custom-made design system** | A reusable component library with a defined colour palette, typography scale, and icon set. **≥ 10 reusable components** (Button, Input, Modal, Card, Avatar, Toast, Tabs, Dropdown, Spinner, Badge, …) built on Tailwind tokens. |
@@ -184,11 +173,7 @@ We selected **4 Major** and **7 Minor** modules for a total of **15 points**.
 | **TypeScript** | Catches whole classes of bugs at compile time, especially around API payload shapes. Pairs well with the OpenAPI-generated types. |
 | **React Router** | Declarative routing with nested routes, naturally maps to our protected-route model via `RequireAuth`. |
 | **TanStack Query** | Eliminates almost all of the boilerplate around server state (cache, dedupe, retries, refetch), and makes optimistic updates straightforward. |
-<<<<<<< HEAD
-| **Axios** | Interceptors for token attachment, refresh, and centralised handling of the unified ApiResponse envelope (isSuccess / errors / message / metadata). |
-=======
 | **Axios** | Interceptors for token attachment, refresh, and centralised error handling. |
->>>>>>> main
 | **i18next** | Industry-standard i18n with namespace splitting, pluralisation, and runtime language switching — directly satisfies the **multi-language minor module**. |
 | **MSW** | Lets the frontend run end-to-end without the backend, which unblocked parallel work and gave us a reliable demo fallback. |
 | **Tailwind CSS** | Utility-first, design-system-friendly. Tailwind tokens back our **custom design system minor module**. |

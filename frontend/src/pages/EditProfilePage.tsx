@@ -6,6 +6,8 @@ import type { UpdateProfileDto, ChangePasswordDto } from '../types/api'
 import { useRef } from 'react'
 import { UploadProgressOverlay } from '../components/UploadProgressOverlay'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
+import { UnknownProfileAvatar } from '../components/icons/UnknownProfileAvatar'
+import { XCircleIcon } from '../components/icons/XCircleIcon'
 
 type EditProfileForm = {
   fullName: string
@@ -18,8 +20,7 @@ const DUMMY_PROFILE_FORM: EditProfileForm = {
   fullName: '',
   username: '',
   bio: '',
-  AvatarUrl:
-    'https://placehold.co/200x200',
+  AvatarUrl:'',
 }
 
 export function EditProfilePage() {
@@ -273,26 +274,29 @@ async function handleChangePassword(e: React.FormEvent) {
           <div className="mb-8 flex items-center justify-between">
             <h1 className="text-2xl font-semibold text-text">{t('editprofile.editprofile')}</h1>
             
-            <button
+            <button 
               type="button"
               onClick={handleClose}
-              className="btn-ghost flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-text hover:bg-gray-100"
-              aria-label="Close settings"
+              className="group flex items-center justify-center rounded-full"
+              aria-label="Close Edit Profile"
             >
-              ×
+              <XCircleIcon className="h-12 w-12" />
             </button>
           </div>
             
         {/* {AvatarUrl} */}
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-4">
-              <img
-                src={avatarPreviewUrl || 
-                  (profileForm.AvatarUrl  ? `${import.meta.env.VITE_API_BASE_URL}${profileForm.AvatarUrl }`: 'https://placehold.co/200x200')}
-                alt="Profile avatar"
-                className="h-24 w-24 rounded-full object-cover ring-2 ring-panel"
-              />
-
+              
+              {
+                profileForm.AvatarUrl ? 
+                <img
+                src={avatarPreviewUrl || `${import.meta.env.VITE_API_BASE_URL}${profileForm.AvatarUrl }`}
+                  alt="Profile avatar"
+                  className="h-24 w-24 rounded-full object-cover ring-2 ring-panel"
+                  />
+                  : (<UnknownProfileAvatar className="h-24 w-24 rounded-full object-cover ring-2 ring-panel"/>)
+              }
               <button
                 type="button"
                 onClick={handleChangePhotoClick}

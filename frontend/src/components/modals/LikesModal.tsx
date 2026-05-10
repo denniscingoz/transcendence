@@ -1,8 +1,10 @@
 import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePostLikes } from '../../hooks/usePost'
-import type { LikesPreviewDto } from '../../types/api'
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll'
+import { UnknownProfileAvatar } from '../icons/UnknownProfileAvatar'
+import { XCircleIcon } from '../icons/XCircleIcon'
+
 
 type LikesModalProps = {
   postId: string
@@ -47,25 +49,25 @@ export function LikesModal({ postId, onClose }: LikesModalProps) {
     rootMargin: '150px',
   })
 
-  const getAvatarSrc = (avatarPath: string | null) => {
-    if (!avatarPath) {
-      return 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
-    }
-
-    if (/^https?:\/\//i.test(avatarPath)) {
-      return avatarPath
-    }
-
-    if (!apiBase) {
-      return avatarPath
-    }
-
-    if (avatarPath.startsWith('/')) {
-      return `${apiBase}${avatarPath}`
-    }
-
-    return `${apiBase}/${avatarPath}`
+const getAvatarSrc = (avatarPath: string | null) => {
+  if (!avatarPath) {
+    return null
   }
+
+  if (/^https?:\/\//i.test(avatarPath)) {
+    return avatarPath
+  }
+
+  if (!apiBase) {
+    return avatarPath
+  }
+
+  if (avatarPath.startsWith('/')) {
+    return `${apiBase}${avatarPath}`
+  }
+
+  return `${apiBase}/${avatarPath}`
+}
 
   return (
     <div
@@ -79,42 +81,55 @@ export function LikesModal({ postId, onClose }: LikesModalProps) {
         <div className="mb-8 flex items-start justify-between">
           <h2 className="text-2xl font-semibold text-text">{t('postdetail.likes')}</h2>
 
-          <button
+        {/* CLOSE BUTTON */}
+          <button 
             type="button"
             onClick={onClose}
-            className="btn-ghost flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-text hover:bg-gray-100"
-            aria-label="Close likes"
+            className="group flex items-center justify-center rounded-full"
+            aria-label="Close Edit Profile"
           >
-            x
+            <XCircleIcon className="h-10 w-10" />
           </button>
         </div>
 
+
+        {/* LIKES MAPPPING */}
         <div className="min-h-0 max-h-[65vh] space-y-2 overflow-y-auto">
           {isLoading && <div>{t('postdetail.loading')}</div>}
 
+        {/* ERROR HANDLE */}
           {error && !isLoading && <div>{t('postdetail.postnotfound')}</div>}
 
+          {/* In case of no likes */}
           {!isLoading && !error && likes.length === 0 && (
             <div className="text-sm text-gray-500">No likes yet.</div>
           )}
 
           {!isLoading && !error && likes.map((user) => {
+            const avatarSrc = getAvatarSrc(user.authorProfileImageUrl)
             return (
               <div
                 key={user.id}
                 className="flex items-center gap-4 rounded-2xl bg-gray-200 p-4"
               >
-                <img
-                  src={getAvatarSrc(user.authorProfileImageUrl)}
-                  alt={user.authorUsername}
-                  className="h-14 w-14 rounded-full border-2 border-red-200 object-cover"
-                />
-
+                {avatarSrc ? (
+                  <img
+                    src={avatarSrc}
+                    alt={user.authorUsername}
+                    className="h-14 w-14 rounded-full border-2 border-red-200 object-cover"
+                  />
+                ) : (
+                  <UnknownProfileAvatar className="h-14 w-14 rounded-full border-2 border-red-200" />
+                )}
+          
                 <div className="min-w-0 flex-1">
-                  <div className="font-semibold text-gray-900">{user.authorFullName || user.authorUsername}</div>
-                  <div className="text-sm text-gray-500">@{user.authorUsername}</div>
+                  <div className="font-semibold text-gray-900">
+                    {user.authorFullName || user.authorUsername}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    @{user.authorUsername}
+                  </div>
                 </div>
-
               </div>
             )
           })}

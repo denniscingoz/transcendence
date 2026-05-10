@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { searchProfilesApi } from '../../api/search.api'
 import type { OtherProfileDto } from '../../types/api'
 import { useNavigate } from 'react-router-dom'
+import { UnknownProfileAvatar } from '../icons/UnknownProfileAvatar'
+import { XCircleIcon } from '../icons/XCircleIcon'
 
 export function SearchModal({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('')
@@ -141,12 +143,15 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
             >
               <div className="flex flex-col gap-6">
               <div className="flex items-center gap-4">
-              <img
-                src={profile.avatarUrl ? `${import.meta.env.VITE_API_BASE_URL}${profile.avatarUrl }` : 'https://placehold.co/200x200'}
-                alt="Profile avatar"
-                className="h-24 w-24 rounded-full object-cover ring-2 ring-panel"
-              />
-              
+                {
+                  profile.avatarUrl ?
+                  <img
+                  src={`${import.meta.env.VITE_API_BASE_URL}${profile.avatarUrl }`}
+                  alt="Profile avatar"
+                  className="h-24 w-24 rounded-full object-cover ring-2 ring-panel"
+                  />
+                  : (<UnknownProfileAvatar className="h-24 w-24 rounded-full object-cover ring-2 ring-panel"/>)
+                }
               <div className="min-w-0 flex-1">
               <div className="font-medium">{profile.username}</div>
               <div className="text-sm text-gray-500">{profile.fullName}</div>
@@ -169,14 +174,5 @@ export function SearchModal({ onClose }: { onClose: () => void }) {
         </div>
       )}
     </Modal>
-  )
-}
-
-function XCircleIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <path d="m15 9-6 6M9 9l6 6" />
-    </svg>
   )
 }

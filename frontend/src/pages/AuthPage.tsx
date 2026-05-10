@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 import type { SignInRequestDto, SignUpRequestDto, AuthResponseDto } from '../types/api'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
-import { TheSocialLogo } from '../components/Header'
+import { TheSocialLogo } from '../components/icons/TheSocialLogo'
 import api from '../api/axios'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { googleSignInApi } from '../api/auth.api'
@@ -25,6 +25,9 @@ export function AuthPage() {
   const [signupApiError, setSignupApiError] = useState<string | null>(null)
   const [googleError, setGoogleError] = useState<string | null>(null)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+
+
+  const googleButtonWidth = Math.min(window.innerWidth - 80, 400)   // Responsive google button size
 
   const signInForm = useForm<SignInRequestDto>({
     defaultValues: { email: '', password: '' },
@@ -179,7 +182,7 @@ export function AuthPage() {
             clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
               locale={i18n.language}
           >
-            <div className="flex justify-center">
+            <div className="flex  justify-center">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleError}
@@ -188,7 +191,7 @@ export function AuthPage() {
                 shape="pill"
                 size="large"
                 logo_alignment="center"
-                width={400}
+                width={googleButtonWidth}
               />
             </div>
           </GoogleOAuthProvider>

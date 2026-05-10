@@ -3,6 +3,9 @@ import { useAddFriend, useFriends, useRemoveFriend } from '../hooks/useFriends'
 import { useTranslation } from 'react-i18next'
 import { BottomNav } from '../components/BottomNav'
 import { useNavigate } from 'react-router-dom'
+import { UnknownProfileAvatar } from '../components/icons/UnknownProfileAvatar'
+import { XCircleIcon } from '../components/icons/XCircleIcon'
+
 
 type FriendshipStatus = 'friends' | 'requested' | 'none'
 
@@ -72,21 +75,24 @@ export function FriendsPage() {
   }
 
   return (
-    <div className="h-[calc(100dvh-250px)] overflow-hidden bg-white">
+    <div className="h-[calc(100dvh-150px)] overflow-hidden bg-white">
       <main className="mx-auto h-full max-w-2xl px-4 py-6">
         <div className="panel flex h-[85%] flex-col overflow-hidden">
           <div className="mb-8 flex items-start justify-between">
             <h1 className="text-2xl font-semibold text-text">{t('friends.friends')}</h1>
 
-            <button
+
+          {/* Close Button */}
+            <button 
               type="button"
               onClick={handleClose}
-              className="btn-ghost flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-text hover:bg-gray-100"
-              aria-label="Close settings"
+              className="group flex items-center justify-center rounded-full"
+              aria-label="Close Edit Profile"
             >
-              ×
+              <XCircleIcon className="h-12 w-12" />
             </button>
           </div>
+
 
           <div className="min-h-0 flex-1 space-y-2 overflow-y-auto">
             {friends.map((friend) => {
@@ -105,20 +111,22 @@ export function FriendsPage() {
                   }}
                   className="flex cursor-pointer items-center gap-4 rounded-2xl bg-gray-100 p-4 hover:bg-gray-200"
                   >
+                    {/* AVATAR URL */}
+                    {friend.avatarUrl ? 
+                    
                     <img
-                    src={
-                      friend?.avatarUrl
-                        ? `${import.meta.env.VITE_API_BASE_URL}${friend.avatarUrl}`
-                        : 'https://media.moddb.com/cache/images/groups/1/37/36085/thumb_620x2000/Unknown_person.jpg'
-                    }
+                    src={ `${import.meta.env.VITE_API_BASE_URL}${friend.avatarUrl}`}
                     alt={friend.fullName}
                     className="h-14 w-14 rounded-full border-2 border-red-200 object-cover"
-                    />
+                    /> : 
+                      (<UnknownProfileAvatar className="h-14 w-14 rounded-full border-2 border-red-200 object-cover" />)
+                    }
                     <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-gray-900">{friend.fullName}</div>
-                    <div className="text-sm text-gray-500">@{friend.username}</div>
+                    <div className="break-words font-semibold text-gray-900">{friend.fullName}</div>
+                    <div className="break-words text-sm text-gray-500">@{friend.username}</div>
                   </div>
                   
+                  {/* FRIENDSHIP TOGGLE AREA */}
                   <button
                     type="button"
                     onClick={(e) => {

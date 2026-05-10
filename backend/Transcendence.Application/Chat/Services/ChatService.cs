@@ -9,6 +9,7 @@ using Transcendence.Domain.Users;
 using Transcendence.Application.Common.Responses;
 using Transcendence.Application.Users.Interfaces;
 using Transcendence.Application.Realtime.Contracts;
+using Google.Apis.Util;
 
 namespace Transcendence.Application.Chat.Services;
 
@@ -42,14 +43,10 @@ public class ChatService : IChatService
             SenderId = message.SenderId,
             CreatedAt = message.CreatedAt,
             IsDeleted = message.IsDeleted,
+            IsDelivered = message.IsDelivered,
             IsReadByUser = message.SenderId == currentUserId || message.CreatedAt <= readByUser,
             IsReadByOthers =  message.CreatedAt <= readByOthers && message.SenderId == currentUserId
         };
-        // We map the domain Message to ChatMessageDto to avoid leaking domain entities,
-        // control what data is exposed, and keep the application boundary explicit.
-        // DTOs are stable contracts for transport, while domain models may change.
-
-        //
     }
     public record ReadTime(DateTimeOffset ByMe, DateTimeOffset ByOthers);
 
@@ -230,7 +227,7 @@ public async Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId, 
     return dtos;
     
     }
-public async Task DeleteMessageAsync(Guid userId, Guid messageId)
+public async Task<MessageDeletedDto> DeleteMessageAsync(Guid userId, Guid messageId)
 {
     var message = await _messageRepository.GetByIdAsync(messageId)
         ?? throw new NotFoundException("Message not found.");
@@ -239,8 +236,14 @@ public async Task DeleteMessageAsync(Guid userId, Guid messageId)
         throw new ForbiddenException("You can delete only your own messages.");
 
     message.Delete(DateTime.UtcNow);
-    
+
     await _messageRepository.SaveChangesAsync();
+
+    return new MessageDeletedDto
+    {
+        MessageId = message.Id,
+        ConversationId = message.ConversationId
+    };
 }
     public async Task DeleteConversationAsync(
         Guid userId,
@@ -261,10 +264,51 @@ public async Task DeleteMessageAsync(Guid userId, Guid messageId)
         await _conversationRepository.DeleteConversationWithDataAsync(conversationId);
 
         await _notificationService.NotifyConversationDeleted(
-            participantIds,
-            conversationId);
+            participantIds, conversationId);
     }
 
+    public async Task<MessageDeliveredDto> MarkMessageAsDeliveredAsync(
+        Guid readerId,
+        Guid messageId)
+    {
+        var message = await _messageRepository.GetByIdAsync(messageId)
+            ?? throw new NotFoundException("Message not found.");
+
+        if (message.SenderId == readerId)
+            throw new ForbiddenException("You cannot deliver your own message.");
+
+        message.setDelivered();
+
+        await _messageRepository.SaveChangesAsync();
+
+        return new MessageDeliveredDto
+        {
+            ReaderId = readerId,
+            SenderId = message.SenderId,
+            MessageId = message.Id
+        };
+    }
+    public async Task<IReadOnlyList<MessageDeliveredDto>> GetUnreadMessagesAsync(Guid userId)
+    {
+
+
+        var meassages =  await _messageRepository.GetUndeliveredIncomingMessagesAsync(userId) ;
+        
+        var res = new List<MessageDeliveredDto> ();
+        
+        foreach (var m in meassages)
+        {
+            m.setDelivered();
+            res.Add(new MessageDeliveredDto
+            {
+              ReaderId = userId,
+              MessageId = m.Id,
+              SenderId = m.SenderId
+            });
+        }
+        await _messageRepository.SaveChangesAsync();
+        return res;
+     } 
 }
  
  /*

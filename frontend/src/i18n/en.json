@@ -43,9 +43,15 @@
     "noMessagesYet": "No messages yet",
     "typeMessage": "Type a message...",
     "deleteMessage": "Delete message",
-    "areYouSure": "Are you Sure?",
+    "deleteConversation": "Delete conversation",
+    "areYouSure": "Are you sure?",
     "delete": "Delete",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "newChat": "New chat",
+    "newChatWith": "New chat with {{name}}",
+    "online": "Online",
+    "offline": "Offline",
+    "backToChats": "Back to chats"
   },
   "common": {
     "loading": "Loading...",

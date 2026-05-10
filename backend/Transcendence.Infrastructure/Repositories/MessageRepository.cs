@@ -2,10 +2,12 @@ using Transcendence.Domain.Chat;
 using Transcendence.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http.HttpResults;
-
+using Transcendence.Application.Chat.DTOs;
+namespace Transcendence.Infrastructure.Repositories;
 public sealed class  MessageRepository : IMessageRepository
 {
     private readonly TranscendenceDbContext _db; 
+    
 
     public MessageRepository (TranscendenceDbContext db)
     {
@@ -63,6 +65,17 @@ public sealed class  MessageRepository : IMessageRepository
     {
         await _db.SaveChangesAsync();
     }
+    
+    public async Task<IReadOnlyList<Message>> GetUndeliveredIncomingMessagesAsync(Guid userId)
+    {
+            return await _db.ConversationParticipants
+                                    .Where(p => p.UserId == userId )
+                                    .SelectMany(p => _db.Messages
+                                    .Where(m => m.ConversationId == p.ConversationId)
+                                    .Where(m=> !m.IsDeleted))
+                                    .ToListAsync();
+    }
+
 }
 
  

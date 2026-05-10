@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { TheSocialLogo } from "../components/Header"
+import { TheSocialLogo } from '../components/icons/TheSocialLogo'
 import { Link } from "react-router-dom"
+import { XCircleIcon } from "../components/icons/XCircleIcon"
 
 export function PrivacyPolicyPage()
 {
@@ -29,14 +30,14 @@ export function PrivacyPolicyPage()
 					<h1 className="text-2xl font-semibold text-text">{t('privacyPolicy.header')}</h1>
 	
 					{/* Close Button */}
-          			  <button
-          			    type="button"
-          			    onClick={handleClose}
-          			    className="btn-ghost flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-text hover:bg-gray-100"
-          			    aria-label="Close settings"
-          			  >
-          			    ×
-          			  </button>
+          			  <button 
+						type="button"
+						onClick={handleClose}
+						className="group flex items-center justify-center rounded-full"
+						aria-label="Close Edit Profile"
+						>
+						<XCircleIcon className="h-12 w-12" />
+						</button>
 
           		</div>
 				

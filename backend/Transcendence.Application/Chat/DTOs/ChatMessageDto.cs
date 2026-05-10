@@ -11,6 +11,8 @@ public sealed class ChatMessageDto
 
     public DateTimeOffset CreatedAt { get; init; }
     public bool IsDeleted { get; set; }
+    public bool IsDelivered { get;  set; }
+
 
 }
 /*

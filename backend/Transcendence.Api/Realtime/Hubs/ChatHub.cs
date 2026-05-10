@@ -13,6 +13,7 @@ using  Transcendence.Api.Realtime.Hubs;
 using System.Text.Json;
 using System.IO.IsolatedStorage;
 using System.Collections.Specialized;
+using Transcendence.Domain.Users;
 
 namespace Transcendence.Api.Realtime.Hubs;
 
@@ -171,35 +172,37 @@ public sealed class ChatHub : Hub<IRealtimeClient>
     {
         var  userId = GetUserId(); 
         
-
+        var deliveredDto = await _chatService.MarkMessageAsDeliveredAsync(userId, messageId);
         await Clients
                 .Group(GroupNames.User(senderId))  
-                .MessageDelivered(new MessageDeliveredDto //send delivery event to all sender's active connections (multi-device support
-                {
-                    ReaderId = userId,
-                    MessageId = messageId                
-                });
+                .MessageDelivered(deliveredDto);
     }
+  
+    public async Task MarkAsRead(Guid conversationId)
+{
+    var userId = GetUserId();
 
-    public  async Task MarkAsRead(Guid conversationId)
+    await _chatService.MarkConversationAsRead(userId, conversationId);
+    await _notificationService.NotifyChange(userId);
+
+    var lastMessageId = await _chatService.GetLastMessageId(conversationId);
+
+    var participants = await _chatService.GetParticipantsIds(conversationId);
+    var senderIds = participants.Where(id => id != userId);
+
+    foreach (var senderId in senderIds)
     {
-        var  userId = GetUserId(); 
-
-        await _chatService.MarkConversationAsRead(userId, conversationId);
-        await _notificationService.NotifyChange(userId);
-
-
-        var lastMessageId = await _chatService.GetLastMessageId(conversationId);
-
-       await Clients
-            .OthersInGroup(GroupNames.Conversation(conversationId))
+        await Clients
+            .Group(GroupNames.User(senderId))
             .MessageRead(new MessageReadDto
             {
                 ConversationId = conversationId,
                 ReaderId = userId,
                 MessageId = lastMessageId ?? Guid.Empty
             });
-    }  
+    }
+}
+   
      private Guid GetUserId()
     {
         var claimValue =
@@ -221,7 +224,32 @@ public sealed class ChatHub : Hub<IRealtimeClient>
 
         throw new UnauthorizedAccessException("Invalid token.");
     }
+    public async Task MarkAllIncomingAsDelivered()
+    {
+        var userId = GetUserId();
+        var messages = await _chatService.GetUnreadMessagesAsync(userId);
+        foreach(var m in messages)
+        {
+               await Clients
+                .Group(GroupNames.User(m.SenderId))  
+                .MessageDelivered(m);
+        }
+    }
+    public async Task DeleteMessage(Guid messageId)
+{
+    var userId = GetUserId();
 
+    var deleted = await _chatService.DeleteMessageAsync(userId, messageId);
+
+    var participantIds = await _chatService.GetParticipantsIds(deleted.ConversationId);
+
+    foreach (var participantId in participantIds)
+    {
+        await Clients
+            .Group(GroupNames.User(participantId))
+            .MessageDeleted(deleted);
+    }
+}
     private Guid? TryGetCurrentUserId()
     {
         var claimValue =
