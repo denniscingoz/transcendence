@@ -35,7 +35,7 @@ Transcendence is a private social application that brings together authenticatio
 | **School** | 42 Vienna |
 | **Project** | ft_transcendence |
 | **Team size** | 4 |
-| **Total points** | 14 |
+| **Total points** | 15 |
 | **Live demo** | https://localhost:8443 |
 
 ## Team
