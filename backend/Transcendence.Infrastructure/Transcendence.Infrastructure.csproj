@@ -10,15 +10,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+  <!-- EF CORe packages for providing ORM to talk to database -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" /> 
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+    <!-- Allows this package to be used during build/design time, but not exposed as a normal dependency. -->
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <!-- Keeps this package private to this project, so other projects do not inherit it. -->
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <!-- Provides token validation and cryptographic security classes for JWT authentication. -->
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.16.0" />
+     <!-- PostgreSQL provider for EF Core. Allows EF Core to communicate with PostgreSQL via Npgsql. -->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
+    <!-- Provides classes for creating, reading, and validating JWT tokens. -->
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
-    <ProjectReference Include="..\Transcendence.Application\Transcendence.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
