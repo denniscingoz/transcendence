@@ -23,7 +23,6 @@ Transcendence is a private social application that brings together authenticatio
 13. [Database operations](#database-operations)
 14. [API overview](#api-overview)
 15. [Frontend notes](#frontend-notes)
-17. [Troubleshooting](#troubleshooting)
 18. [Credits and license](#credits-and-license)
 
 ---
@@ -690,17 +689,6 @@ Run the frontend against MSW-mocked endpoints by setting:
 ```env
 VITE_USE_MOCKS=true
 ```
-
----
-
-## Troubleshooting
-
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| `make` fails complaining about missing certs | First run on a new machine | Re-run `make`; the cert script generates them automatically |
-| API container restarts on startup | DB not yet ready when the API tries to migrate | Wait ~10 seconds; otherwise `docker compose logs` to see the actual error |
-| Chat connects but messages don't broadcast | Nginx not upgrading WebSockets | Confirm `Upgrade` / `Connection` headers in `docker/nginx/*.conf` |
-| `npm run dev` proxy errors | Backend not running, or `VITE_API_BASE_URL` wrong | Start the API (`make`) and verify `frontend/.env` |
 
 ---
 
