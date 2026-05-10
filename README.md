@@ -236,6 +236,7 @@ We selected **4 Major** and **6 Minor** modules for a total of **8 module-credit
 The dependency arrows all point *inward*: Api and Infrastructure depend on Application, Application depends on Domain, and Domain depends on nothing. That's the rule that makes the rest of the design work, swapping Postgres for another database, or HTTP for a CLI, would only touch the outer layers.
 
 In practice this means new features tend to slot in along predictable seams: a new entity in Domain, a service interface in Application, an EF Core configuration and repository in Infrastructure, and a controller (or hub method) in Api. The shape is repetitive on purpose.
+
 ---
 
 ## Database schema
