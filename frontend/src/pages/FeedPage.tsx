@@ -106,6 +106,7 @@ const toggleLike = async (postId: string) => {
         ) : ( (posts?.length ?? 0) ?
           posts.map((post) => (
             <article key={post.id} className="space-y-4">
+              {/* Top part with avatar etc */}
               <button onClick={() => navigate(`/profile/${post.authorId}`)} className="flex items-center gap-3">
                 { post.authorAvatarUrl ? <img
                   className="w-12 h-12 rounded-full object-cover border-2 border-gray-100"
@@ -115,6 +116,7 @@ const toggleLike = async (postId: string) => {
                   : (<UnknownProfileAvatar className="h-10 w-10 rounded-full" /> )
                }
                 
+                {/* Username */}
                 <div>
                   
                   <div className="font-semibold text-gray-900">
@@ -126,11 +128,11 @@ const toggleLike = async (postId: string) => {
 
               </button>
 
-
+              {/* IMAGEorVIDEO */}
                <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden">
                  <ProtectedPostThumbContent fileUrl={post.imageUrl} contentType={post.contentType} />
               </div>
-              
+              {/* LIKE and Comment AREA */}
               <div className="flex items-center gap-6">
                 <button
                   onClick={() => toggleLike(post.id)}
