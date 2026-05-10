@@ -54,7 +54,7 @@ public class PostsProfileService : IPostsProfileService
 		var cursorPageDto = await _postsProfileRepository.GetProfilePostsPreviewAsync(targetUserId, take, cursor, ct);
 
 
-
+		//Go through each post image and get their type for rendering information
 		foreach (var post in cursorPageDto.Items)
 		{
 			if (post.ImageUrl != null)

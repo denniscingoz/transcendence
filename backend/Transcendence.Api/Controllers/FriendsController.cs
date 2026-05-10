@@ -1,16 +1,10 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Transcendence.Api.Common.Extensions;
 using Transcendence.Application.Common.Responses;
 using Transcendence.Application.Friends.DTOs;
 using Transcendence.Application.Friends.Interfaces;
-using Transcendence.Application.Friends.Services;
 using Transcendence.Application.Posts.DTOs;
-using Transcendence.Application.Users.DTOs;
-using Transcendence.Application.Users.Interfaces;
-using Transcendence.Application.Users.Services;
 
 namespace Transcendence.Api.Controllers;
 
@@ -45,7 +39,7 @@ public sealed class FriendsController : ControllerBase
 	{
 		Guid requesterId = GetUserId();
 		await _friendsService.SendFriendshipRequestAsync(requesterId, targetUserId, ct);
-		return StatusCode(StatusCodes.Status201Created); // 201, no body, no Location
+		return StatusCode(StatusCodes.Status201Created); // 201, no body, no Location // new source action was created
 	}
 
 	//DELETE /friends/{friendUserId}

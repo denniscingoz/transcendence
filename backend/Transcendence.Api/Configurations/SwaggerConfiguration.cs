@@ -7,16 +7,20 @@ public static class SwaggerConfiguration
 {
 	public static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services)
 	{
+		// Allows Swagger to discover API endpoints.
 		services.AddEndpointsApiExplorer();
 
+		// Registers and configures Swagger/OpenAPI generation.
 		services.AddSwaggerGen(options =>
 		{
+			// Defines the Swagger document information.
 			options.SwaggerDoc("v1", new OpenApiInfo
 			{
 				Title = "Transcendence.Api",
 				Version = "v1"
 			});
 
+			// Adds JWT Bearer authentication support to Swagger UI.
 			options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 			{
 				Name = "Authorization",
@@ -27,11 +31,13 @@ public static class SwaggerConfiguration
 				Description = "Paste only the JWT token"
 			});
 
+			// Applies the Bearer token requirement to protected endpoints.
 			options.AddSecurityRequirement(new OpenApiSecurityRequirement
 			{
 				{
 					new OpenApiSecurityScheme
 					{
+						// References the Bearer security definition above.
 						Reference = new OpenApiReference
 						{
 							Type = ReferenceType.SecurityScheme,
@@ -43,6 +49,7 @@ public static class SwaggerConfiguration
 			});
 		});
 
+		// Returns services so calls can be chained in Program.cs.
 		return services;
 	}
 }

@@ -12,16 +12,17 @@ using Transcendence.Application.Realtime.Contracts;
 using Transcendence.Infrastructure;
 using Transcendence.Infrastructure.Persistence;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args); // builds, loads configurations such as appsettings.json, enviorenment vars
 
 // ================= SERVICES =================
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddSwaggerDocumentation();
+builder.Services.AddEndpointsApiExplorer(); //registers swagger services for api documentation
+builder.Services.AddSwaggerGen(); // makes ASP.NET Core dsicover API endpoints, so they appear on Swagger
+builder.Services.AddSwaggerDocumentation(); // swagger documentation addition
 
-// CORS
-builder.Services.AddCors(options =>
+// CORS or Cross-Origin Resource Sharing to let calls from that adress,
+// It is for development times not for production
+builder.Services.AddCors(options => 
 {
 	options.AddPolicy("DevCors", policy =>
 	{
@@ -33,10 +34,12 @@ builder.Services.AddCors(options =>
 	});
 });
 
-// JWT
-var jwtSection = builder.Configuration.GetSection("Jwt");
-var key = jwtSection["Key"]!;
+// JWT - JSON Web Token
+//
+var jwtSection = builder.Configuration.GetSection("Jwt"); //read the config -- appsetings
+var key = jwtSection["Key"]!; 
 
+//Enabling JWT auth., Auth method
 builder.Services
 	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	.AddJwtBearer(options =>
@@ -98,19 +101,19 @@ builder.Services.AddSignalR(options =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddControllers();
+builder.Services.AddControllers(); //adding controllers to the backend for API side.
 
 // Logging
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
+builder.Logging.ClearProviders(); //clear the loggin from defaults
+builder.Logging.AddConsole(); // added them to console so we can check the logs from docker compose logs api
 
 // ================= APP =================
 
-var app = builder.Build();
+var app = builder.Build(); //creating the app from configuration above.
 
-app.UseGlobalExceptionHandling();
+app.UseGlobalExceptionHandling(); // use global exception handling so we can control the outcome and code it instead of crash
 
-
+// it is for running the database migrations automatically when the app runs
 using (var scope = app.Services.CreateScope())
 {
 	var logger = scope.ServiceProvider
@@ -134,8 +137,8 @@ using (var scope = app.Services.CreateScope())
 
 app.UseStaticFiles();
 
-app.UseRouting();
-app.UseCors("DevCors");
+app.UseRouting();//routing is added so we can call different like api/get post/postid etc
+app.UseCors("DevCors"); //being able to run the cors on development
 
 if (app.Environment.IsDevelopment())
 {
@@ -143,8 +146,8 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthentication(); 
+app.UseAuthorization();  
 
 // Endpoints
 app.MapChatEndpoints();

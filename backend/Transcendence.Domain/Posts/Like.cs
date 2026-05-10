@@ -3,7 +3,7 @@ public sealed class Like
 {
 	public Guid Id { get; private set; }
 	public Guid PostId { get; private set; }
-	public Guid AuthorId { get; private set; } // dasha: seems to be the user of the post, not of the like. LikedByUserId?
+	public Guid AuthorId { get; private set; }
 	public DateTime CreatedAtUtc { get; private set; }
 #pragma warning disable CS8618
 	private Like() { } // EF Core
