@@ -231,35 +231,116 @@ We selected **4 Major** and **7 Minor** modules for a total of **15 points**.
 
 ## Database schema
 
-The schema is normalised PostgreSQL, managed by EF Core migrations under `backend/Transcendence.Infrastructure/Migrations`.
+```mermaid
+erDiagram
+    USERS ||--o| FILES : "avatar"
+    USERS ||--o{ POSTS : "authors"
+    USERS ||--o{ FILES : "owns"
+    USERS ||--o{ COMMENTS : "writes"
+    USERS ||--o{ LIKES : "gives"
+    USERS ||--o{ FRIENDSHIPS : "User1"
+    USERS ||--o{ FRIENDSHIPS : "User2"
+    USERS ||--o{ FRIENDSHIP_REQUESTS : "requester"
+    USERS ||--o{ FRIENDSHIP_REQUESTS : "target"
 
-### Core entities
+    POSTS ||--o{ COMMENTS : "has"
+    POSTS ||--o{ LIKES : "has"
+    POSTS }o--|| FILES : "image"
 
-| Table | Purpose | Key relationships |
-|---|---|---|
-| `users` | User identity, profile, avatar | 1:N → `posts`, `comments`, `notifications` |
-| `friendships` | Bidirectional friend graph + status | N:N between `users` |
-| `posts` | Feed and profile posts | N:1 → `users`; 1:N → `comments`, `likes` |
-| `comments` | Post comments | N:1 → `posts`, `users` |
-| `likes` | Post likes | N:1 → `posts`, `users`; unique (`post_id`, `user_id`) |
-| `notifications` | Per-user event log | N:1 → `users` |
-| `conversations` | Chat conversations | N:N → `users` via `conversation_participants` |
-| `messages` | Chat messages | N:1 → `conversations`, `users` |
-| `files` | Uploaded file metadata | N:1 → `users` (owner) |
-| `refresh_tokens` | Refresh token store | N:1 → `users` |
+    CONVERSATIONS ||--o{ CONVERSATION_PARTICIPANTS : "has"
+    CONVERSATIONS ||--o{ MESSAGES : "contains"
 
-### Diagram
+    USERS ||--o{ NOTIFICATIONS : "receives"
 
+    USERS {
+        uuid Id PK
+        string Username UK
+        string Email UK
+        string FullName
+        string PasswordHash "nullable"
+        string GoogleId "nullable, UK"
+        uuid AvatarFileId FK "nullable"
+        bool IsDeleted
+        timestamptz CreatedAt
+    }
+
+    FILES {
+        uuid Id PK
+        uuid OwnerId FK
+        string StoragePath UK
+        string ContentType
+        bigint SizeBytes
+    }
+
+    POSTS {
+        uuid Id PK
+        uuid AuthorId FK
+        uuid ImageFileId FK
+        string Content "nullable, max 1000"
+        timestamptz CreatedAtUtc
+    }
+
+    COMMENTS {
+        uuid Id PK
+        uuid PostId FK
+        uuid AuthorId FK
+        string Content "max 1000"
+        timestamptz CreatedAtUtc
+    }
+
+    LIKES {
+        uuid Id PK
+        uuid PostId FK
+        uuid AuthorId FK
+        timestamptz CreatedAtUtc
+    }
+
+    FRIENDSHIPS {
+        uuid User1Id PK,FK
+        uuid User2Id PK,FK
+        timestamptz CreatedAt
+    }
+
+    FRIENDSHIP_REQUESTS {
+        uuid Id PK
+        uuid RequesterId FK
+        uuid TargetUserId FK
+        uuid User1Id "normalized"
+        uuid User2Id "normalized"
+    }
+
+    CONVERSATIONS {
+        uuid Id PK
+        int Type "1=Direct, 2=Group"
+        string LastMessageText "nullable"
+        timestamptz LastMessageAt "nullable"
+    }
+
+    CONVERSATION_PARTICIPANTS {
+        uuid ConversationId PK,FK
+        uuid UserId PK
+        timestamptz LastReadAt
+    }
+
+    MESSAGES {
+        uuid Id PK
+        uuid ConversationId FK
+        uuid SenderId
+        uuid ClientMessageId "idempotency"
+        string Content "max 4000"
+        bool IsDeleted
+        timestamptz CreatedAt
+    }
+
+    NOTIFICATIONS {
+        uuid Id PK
+        uuid UserId
+        int Type
+        string Text
+        bool IsRead
+        timestamptz CreatedAt
+    }
 ```
-   users ──┬──< posts ──┬──< comments
-           │            └──< likes
-           ├──< notifications
-           ├──< files
-           ├──< friendships >──── users
-           └──< conversation_participants >── conversations ──< messages
-```
-
-> A more detailed ER diagram lives at `docs/db_schema/schema.png` _(generate later with dbdiagram.io / drawSQL and commit the export)_.
 
 ---
 
