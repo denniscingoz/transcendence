@@ -15,9 +15,11 @@ public static class ExceptionHandlingExtensions
         {
 			errorApp.Run(async context =>
 			{
+				// Gets the exception that was thrown.
 				var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
 				var exception = exceptionFeature?.Error;
-
+				
+				//Mapping specific errors to specific codes so we can understand better in the console.
 				var statusCode = exception switch
 				{
 					DomainValidationException => StatusCodes.Status400BadRequest,
@@ -28,19 +30,24 @@ public static class ExceptionHandlingExtensions
 					_ => StatusCodes.Status500InternalServerError
 				};
 
+				//creating a exception body
 				var problem = new ProblemDetails
 				{
 					Status = statusCode,
 					Title = ReasonPhrases.GetReasonPhrase(statusCode),
 					Detail = exception?.Message
 				};
-
+				
+				//Sets the GTTP response status code
 				context.Response.StatusCode = statusCode;
+				//Tells the client this ia standar ProblemDetials JSON Response
 				context.Response.ContentType = "application/problem+json";
+				//Sends the response as a Json
 				await context.Response.WriteAsJsonAsync(problem);
 			});
 		});
 
+			//returns the app so it can  be chained in Program.cs
         return app;
     }
 }

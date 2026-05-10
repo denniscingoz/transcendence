@@ -7,21 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Used for validating Google OAuth tokens. -->
     <PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
+    <!-- Allows this layer to use configuration abstractions. like we can reach IConfiguration ICOnfigurationSection etc -->
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.1" />
+     <!-- Allows this layer to define dependency injection registrations. -->
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
 
   </ItemGroup>
 
   <ItemGroup>
+  <!-- Allows Application to use Domain entities, rules, and exceptions -->
     <ProjectReference Include="..\Transcendence.Domain\Transcendence.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Files\Exceptions\" />
-    <Folder Include="Files\Queries\" />
-    <Folder Include="Posts\Exceptions\" />
-    <Folder Include="Posts\Queries\" />
+   <!-- Allows use of ASP.NET Core shared framework types. -->
 	<FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 

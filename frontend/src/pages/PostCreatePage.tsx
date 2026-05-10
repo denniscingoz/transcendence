@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import axios from 'axios'
 import type { CreatePostDto } from '../types/api'
 import { useTranslation } from 'react-i18next'
 import { BottomNav } from '../components/BottomNav'
 import { useNavigate } from 'react-router-dom'
-import { useRef } from 'react'
 import { useSharePost, useUploadPostFile } from '../hooks/usePost'
 import { getApiErrorMessage } from '../utils/getApiErrorMessage'
 import { UploadProgressOverlay } from '../components/UploadProgressOverlay'
@@ -47,6 +47,7 @@ export function PostCreatePage() {
 	const [isUploadComplete, setIsUploadComplete] = useState(false)
  
 	const postFileInputRef = useRef<HTMLInputElement | null>(null)
+	const abortRef = useRef<AbortController | null>(null)
 	const [saveError, setSaveError] = useState<string | null>(null)
 
 	const [postForm, setPostForm] = useState<CreatePostForm>({
@@ -56,9 +57,13 @@ export function PostCreatePage() {
 
 	const OVERLAY_REDIRECT_DELAY_MS = 800
 
-  const handlePostPhotoClick = () => {
-    postFileInputRef.current?.click()
-  }
+	useEffect(() => {
+		return () => abortRef.current?.abort()
+	}, [])
+
+	const handlePostPhotoClick = () => {
+		postFileInputRef.current?.click()
+	}
 
 	const handlePostPreview = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -70,29 +75,29 @@ export function PostCreatePage() {
       return
     }
 
-		if (file.type.startsWith('image/')) {
-			try {
-				const { width, height } = await getImageDimensions(file)
-				const isTooWide = width > height * MAX_IMAGE_ASPECT_RATIO
-				const isTooTall = height > width * MAX_IMAGE_ASPECT_RATIO
+	if (file.type.startsWith('image/')) {
+		try {
+			const { width, height } = await getImageDimensions(file)
+			const isTooWide = width > height * MAX_IMAGE_ASPECT_RATIO
+			const isTooTall = height > width * MAX_IMAGE_ASPECT_RATIO
 
-				if (isTooWide || isTooTall) {
-					setSaveError('Image ratio is not acceptable. Width and height cannot exceed a 6:1 ratio.')
-					e.target.value = ''
-					return
-				}
-			} catch {
-				setSaveError('Could not validate selected image.')
+			if (isTooWide || isTooTall) {
+				setSaveError('Image ratio is not acceptable. Width and height cannot exceed a 6:1 ratio.')
 				e.target.value = ''
 				return
 			}
+		} catch {
+			setSaveError('Could not validate selected image.')
+			e.target.value = ''
+			return
 		}
+	}
 
-		setSaveError(null)
+	setSaveError(null)
     setSelectedPostFile(file)
-		if (postPreviewUrl) {
-			URL.revokeObjectURL(postPreviewUrl)
-		}
+	if (postPreviewUrl) {
+		URL.revokeObjectURL(postPreviewUrl)
+	}
     const previewUrl = URL.createObjectURL(file)
     setPostPreviewUrl(previewUrl)
   }
@@ -105,6 +110,10 @@ export function PostCreatePage() {
 	    return
 	  }
 
+	  abortRef.current?.abort()
+	  abortRef.current = new AbortController()
+	  const signal = abortRef.current.signal
+
 	  const payload: Partial<CreatePostDto> = {}
 	  setSaveError(null)
 	  setIsUploadOverlayOpen(true)
@@ -114,6 +123,7 @@ export function PostCreatePage() {
 	  try {
 	    const uploadedFileId = await uploadPostFile.mutateAsync({
 	      file: selectedPostFile,
+		  signal,  
 	      onProgress: (progress) => {
 	        // Keep some headroom until the backend confirms the full workflow succeeded.
 	        setUploadProgress(Math.min(progress, 98))
@@ -125,7 +135,7 @@ export function PostCreatePage() {
 	      payload.content = postForm.caption.trim()
 	    }
 
-	    await sharePost.mutateAsync(payload)
+	    await sharePost.mutateAsync({ data: payload, signal })
 
 	    setUploadProgress(100)
 	    setIsUploadComplete(true)
@@ -134,6 +144,7 @@ export function PostCreatePage() {
 	      navigate('/profile')
 	    }, OVERLAY_REDIRECT_DELAY_MS)
 	  } catch (e: any) {
+		if (axios.isCancel(e)) return
 	    setIsUploadOverlayOpen(false)
 	    setUploadProgress(0)
 	    setIsUploadComplete(false)

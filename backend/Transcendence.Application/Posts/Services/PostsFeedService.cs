@@ -56,6 +56,7 @@ internal class PostsFeedService : IPostsFeedService
 			AuthorAvatarUrl = p.AuthorAvatarUrl
 		}).ToList();
 
+		//Loop through each item and get their ContentType so frontend can render based on what it is! VIDEO, IMAGE
 		foreach (var post in items)
 		{
 			if (post.ImageFileId != Guid.Empty)

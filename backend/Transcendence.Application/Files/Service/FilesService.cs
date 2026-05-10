@@ -152,21 +152,16 @@ public sealed class FilesService : IFilesService
 	//GET /files/avatar/{fileId}
 	public async Task<FileGetResult> GetAvatarFileAsync(Guid fileId, CancellationToken ct)
 	{
-				Console.WriteLine("Trying to file the file");
 		var asset = await _fileRepository.GetByIdAsync(fileId, ct)
 			?? throw new NotFoundException("File not found.");
-				Console.WriteLine("Found the file");
-				Console.WriteLine("Trying to find the owner");
-			Console.WriteLine($"File id{fileId}");
+		
 		Guid? avatarOwnerId = await _userRepository.GetUserIdByAvatarFileIdAsync(fileId, ct);
+		
 		if (avatarOwnerId is null)
 			throw new NotFoundException("File is not used as an avatar.");
-				Console.WriteLine("Found the owner");
 
-				Console.WriteLine("Trying to open");
 		var stream = await _filesStorage.OpenReadAsync(asset.StoragePath, ct);
-				Console.WriteLine("Opened");
-		Console.WriteLine($"Getting avatar with asset.ContentType: {asset.ContentType}");
+
 		return new FileGetResult(stream, asset.ContentType);
 	}
 

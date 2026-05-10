@@ -7,10 +7,14 @@
   </PropertyGroup>
 
 <ItemGroup>
+  <!-- Google OAuth toke validation adding so wecan test  -->
   <PackageReference Include="Google.Apis.Auth" Version="1.73.0" />
+  <!-- JWT Authentication middle for ASP NET CORE -->
   <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.12" />
+  <!-- Development checks for SWAGGER support, not used in production -->
   <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20" />
 
+  <!-- JWT TOKEN Creation and validation helper -->
   <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.16.0" />
 
   <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5">
@@ -19,9 +23,11 @@
   </PackageReference>
 
   <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  <!-- JWT TOKEN Creation and validation helper -->
   <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
 </ItemGroup>
 
+  <!-- Adding  classlib so we can contact, domain is not added for safety clean architecture mode -->
   <ItemGroup>
     <ProjectReference Include="..\Transcendence.Application\Transcendence.Application.csproj" />
     <ProjectReference Include="..\Transcendence.Infrastructure\Transcendence.Infrastructure.csproj" />

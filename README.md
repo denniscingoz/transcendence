@@ -23,6 +23,8 @@ Transcendence is a private social application that brings together authenticatio
 13. [Database operations](#database-operations)
 14. [API overview](#api-overview)
 15. [Frontend notes](#frontend-notes)
+16. [Security considerations](#security-considerations)
+17. [Troubleshooting](#troubleshooting)
 18. [Credits and license](#credits-and-license)
 
 ---

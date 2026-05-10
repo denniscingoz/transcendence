@@ -59,9 +59,14 @@ export function useDeletePost() {
   })
 }
 
+type SharePostArgs = {
+  data: Partial<CreatePostDto>
+  signal?: AbortSignal
+}
+
 export function useSharePost() {
   return useMutation({
-    mutationFn: sharePost,
+    mutationFn: ({ data, signal }: SharePostArgs) => sharePost(data, signal),
   })
 }
 

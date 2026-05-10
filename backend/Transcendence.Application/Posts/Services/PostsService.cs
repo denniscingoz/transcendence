@@ -59,7 +59,6 @@ public class PostsService : IPostsService
 		var author = await _userRepository.GetByIdAsync(authorId, ct)
 				?? throw new NotFoundException("Author not found.");
 		var likesCount = await _postRepository.GetLikeCountAsync(postId, ct);
-		//var comments = await _postRepository.GetCommentsAsync(postId, ct);//not used
 
 		string? BuildAvatarFileUrl(Guid? fileId)
 			=> fileId is Guid id ? $"/files/avatar/{id}" : null;
@@ -69,7 +68,7 @@ public class PostsService : IPostsService
 		bool isLikedByCurrentUser = false;
 		if (likeOfTheUser != null && likeOfTheUser.AuthorId == currentUserId)	
 		{
-			// If the user is the author, we can be sure they liked it (since they see it), so we can skip the DB check
+			// If the user is the author of the like, we can be sure they liked it (since they see it), so we can skip the DB check
 			isLikedByCurrentUser = true;
 		}
 
@@ -136,6 +135,7 @@ public class PostsService : IPostsService
 		catch (NotFoundException)
 		{
 			// Intentionally ignored: the post is already deleted; file metadata might already be gone.
+			//try to delete the file. If the file is already missing, failing doesn't matter because file is gone
 		}
 	}
 

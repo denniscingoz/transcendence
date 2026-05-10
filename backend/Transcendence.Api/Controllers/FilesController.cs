@@ -1,16 +1,10 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Reflection.Metadata;
 using Transcendence.Api.Common.Extensions;
 using Transcendence.Application.Common.Responses;
 using Transcendence.Application.Files.Dto;
 using Transcendence.Application.Files.Interface;
-using Transcendence.Application.Files.Service;
+
 
 
 namespace Transcendence.Api.Controllers;
@@ -26,7 +20,7 @@ public sealed class FilesController : ControllerBase
 
 	//POST /files
 	[HttpPost]
-	[Consumes("multipart/form-data")]
+	[Consumes("multipart/form-data")] // it is no Json, but form data so we notify the ASP.NET Core to expect form data
 	public async Task<ActionResult<ApiResponse<UploadFilesResultDto>>> UploadFile(
 	[FromForm] UploadFileRequestDto request,
 	CancellationToken ct)
