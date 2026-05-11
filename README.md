@@ -668,4 +668,3 @@ In line with 42's transparency expectations, this section describes how AI tools
 ### Honest caveats
 
 - Some prose in `docs/` and the README was first drafted by AI and lightly edited; we believe the content accurately reflects what we built, but the phrasing is not always our own.
-- Diagram code (Mermaid ERDs in particular) was AI-generated from our schema and verified against the EF Core model.
