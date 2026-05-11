@@ -50,7 +50,7 @@ Transcendence is a private social application that brings together authenticatio
 |---|---|---|---|
 | **Deniz** | **Product Owner (PO) & Project Manager (PM)** | [@denniscingoz](https://github.com/denniscingoz) | Vision, scope, acceptance criteria, design, planning, coordination, delivery |
 | **Daria** | **Tech Lead** | [@grignetta](https://github.com/grignetta) | Architecture, code review, technical direction, database |
-| **Valerii** | **Backend Developer** | [@Vbezhevets](https://github.com/Vbezhevets) | Realtime features with SignalR |
+| **Valeriy** | **Backend Developer** | [@Vbezhevets](https://github.com/Vbezhevets) | Realtime features with SignalR |
 | **Michaelaela** | **Frontend Developer** | [@Michaelaela811](https://github.com/Michaelaela811) | Frontend application |
 
 > _Roles were assigned at kickoff and remained stable through the project. All members contributed to code, and everyone tested the system and fixed bugs across the codebase; the role headings indicate primary responsibility, not exclusive ownership._
@@ -109,7 +109,7 @@ We selected **4 Major** and **6 Minor** modules for a total of **8 module-credit
 | **m3** | **Multi-language support (≥ 3)** | i18next-powered i18n with three complete translations (EN, ES, FR), a UI language switcher, and full coverage of user-facing strings. |
 | **m4** | **Remote authentication (OAuth 2.0)** | Google sign-in via OAuth 2.0, integrated with the JWT issuance flow so federated and local accounts share a single identity model. |
 | **m5** | **Custom-made design system** | A reusable UI layer built on Tailwind tokens: layout components (`Layout`, `Header`, `BottomNav`), generic widgets (`Modal`, `Field`, `LanguageDropdown`, `UploadProgressOverlay`, `ProtectedPostThumb`), and domain modals (`PostDetailModal`, `LikesModal`, `NotificationsModal`, `SearchModal`, `SettingsModal`) — plus a shared CSS utility layer in `index.css` (`.btn-*`, `.input`, `.card`, `.panel`, `.divider`, `.message-*`). |
-| **m6** | **Use an ORM** | **Entity Framework Core** with code-first migrations, applied automatically on API startup. |
+| **m6** | **Use an ORM** | **Entity Framework Core** with code-first migrations. |
 | **m7** | **Support for additional browsers** | The app is tested and verified to work in **Chrome, Firefox, Safari** with consistent UI/UX. All features (chat, real-time presence, file upload, OAuth popup, i18n) function identically across browsers. Any browser-specific limitations are documented in `docs/browser-support.md`. |
 
 
@@ -157,7 +157,7 @@ We selected **4 Major** and **6 Minor** modules for a total of **8 module-credit
 | **Design system** | Reusable UI components (Modal, BottomNav, Field, LanguageDropdown, UploadProgressOverlay, ProtectedPostThumb, …) | Michaela | — | ✅ |
 | | Shared CSS utilities (`.btn-*`, `.input`, `.card`, `.panel`, `.divider`, `.message-*`) | Michaela | — | ✅ |
 | **Infra** | Docker Compose (db + api + nginx) | — | Daria | ✅ |
-| | Nginx reverse proxy + WebSocket upgrade | — | Daria | ✅ |
+| | Nginx reverse proxy + WebSocket upgrade | — | Daria, Valeriy | ✅ |
 | | Local TLS certs (self-signed) | — | Daria | ✅ |
 | | DB backup / restore scripts | — | Daria | ✅ |
 | | EF Core migrations applied on startup | — | Daria | ✅ |
@@ -224,17 +224,17 @@ We selected **4 Major** and **6 Minor** modules for a total of **8 module-credit
                        └─────┬─────────────────────┬─────────┘
                              │                     │
                              ▼                     ▼
-              ┌─────────────────────────┐   ┌──────────────────────────┐
-              │ Transcendence.Application│  │ Transcendence.Infrastructure │
-              │  Service contracts       │  │  EF Core · repositories  │
-              │  Use cases · DTOs        │◄─│  File storage · JWT gen  │
-              └────────────┬─────────────┘  └──────────────┬───────────┘
-                           │                                │
-                           ▼                                ▼
-              ┌─────────────────────────┐    ┌──────────────────────┐
-              │  Transcendence.Domain   │    │   PostgreSQL 16      │
-              │  Entities · core rules  │    │   + /app/uploads     │
-              └─────────────────────────┘    └──────────────────────┘
+              ┌─────────────────────────┐     ┌──────────────────────────────┐
+              │ Transcendence.Application│    │ Transcendence.Infrastructure │
+              │  Service contracts       │    │  EF Core · repositories      │
+              │  Use cases · DTOs        │◄─--│  File storage · JWT gen      │
+              └────────────┬─────────────┘    └──────────────┬───────────────┘
+                           │                                 │
+                           ▼                                 ▼
+              ┌─────────────────────────┐     ┌──────────────────────────┐
+              │  Transcendence.Domain   │     │      PostgreSQL 16       │
+              │  Entities · core rules  │     │     + /app/uploads       │
+              └─────────────────────────┘     └──────────────────────────┘
 ```
 
 **Why this layering?** It keeps the **Domain** pure, no framework, no database, no HTTP, so the business rules can be reasoned about on their own. **Application** sits on top, defining the use cases and the contracts that the outer layers must satisfy. **Infrastructure** implements those contracts against EF Core, the filesystem, and external services like Google Identity. **Api** is the thin edge that translates HTTP requests and SignalR messages into Application calls.
@@ -247,122 +247,7 @@ In practice this means new features tend to slot in along predictable seams: a n
 
 ## Database schema
 
-```mermaid
-erDiagram
-    USERS ||--o| FILES : "avatar"
-    USERS ||--o{ POSTS : "authors"
-    USERS ||--o{ FILES : "owns"
-    USERS ||--o{ COMMENTS : "writes"
-    USERS ||--o{ LIKES : "gives"
-    USERS ||--o{ FRIENDSHIPS : "User1"
-    USERS ||--o{ FRIENDSHIPS : "User2"
-    USERS ||--o{ FRIENDSHIP_REQUESTS : "requester"
-    USERS ||--o{ FRIENDSHIP_REQUESTS : "target"
-
-    POSTS ||--o{ COMMENTS : "has"
-    POSTS ||--o{ LIKES : "has"
-    POSTS }o--|| FILES : "image"
-
-    CONVERSATIONS ||--o{ CONVERSATION_PARTICIPANTS : "has"
-    CONVERSATIONS ||--o{ MESSAGES : "contains"
-
-    USERS ||--o{ NOTIFICATIONS : "receives"
-
-    USERS {
-        uuid Id PK
-        string Username UK
-        string Email UK
-        string FullName
-        string PasswordHash "nullable"
-        string GoogleId "nullable, UK"
-        uuid AvatarFileId FK "nullable"
-        bool IsDeleted
-        timestamptz CreatedAt
-    }
-
-    FILES {
-        uuid Id PK
-        uuid OwnerId FK
-        string StoragePath UK
-        string ContentType
-        bigint SizeBytes
-    }
-
-    POSTS {
-        uuid Id PK
-        uuid AuthorId FK
-        uuid ImageFileId FK
-        string Content "nullable, max 1000"
-        timestamptz CreatedAtUtc
-    }
-
-    COMMENTS {
-        uuid Id PK
-        uuid PostId FK
-        uuid AuthorId FK
-        string Content "max 1000"
-        timestamptz CreatedAtUtc
-    }
-
-    LIKES {
-        uuid Id PK
-        uuid PostId FK
-        uuid AuthorId FK
-        timestamptz CreatedAtUtc
-    }
-
-    FRIENDSHIPS {
-        uuid User1Id PK,FK
-        uuid User2Id PK,FK
-        timestamptz CreatedAt
-    }
-
-    FRIENDSHIP_REQUESTS {
-        uuid Id PK
-        uuid RequesterId FK
-        uuid TargetUserId FK
-        uuid User1Id "normalized"
-        uuid User2Id "normalized"
-    }
-
-    CONVERSATIONS {
-        uuid Id PK
-        int Type "1=Direct, 2=Group"
-        string LastMessageText "nullable"
-        timestamptz LastMessageAt "nullable"
-    }
-
-    CONVERSATION_PARTICIPANTS {
-        uuid ConversationId PK,FK
-        uuid UserId PK
-        timestamptz LastReadAt
-    }
-
-    MESSAGES {
-        uuid Id PK
-        uuid ConversationId FK
-        uuid SenderId
-        uuid ClientMessageId "idempotency"
-        string Content "max 4000"
-        bool IsDeleted
-        timestamptz CreatedAt
-    }
-
-    NOTIFICATIONS {
-        uuid Id PK
-        uuid UserId
-        int Type
-        string Text
-        bool IsRead
-        timestamptz CreatedAt
-    }
-```
-   users ──┬──< posts ──┬──< comments
-           │            └──< likes
-           ├──< notifications
-           ├──< files
-           ├──< friendships >──── users
-           └──< conversation_participants >── conversations ──< messages
+![alt text](image-1.png)
 ```
 
 > A more detailed ER diagram lives at `docs/db_schema/schema.png` _(generate later with dbdiagram.io / drawSQL and commit the export)_.
@@ -404,7 +289,7 @@ Sole owner of the frontend application end-to-end.
 - **Key PRs:** `#3`, `#5`, `#28`
 - **Cross-cutting work:** Architecture decisions, performance review, code-review backbone.
 
-### Valerii — Backend Developer
+### Valeriy — Backend Developer
 
 - **Major contributions:**
   - _[e.g. "Built the full file upload and management module: client validation, multipart endpoints, secure storage, and the deletion flow."]_
@@ -415,7 +300,7 @@ Sole owner of the frontend application end-to-end.
 
 # Architecture
 
-Project Transcendence is a social platform whose database is organized around **five domains**: identity, social feed, friendships, chat, and notifications. All tables live in PostgreSQL under the `app` schema and are managed via EF Core migrations applied automatically at API startup.
+Project Transcendence is a social platform whose database is organized around **five domains**: identity, social feed, friendships, chat, and notifications. All tables live in PostgreSQL under the `app` schema and are managed via EF Core migrations.
 
 ## Identity
 
@@ -683,7 +568,7 @@ npm run preview   # preview the production build
 
 ## Database operations
 
-EF Core migrations live in `backend/Transcendence.Infrastructure/Migrations` and are applied automatically on API startup.
+EF Core migrations live in `backend/Transcendence.Infrastructure/Migrations`.
 
 Helper commands:
 
