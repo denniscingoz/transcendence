@@ -248,7 +248,6 @@ In practice this means new features tend to slot in along predictable seams: a n
 ## Database schema
 
 ![alt text](image-1.png)
-```
 
 > A more detailed ER diagram lives at `docs/db_schema/schema.png` _(generate later with dbdiagram.io / drawSQL and commit the export)_.
 
