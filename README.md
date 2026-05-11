@@ -295,9 +295,9 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 
 ---
 
-# Individual contributions
+## Individual contributions
 
-## Michaela — Frontend Developer
+### Michaela — Frontend Developer
 
 - **Application shell & routing.** Set up the Vite + React + TypeScript project, the routing tree, the `RequireAuth` protected-route wrapper, and the `RealtimeProvider` that mounts the SignalR client at the right point in the lifecycle.
 - **Custom design system.** Built the reusable UI layer on Tailwind tokens — layout components (`Layout`, `Header`, `BottomNav`), generic widgets (`Modal`, `Field`, `LanguageDropdown`, `UploadProgressOverlay`, `ProtectedPostThumb`), and domain modals (`PostDetailModal`, `LikesModal`, `NotificationsModal`, `SearchModal`, `SettingsModal`) — together with a shared CSS utility layer in `index.css` (`.btn-*`, `.input`, `.card`, `.panel`, `.divider`, `.message-*`). Satisfies the **custom design system** Minor module.
@@ -308,7 +308,7 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 - **Mock-mode harness.** Set up MSW so the frontend could run end-to-end without the backend, which unblocked parallel work and gave us a reliable demo fallback.
 - **Tooling.** ESLint config, Tailwind setup, TypeScript strict-mode, and the `frontend/.env` contract.
 
-## Deniz — Product Owner & Backend Developer
+### Deniz — Product Owner & Backend Developer
 
 - **Application layer.** Implemented the services that drive the user-facing features: `AuthService`, `ProfileService`, `PostsService`, `PostsFeedService`, `PostsProfileService`, `FriendsService`, and `FilesService`.
 - **Domain rules and invariants.** Encoded the rules that keep the data consistent — no self-friendships, no duplicate friend requests, friends-only file access, idempotent like/unlike, and the soft-delete semantics for posts and comments.
@@ -320,7 +320,7 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 - **API integration layer.** Built the typed API clients under `src/api/`, the Axios instance with token attachment and 401 handling, and the TanStack Query hooks that consume them across the app.
 - **Authentication flows.** Email/password sign-in, Google OAuth 2.0 sign-in, sign-out, JWT handling, and session restoration on reload.
 
-## Daria — Tech Lead & Backend Foundation
+### Daria — Tech Lead & Backend Foundation
 
 - **Architecture.** Established the four-project layout (`Transcendence.Api` / `Application` / `Domain` / `Infrastructure`) and the dependency-direction rules between them.
 - **Database & ORM.** Designed the schema, wrote the initial `TranscendenceDbContext`, the per-entity EF Core configurations, and every migration in `Transcendence.Infrastructure/Migrations`.
@@ -329,7 +329,7 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 - **CI.** Backend build pipeline (`dotnet build` on Ubuntu) so every PR is verified before merge.
 - **Cross-cutting (Tech Lead).** Architecture reviews, performance review, and the code-review backbone for the backend.
 
-## Valeriy — Backend Developer (Realtime & Notifications)
+### Valeriy — Backend Developer (Realtime & Notifications)
 
 - **SignalR hubs.** Designed and implemented the `ChatHub` and the connection lifecycle around it — auth handshake, group join on conversation open, and graceful disconnection.
 - **Chat message flow.** End-to-end persistence-and-broadcast pipeline: store the message, target the right group, deliver to participants, and ack back to the sender. Includes read/delivery receipts and soft-delete semantics for messages and conversations.
@@ -616,9 +616,9 @@ Third-party libraries used in this project remain under their respective license
 - **Valeriy Bezhevets** ([@Vbezhevets](https://github.com/Vbezhevets))
 - **Michaela Masarova** ([@michaela811](https://github.com/michaela811))
 
-### Resources
+## Resources
 
-## Documentation
+### Documentation
 
 - [PostgreSQL — Official Documentation](https://www.postgresql.org/docs/)
 - [EF Core — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/)
@@ -629,28 +629,28 @@ Third-party libraries used in this project remain under their respective license
 - [Sign in with Google — Google Identity](https://developers.google.com/identity/sign-in/web)
 - [Mermaid — Diagrams as code](https://mermaid.js.org/intro/)
 
-## Articles & Tutorials
+### Articles & Tutorials
 
 - [TBC]
 - [TBC]
 - [TBC]
 
-## Specifications
+### Specifications
 
 - [42 — `ft_transcendence` subject](https://cdn.intra.42.fr/pdf/pdf/203589/en.subject.pdf)
 
 ---
 
-### Use of AI
+## Use of AI
 
 In line with 42's transparency expectations, this section describes how AI tools were used during the project — for which tasks and which parts of the codebase.
 
-## Tools used
+### Tools used
 
-- **Claude (Anthropic)** — primary assistant for documentation and design discussions.
+- **Claude (Anthropic)** and **Chat GPT** — primary assistant for documentation and design discussions.
 - _[add others if applicable: ChatGPT, GitHub Copilot, etc.]_
 
-## Where AI helped
+### Where AI helped
 
 - **Documentation.** README sections, schema descriptions, the database ERD, and architectural write-ups were drafted with AI assistance and then reviewed and edited by team members before being committed.
 - **Concept explanation.** AI was used to explain unfamiliar concepts before applying them in code — e.g., SignalR connection lifecycle, OAuth 2.0 authorization-code flow, EF Core change tracking, trunk-based branching conventions.
@@ -658,13 +658,13 @@ In line with 42's transparency expectations, this section describes how AI tools
 - **Boilerplate and scaffolding.** Repetitive code (DTO mappings, basic CRUD endpoints, test fixtures) was occasionally drafted with AI assistance and then adapted to fit our conventions.
 - **SQL and query review.** Complex SuiteQL/SQL queries were reviewed with AI as a second pair of eyes for edge cases.
 
-## Where AI was *not* used
+### Where AI was *not* used
 
 - **Architectural decisions.** The API contract, database schema (including the friendship pair-normalization, message idempotency design, and notification denormalization), and module boundaries were designed by the team.
 - **Unreviewed generation.** No AI-generated code was merged without being read, understood, and adapted by the developer responsible.
 - **Bypassing learning.** AI was treated as a research and writing assistant, not a substitute for understanding the underlying concepts — every team member can explain and defend the code in the parts they own.
 
-## Honest caveats
+### Honest caveats
 
 - Some prose in `docs/` and the README was first drafted by AI and lightly edited; we believe the content accurately reflects what we built, but the phrasing is not always our own.
 - Diagram code (Mermaid ERDs in particular) was AI-generated from our schema and verified against the EF Core model.
