@@ -94,10 +94,7 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 			user.UpdateBio(newBio);
 		}
 
-		// 3. Update AvatarFileId (Same logic as Bio) //This works, but design-wise it is a bit awkward:your domain stores AvatarFileId, but DTO sends AvatarUrl.
-		//												That means service has to parse URL text just to get the actual ID.
-		//												A cleaner backend contract would often be:
-		//												frontend sends avatarFileId.backend builds URL in response.instead of sending URL back into backend.
+		// 3. Update AvatarFileId (Same logic as Bio) /
 		if (dto.AvatarUrl != null)
 		{
 			Guid? newAvatarFileId = null;
@@ -177,6 +174,15 @@ public sealed class ProfileService : IProfileService // collects meaning, reposi
 		var user = await _userRepository.GetByIdAsync(userId, ct)
 			?? throw new NotFoundException("User not found.");
 
+		if(user.IsDeleted)
+			return;
+
+		var anonId = Guid.NewGuid().ToString("N");
+		user.UpdateDetails("Deleted User", $"deleted_{anonId}");
+		user.UpdateEmail($"deleted_{anonId}@deleted.invalid");
+		user.SetGoogleId($"deleted_{anonId}");
+		user.UpdateAvatar(null);
+		user.UpdateBio(null);
 		user.Delete();
 		await _userRepository.SaveChangesAsync(ct);
 	}

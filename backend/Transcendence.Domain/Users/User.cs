@@ -135,6 +135,11 @@ public sealed class User
 		if (username != null) SetUsername(username);
 	}
 
+	public void UpdateEmail(string value)
+	{
+	    SetEmail(value);
+	}
+
 	public void UpdateAvatar(Guid? avatarFileId)
 	{
 		AvatarFileId = avatarFileId;
