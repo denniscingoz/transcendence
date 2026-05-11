@@ -47,7 +47,7 @@ public class PostsProfileService : IPostsProfileService
 
 		take = (take < 1 || take > 50) ? 20 : take;
 		var targetUser = await _userRepository.GetByIdAsync(targetUserId, ct);
-		if (targetUser == null || targetUser.IsDeleted) { throw new UnauthorizedException("Invalid session."); }
+		if (targetUser == null || targetUser.IsDeleted) { throw new NotFoundException("User not found."); }
 
 		if (targetUserId != currentUserId)
 		{
