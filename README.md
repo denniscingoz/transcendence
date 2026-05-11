@@ -65,7 +65,7 @@ Given the small team size and fixed academic deadline, we kept coordination deli
 
 - **Discovery phase (week 1).** Requirements walk-through, scope agreement, module selection, and a target point total. Wireframes and a domain model were produced before any code was written.
 - **API-first contract.** Backend and frontend agreed on endpoint shapes, payloads, and auth flows **before** parallel implementation began. This single decision unblocked nearly all parallel work.
-- **Documentation discipline.** `docs/` is split by audience - `api/`, `back end/`, `front/`, `db_schema/`, and `minor/`. Cross-module dependencies were tracked in `Dependency map.pages` so we always knew the impact radius of a change.
+- **Documentation discipline.** `docs/` is split by audience - `api/`, `back end/`, `front/`, `db_schema/`, and `minor/`.
 - **Task tracking.** Work items were captured as GitHub issues against the repo and assigned at kickoff, then reallocated as scope shifted. We did not run formal sprints, coordination was continuous rather than time-boxed.
 - **Branching strategy.** Trunk-based development with short-lived feature branches, pull requests into `main`, and review before merge to keep history readable.
 - **Communication.** Async-first via a shared WhatsApp group for day-to-day coordination: blockers, asks, progress updates, supplemented by occasional calls for design discussions and harder problem solving. This kept overhead low and let each member work in long uninterrupted blocks.
@@ -321,12 +321,12 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 
 ### Daria — Tech Lead & Backend Foundation
 
-- **Architecture.** Established the four-project layout (`Transcendence.Api` / `Application` / `Domain` / `Infrastructure`) and the dependency-direction rules between them.
-- **Database & ORM.** Designed the schema, wrote the initial `TranscendenceDbContext`, the per-entity EF Core configurations, and every migration in `Transcendence.Infrastructure/Migrations`.
+- **Clean Architecture.**  Organized the backend into Api, Application, Domain, and Infrastructure projects to separate business logic, persistence, and HTTP concerns.
+- **Database & ORM (EF Core).** Designed the PostgreSQL database schema, created the TranscendenceDbContext, configured entity relationships, and wrote the EF Core migrations for users, posts, friendships, messages, and notifications.
 - **Repository layer.** Implemented the persistence side of every `I*Repository` interface defined in Application — `UserRepository`, `PostsRepository`, `FriendsRepository`, `MessageRepository`, `NotificationRepository`, and the rest.
-- **Infrastructure & deployment.** Built the Docker Compose stack (db + api + nginx), the Nginx reverse-proxy config including TLS termination and the WebSocket upgrade for SignalR, the self-signed cert generation script, the DB backup/restore scripts, and the Makefile that ties it all together.
-- **CI.** Backend build pipeline (`dotnet build` on Ubuntu) so every PR is verified before merge.
-- **Cross-cutting (Tech Lead).** Architecture reviews, performance review, and the code-review backbone for the backend.
+- **Dockerized deployment.** Built the Docker Compose setup for the API, PostgreSQL database, and Nginx reverse proxy, and created the root Makefile so the whole project can be started with a single command.
+- **Nginx & HTTPS setup.** Configured Nginx to serve the frontend, forward API requests to ASP.NET, enable HTTPS with self-signed certificates, and support SignalR real-time connections.
+- **Tech Lead responsibilities.** Reviewed backend pull requests, helped define architecture decisions, and assisted the team with debugging and backend integration issues.
 
 ### Valeriy — Backend Developer (Realtime & Notifications)
 
@@ -464,7 +464,6 @@ VITE_API_BASE_URL=/api
 ├── .env.example
 ├── .gitignore
 ├── API-First PLAN Backend–Frontend Collaboration (Draft).md
-├── Dependency map.pages                # Cross-module dependency map
 ├── docker-compose.yml
 ├── Makefile
 ├── README.md
