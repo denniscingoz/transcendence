@@ -259,13 +259,13 @@ Project Transcendence is a social platform whose database is organized around **
 
 Identity is the foundation. Every `users` row supports either password or Google SSO authentication, enforced by a check constraint requiring at least one of `PasswordHash` or `GoogleId` to be set. Each user links optionally to an avatar in the `files` table.
 
-`files` itself is a generic blob registry — every uploaded asset gets a row, owned by a user, with cascade deletion when that user is removed.
+`files` is a central table that stores all uploaded files (images, avatars, etc.) — every uploaded asset gets a row, owned by a user, with cascade deletion when that user is removed.
 
 #### Social Feed
 
 The social feed is a classic **posts / comments / likes** triangle:
 
-- A post **must** carry an image. The FK to `files` uses `RESTRICT` so you can't orphan a post by deleting its image.
+- A post **must** carry an image. The FK to `files` uses `RESTRICT` - the database prevents deleting an image if it is still used by a post, ensuring that posts always have a valid image.
 - The `likes` table has a unique index on `(PostId, AuthorId)`, so a user can only like a given post once.
 - Cascading deletes on `PostId` clean up comments and likes when a post is removed.
 
@@ -282,13 +282,13 @@ The **original direction** of a request is preserved separately via `RequesterId
 
 Chat supports both **direct (1-to-1)** and **group** conversations via a `Type` discriminator on `Conversations`. Participation is a join table with per-user `LastReadAt` for cheap unread-count queries.
 
-Messages carry a client-generated `ClientMessageId` so **retries are idempotent**: the unique index on `(SenderId, ClientMessageId)` means the second copy of a retried send collides on insert and the original is returned, instead of producing duplicates.
+Messages carry a client-generated `ClientMessageId` so **retries are idempotent**: the unique index on `(SenderId)` prevent duplicates. If the same message is sent multiple times (for example due to network retries), the database recognizes it and stores only one copy..
 
 Deleted messages are **soft-deleted** (`IsDeleted` + `DeletedAt`) to keep threading and read pointers consistent.
 
 #### Notifications
 
-Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`) directly onto each row, so the feed renders without joins — even if the actor later changes their username or avatar. A typed `Type` column distinguishes the six notification kinds: new message, friend request, accepted, declined, post liked, post commented.
+Notifications store a snapshot of the sender’s username and avatar at the time they are created. This allows the frontend to display notifications without additional queries, and ensures older notifications remain unchanged even if the user later updates their profile. Each notification has a Type field to distinguish different events, such as: new message, friend request, accepted, declined, post liked, and post commented.
 
 ---
 
