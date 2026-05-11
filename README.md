@@ -50,7 +50,7 @@ Transcendence is a private social application that brings together authenticatio
 |---|---|---|---|
 | **Deniz** | **Product Owner (PO) & Project Manager (PM)** | [@denniscingoz](https://github.com/denniscingoz) | Vision, scope, acceptance criteria, design, planning, coordination, delivery |
 | **Daria** | **Tech Lead** | [@grignetta](https://github.com/grignetta) | Architecture, code review, technical direction, database |
-| **Valeriy** | **Backend Developer** | [@Vbezhevets](https://github.com/Vbezhevets) | Realtime features with SignalR |
+| **Valerii** | **Backend Developer** | [@Vbezhevets](https://github.com/Vbezhevets) | Realtime features with SignalR |
 | **Michaelaela** | **Frontend Developer** | [@Michaelaela811](https://github.com/Michaelaela811) | Frontend application |
 
 > _Roles were assigned at kickoff and remained stable through the project. All members contributed to code, and everyone tested the system and fixed bugs across the codebase; the role headings indicate primary responsibility, not exclusive ownership._
@@ -135,29 +135,29 @@ We selected **4 Major** and **6 Minor** modules for a total of **8 module-credit
 | | Likes + likes list | Michaela | Deniz | ✅ |
 | **Friends** | Send / accept / decline requests | Michaela | Deniz | ✅ |
 | | Friends list (cursor-paginated) + remove | Michaela | Deniz | ✅ |
-| **Presence** | Online users tracking | — | Valeriy | ✅ |
-| | Online status in friends list & chat | Michaela | Valeriy | ✅ |
-| | Presence broadcast on connect/disconnect | — | Valeriy | ✅ |
+| **Presence** | Online users tracking | — | Valerii | ✅ |
+| | Online status in friends list & chat | Michaela | Valerii | ✅ |
+| | Presence broadcast on connect/disconnect | — | Valerii | ✅ |
 | **Files** | Upload with type/size/magic-byte validation | Deniz | Deniz | ✅ |
 | | Friends-only access control | — | Deniz | ✅ |
 | | Image/video preview + upload progress | Deniz | — | ✅ |
 | | Delete uploaded files | Deniz | Deniz | ✅ |
-| **Notifications** | Persisted notifications (DB) | Michaela | Valeriy | ✅ |
-| | Realtime notification events (SignalR) | Michaela | Valeriy | ✅ |
-| | Unread counter | Michaela | Valeriy | ✅ |
-| | Mark as read (single, all, by conversation) | Michaela | Valeriy | ✅ |
-| **Chat** | Real-time messaging via SignalR | Michaela | Valeriy | ✅ |
-| | Conversation list + message history (paginated) | Michaela | Valeriy | ✅ |
-| | Read / delivery receipts | Michaela | Valeriy | ✅ |
-| | Soft-delete messages | Michaela | Valeriy | ✅ |
-| | Delete conversations | Michaela | Valeriy | ✅ |
-| | Reconnection handling | Michaela | Valeriy | ✅ |
+| **Notifications** | Persisted notifications (DB) | Michaela | Valerii | ✅ |
+| | Realtime notification events (SignalR) | Michaela | Valerii | ✅ |
+| | Unread counter | Michaela | Valerii | ✅ |
+| | Mark as read (single, all, by conversation) | Michaela | Valerii | ✅ |
+| **Chat** | Real-time messaging via SignalR | Michaela | Valerii | ✅ |
+| | Conversation list + message history (paginated) | Michaela | Valerii | ✅ |
+| | Read / delivery receipts | Michaela | Valerii | ✅ |
+| | Soft-delete messages | Michaela | Valerii | ✅ |
+| | Delete conversations | Michaela | Valerii | ✅ |
+| | Reconnection handling | Michaela | Valerii | ✅ |
 | **i18n** | Translation files (EN, ES, FR) | Michaela | — | ✅ |
 | | Runtime language switcher | Michaela | — | ✅ |
 | **Design system** | Reusable UI components (Modal, BottomNav, Field, LanguageDropdown, UploadProgressOverlay, ProtectedPostThumb, …) | Michaela | — | ✅ |
 | | Shared CSS utilities (`.btn-*`, `.input`, `.card`, `.panel`, `.divider`, `.message-*`) | Michaela | — | ✅ |
 | **Infra** | Docker Compose (db + api + nginx) | — | Daria | ✅ |
-| | Nginx reverse proxy + WebSocket upgrade | — | Daria, Valeriy | ✅ |
+| | Nginx reverse proxy + WebSocket upgrade | — | Daria, Valerii | ✅ |
 | | Local TLS certs (self-signed) | — | Daria | ✅ |
 | | DB backup / restore scripts | — | Daria | ✅ |
 | | EF Core migrations applied on startup | — | Daria | ✅ |
@@ -326,13 +326,16 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 - **Nginx & HTTPS setup.** Configured Nginx to serve the frontend, forward API requests to ASP.NET, enable HTTPS with self-signed certificates, and support SignalR real-time connections.
 - **Tech Lead responsibilities.** Reviewed backend pull requests, helped define architecture decisions, and assisted the team with debugging and backend integration issues.
 
-### Valeriy — Backend Developer (Realtime & Notifications)
+### Valerii — Backend Developer (Realtime & Notifications)
 
-- **SignalR hubs.** Designed and implemented the `ChatHub` and the connection lifecycle around it — auth handshake, group join on conversation open, and graceful disconnection.
-- **Chat message flow.** End-to-end persistence-and-broadcast pipeline: store the message, target the right group, deliver to participants, and ack back to the sender. Includes read/delivery receipts and soft-delete semantics for messages and conversations.
-- **Presence service.** Online-users tracking with a `PresenceService` and `OnlineUsersSnapshot`, broadcasting connect/disconnect events to friends and conversation participants.
-- **Notification pipeline.** End-to-end notifications: domain events for friend requests, friend request accept/decline, post likes, post comments, and chat messages — persisted via `NotificationRepository` and pushed in real time over SignalR (`NotificationReceived`, `NotificationsChanged`, `ConversationsChanged`).
-- **Reconnection handling.** Server-side bookkeeping that lets clients reconnect cleanly after transient drops without losing presence or unread state.
+- **Realtime ownership.** Was responsible for realtime features across chat, presence, and notifications.
+- **SignalR foundation.** Designed and implemented the SignalR-based realtime functionality.
+- **ChatHub lifecycle.** Implemented the ChatHub connection lifecycle — authentication, conversation groups, and connect/disconnect handling.
+- **Chat message flow.** Implemented the realtime chat message pipeline: persistence, broadcasting, acknowledgements, read/delivery receipts, soft-delete, and conversation deletion support.
+- **Presence tracking.** Implemented online users, friends/chat online status, and connect/disconnect broadcasts.
+- **Notification pipeline.** Implemented the realtime notification flow — persisted notifications, SignalR push events, unread counters, and mark-as-read behavior.
+- **Frontend integration.** Integrated realtime updates with the chat, friends, presence, and notification features on the frontend.
+- **Reconnection handling.** Implemented reconnection handling for presence, unread counters, and realtime state synchronization.
 
 ---
 
@@ -611,7 +614,7 @@ Third-party libraries used in this project remain under their respective license
 
 - **Daria Padenkova** ([@grignetta](https://github.com/grignetta))
 - **Deniz Cingoz** ([@denniscingoz](https://github.com/denniscingoz))
-- **Valeriy Bezhevets** ([@Vbezhevets](https://github.com/Vbezhevets))
+- **Valerii Bezhevets** ([@Vbezhevets](https://github.com/Vbezhevets))
 - **Michaela Masarova** ([@michaela811](https://github.com/michaela811))
 
 ## Resources
