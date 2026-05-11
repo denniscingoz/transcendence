@@ -254,50 +254,6 @@ In practice this means new features tend to slot in along predictable seams: a n
 
 ---
 
-
-## Individual contributions
-
-### Michaela — Frontend Developer
-
-Sole owner of the frontend application end-to-end.
-
-- **Application shell & routing.** Set up the Vite + React + TypeScript project, the routing tree, the `RequireAuth` protected-route wrapper, and the `RealtimeProvider` that mounts the SignalR client at the right point in the lifecycle.
-- **API integration layer.** Built every typed API client under `src/api/`, the Axios instance with token attachment and centralised error handling, and the TanStack Query hooks that consume them.
-- **Authentication flows.** Email/password sign-in, Google OAuth 2.0 sign-in, sign-out, JWT handling, and session restoration on reload.
-- **Custom design system.** Built the reusable component library (Button, Input, Modal, Card, Avatar, Toast, Tabs, Dropdown, Spinner, Badge, …) on top of Tailwind tokens — directly satisfying the **custom design system** Minor module.
-- **Feature pages.** Feed, post creation, post detail, comments, likes, profile (own + others), edit profile, settings, friends, friend requests, and online status indicators.
-- **Real-time chat UI.** Conversation list, message thread, send/receive, reconnection handling, and presence integration with the SignalR client.
-- **Notifications UI.** Inbox, unread counter, mark-as-read, and surface integration across the app.
-- **File uploads.** Client-side validation (type/size/format), upload progress, image preview, and deletion flows for the **file upload and management** Minor module.
-- **Internationalisation.** Wired i18next, structured the translation namespaces, produced the _[EN / DE / FR]_ translation files, and built the language switcher — covering the **multi-language** Minor module.
-- **Mock-mode harness.** Set up MSW so the frontend could run end-to-end without the backend, which unblocked parallel work and gave us a reliable demo fallback.
-- **Tooling.** ESLint config, Tailwind tokens, TypeScript strict-mode setup, and the `frontend/.env` contract.
-
-### Deniz — Product Owner | Project Manager
-
-- **Major contributions:**
-  - _[e.g. "Designed the friends-graph data model and authored migrations `2025_01_03_AddFriendships` … `2025_01_22_AddFriendBlockList`."]_
-  - _[e.g. "Implemented the SignalR chat hub including reconnection logic and typing indicators."]_
-- **Key PRs:** `#12`, `#34`, `#56`
-- **Cross-cutting work:** Code review, scope arbitration, demo prep.
-
-### Daria — Tech Lead
-
-- **Major contributions:**
-  - _[e.g. "Established the layered architecture (Api / Application / Domain / Infrastructure) and wrote the initial EF Core configuration."]_
-  - _[e.g. "Implemented JWT issuance and the Google OAuth integration."]_
-- **Key PRs:** `#3`, `#5`, `#28`
-- **Cross-cutting work:** Architecture decisions, performance review, code-review backbone.
-
-### Valeriy — Backend Developer
-
-- **Major contributions:**
-  - _[e.g. "Built the full file upload and management module: client validation, multipart endpoints, secure storage, and the deletion flow."]_
-  - _[e.g. "Implemented the notifications pipeline end-to-end."]_
-- **Key PRs:** `#22`, `#33`, `#48`
-
----
-
 # Architecture
 
 Project Transcendence is a social platform whose database is organized around **five domains**: identity, social feed, friendships, chat, and notifications. All tables live in PostgreSQL under the `app` schema and are managed via EF Core migrations.
@@ -339,9 +295,9 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 
 ---
 
-## Individual contributions
+# Individual contributions
 
-### Michaela — Frontend Developer
+## Michaela — Frontend Developer
 
 - **Application shell & routing.** Set up the Vite + React + TypeScript project, the routing tree, the `RequireAuth` protected-route wrapper, and the `RealtimeProvider` that mounts the SignalR client at the right point in the lifecycle.
 - **Custom design system.** Built the reusable UI layer on Tailwind tokens — layout components (`Layout`, `Header`, `BottomNav`), generic widgets (`Modal`, `Field`, `LanguageDropdown`, `UploadProgressOverlay`, `ProtectedPostThumb`), and domain modals (`PostDetailModal`, `LikesModal`, `NotificationsModal`, `SearchModal`, `SettingsModal`) — together with a shared CSS utility layer in `index.css` (`.btn-*`, `.input`, `.card`, `.panel`, `.divider`, `.message-*`). Satisfies the **custom design system** Minor module.
@@ -352,7 +308,7 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 - **Mock-mode harness.** Set up MSW so the frontend could run end-to-end without the backend, which unblocked parallel work and gave us a reliable demo fallback.
 - **Tooling.** ESLint config, Tailwind setup, TypeScript strict-mode, and the `frontend/.env` contract.
 
-### Deniz — Product Owner & Backend Developer
+## Deniz — Product Owner & Backend Developer
 
 - **Application layer.** Implemented the services that drive the user-facing features: `AuthService`, `ProfileService`, `PostsService`, `PostsFeedService`, `PostsProfileService`, `FriendsService`, and `FilesService`.
 - **Domain rules and invariants.** Encoded the rules that keep the data consistent — no self-friendships, no duplicate friend requests, friends-only file access, idempotent like/unlike, and the soft-delete semantics for posts and comments.
@@ -364,7 +320,7 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 - **API integration layer.** Built the typed API clients under `src/api/`, the Axios instance with token attachment and 401 handling, and the TanStack Query hooks that consume them across the app.
 - **Authentication flows.** Email/password sign-in, Google OAuth 2.0 sign-in, sign-out, JWT handling, and session restoration on reload.
 
-### Daria — Tech Lead & Backend Foundation
+## Daria — Tech Lead & Backend Foundation
 
 - **Architecture.** Established the four-project layout (`Transcendence.Api` / `Application` / `Domain` / `Infrastructure`) and the dependency-direction rules between them.
 - **Database & ORM.** Designed the schema, wrote the initial `TranscendenceDbContext`, the per-entity EF Core configurations, and every migration in `Transcendence.Infrastructure/Migrations`.
@@ -373,7 +329,7 @@ Notifications **denormalize actor metadata** (`ActorUsername`, `ActorAvatarUrl`)
 - **CI.** Backend build pipeline (`dotnet build` on Ubuntu) so every PR is verified before merge.
 - **Cross-cutting (Tech Lead).** Architecture reviews, performance review, and the code-review backbone for the backend.
 
-### Valeriy — Backend Developer (Realtime & Notifications)
+## Valeriy — Backend Developer (Realtime & Notifications)
 
 - **SignalR hubs.** Designed and implemented the `ChatHub` and the connection lifecycle around it — auth handshake, group join on conversation open, and graceful disconnection.
 - **Chat message flow.** End-to-end persistence-and-broadcast pipeline: store the message, target the right group, deliver to participants, and ack back to the sender. Includes read/delivery receipts and soft-delete semantics for messages and conversations.
