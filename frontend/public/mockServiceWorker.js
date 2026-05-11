@@ -100,7 +100,7 @@ addEventListener('fetch', function (event) {
   // that cannot be handled by the worker. Bypass such requests.
   if (
     event.request.cache === 'only-if-cached' &&
-    event.request.mode !== 'same-origin-allow-popups'
+    event.request.mode !== 'same-origin'
   ) {
     return
   }

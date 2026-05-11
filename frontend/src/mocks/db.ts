@@ -1,15 +1,15 @@
 import { ProfilePostPreviewDto } from "../types/api"
 
 export type User = {
-  Id: string
-  Username: string
-  Email: string
-  FullName: string
-  Bio: string | null
-  AvatarUrl?: string | null
-  Role: string | null
-  FriendsCount: number
-  PostsCount: number
+  id: string
+  username: string
+  email: string
+  fullName: string
+  bio: string | null
+  avatarUrl?: string | null
+  role: string | null
+  friendsCount: number
+  postsCount: number
 }
 
 export type Friend = {
@@ -33,17 +33,17 @@ export const db: {
   friends: Friend[]
   chat: Map<string, ChatMessage[]>
 } = {
-  token: 'mock-jwt-token',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1LW1lIiwiZXhwIjo0MTAyNDQ0ODAwfQ.mocksig',
   me: {
-    Id: 'u-me',
-    Username: 'michauser',
-    FullName: 'Micha',
-    Email: 'micha@mail.com',
-    Bio: 'Bio details for Micha',
-    AvatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-    PostsCount: 134,
-    FriendsCount: 222,
-    Role: null,
+    id: 'u-me',
+    username: 'michauser',
+    fullName: 'Micha',
+    email: 'micha@mail.com',
+    bio: 'Bio details for Micha',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
+    postsCount: 134,
+    friendsCount: 222,
+    role: null,
   },
   friends: [ /* ... */ ],
   chat: new Map(),
@@ -53,10 +53,10 @@ type AuthResult =
   | {
       ok: true
       user: {
-        Id: string
-        Username: string
-        FullName: string
-        AvatarUrl?: string | null
+        id: string
+        username: string
+        fullName: string
+        avatarUrl?: string | null
       }
     }
   | {
@@ -75,10 +75,10 @@ export function requireAuth(req: Request): AuthResult {
   return {
     ok: true,
     user: {
-      Id: db.me.Id,
-      Username: db.me.Username,
-      FullName: db.me.FullName,
-      AvatarUrl: db.me.AvatarUrl,
+      id: db.me.id,
+      username: db.me.username,
+      fullName: db.me.fullName,
+      avatarUrl: db.me.avatarUrl,
     },
   }
 }

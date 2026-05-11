@@ -6,7 +6,7 @@ import { mockFriends } from './friends'
 
 export const handlers = [
   // Auth
-  http.post('/auth/signin', async ({ request }) => {
+  http.post('/api/auth/signin', async ({ request }) => {
     const body = (await request.json()) as { email: string; password: string }
     if (!body.email || !body.password) {
       return HttpResponse.json(
@@ -14,10 +14,14 @@ export const handlers = [
         { status: 400 }
       )
     }
-    return HttpResponse.json({ token: db.token })
+    const response: AuthResponseDto = {
+      token: db.token,
+      user: { id: '1', username: 'user' },
+    }
+    return HttpResponse.json(response)
   }),
 
-http.post('/auth/signup', async ({ request }) => {
+http.post('/api/auth/signup', async ({ request }) => {
   const body = (await request.json()) as SignUpRequestDto
 
   if (!body.email || !body.password) {
@@ -32,11 +36,14 @@ http.post('/auth/signup', async ({ request }) => {
       { status: 400 }
     )
   }
-
-  return HttpResponse.json({ token: db.token })
+  const response: AuthResponseDto = {
+    token: db.token,
+    user: { id: '1', username: body.email.split('@')[0] },
+  }
+  return HttpResponse.json(response, { status: 201 })
 }),
 
-http.post('/auth/google', async ({ request }) => {
+http.post('/api/auth/google', async ({ request }) => {
   const body = (await request.json()) as GoogleSignInRequestDto
 
   if (!body.idToken) {
@@ -64,29 +71,29 @@ http.post('/auth/google', async ({ request }) => {
 
   // Profile
 
-  http.delete('/profile/me', ({ request }) => {
+  http.delete('/api/profile/me', ({ request }) => {
   const auth = requireAuth(request)
   if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
 
   return HttpResponse.json({
-    IsSuccess: true,
-    Data: null,
-    Errors: [],
+    isSuccess: true,
+    data: null,
+    errors: [],
   })
 }),
 
-  http.get('/profile/me', ({ request }) => {
+  http.get('/api/profile/me', ({ request }) => {
     const auth = requireAuth(request)
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
     
     return HttpResponse.json({
-      IsSuccess: true,
-      Data: db.me,
-      Errors: [],
+      isSuccess: true,
+      data: db.me,
+      errors: [],
     })
   }),
 
-  http.patch('/profile/password', async ({ request }) => {
+  http.patch('/api/profile/password', async ({ request }) => {
   const auth = requireAuth(request)
   if (!auth.ok) {
     return HttpResponse.json(auth.body, { status: auth.status })
@@ -97,9 +104,9 @@ http.post('/auth/google', async ({ request }) => {
   if (!body.currentPassword || !body.newPassword) {
     return HttpResponse.json(
       {
-        IsSuccess: false,
-        Data: null,
-        Errors: ['Current password and new password are required.'],
+        isSuccess: false,
+        data: null,
+        errors: ['Current password and new password are required.'],
       },
       { status: 400 }
     )
@@ -108,7 +115,7 @@ http.post('/auth/google', async ({ request }) => {
   return new HttpResponse(null, { status: 204 })
 }),
   
-http.get('/posts/me', ({ request }) => {
+http.get('/api/posts/me', ({ request }) => {
     const auth = requireAuth(request)
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
 
@@ -124,7 +131,7 @@ http.get('/posts/me', ({ request }) => {
     let startIndex = 0
 
     if (cursor) {
-      const foundIndex = allPosts.findIndex((post) => post.Id === cursor)
+      const foundIndex = allPosts.findIndex((post) => post.id === cursor)
       startIndex = foundIndex >= 0 ? foundIndex + 1 : 0
     }
 
@@ -132,19 +139,19 @@ http.get('/posts/me', ({ request }) => {
     const lastItem = items[items.length - 1]
 
     const nextCursor =
-      startIndex + take < allPosts.length && lastItem ? lastItem.Id : null
+      startIndex + take < allPosts.length && lastItem ? lastItem.id : null
 
     return HttpResponse.json({
-      IsSuccess: true,
-      Data: {
-        Items: items,
-        NextCursor: nextCursor,
+      isSuccess: true,
+      data: {
+        items: items,
+        nextCursor: nextCursor,
       },
-      Errors: [],
+      errors: [],
     })
 }),
 
-http.get('/posts/feed', ({ request }) => {
+http.get('/api/posts/feed', ({ request }) => {
   const auth = requireAuth(request)
   if (!auth.ok) {
     return HttpResponse.json(auth.body, { status: auth.status })
@@ -157,7 +164,7 @@ http.get('/posts/feed', ({ request }) => {
   let startIndex = 0
 
   if (cursor) {
-    const index = mockFeedPosts.findIndex((post) => post.Id === cursor)
+    const index = mockFeedPosts.findIndex((post) => post.id === cursor)
     if (index >= 0) {
       startIndex = index + 1
     }
@@ -166,47 +173,47 @@ http.get('/posts/feed', ({ request }) => {
   const items = mockFeedPosts.slice(startIndex, startIndex + take)
   const nextCursor =
     startIndex + take < mockFeedPosts.length
-      ? items[items.length - 1]?.Id ?? null
+      ? items[items.length - 1]?.id ?? null
       : null
 
   return HttpResponse.json({
-    IsSuccess: true,
-    Data: {
-      Items: items,
-      NextCursor: nextCursor,
+    isSuccess: true,
+    data: {
+      items: items,
+      nextCursor: nextCursor,
     },
-    Errors: [],
+    errors: [],
   })
 }),
 
-http.get('/posts/:postId', ({ request, params }) => {
+http.get('/api/posts/:postId', ({ request, params }) => {
   const auth = requireAuth(request)
   if (!auth.ok) {
     return HttpResponse.json(auth.body, { status: auth.status })
   }
 
   const postId = params.postId as string
-  const post = mockPosts.find((p) => p.Id === postId) ?? mockFeedPosts.find((p) => p.Id === postId)
+  const post = mockPosts.find((p) => p.id === postId) ?? mockFeedPosts.find((p) => p.id === postId)
 
   if (!post) {
     return HttpResponse.json(
       {
-        IsSuccess: false,
-        Data: null,
-        Errors: ['Post not found.'],
+        isSuccess: false,
+        data: null,
+        errors: ['Post not found.'],
       },
       { status: 404 }
     )
   }
 
   return HttpResponse.json({
-    IsSuccess: true,
-    Data: post,
-    Errors: [],
+    isSuccess: true,
+    data: post,
+    errors: [],
   })
 }),
 
-http.post('/posts/:postId/comments', async ({ request, params }) => {
+http.post('/api/posts/:postId/comments', async ({ request, params }) => {
   const auth = requireAuth(request)
   if (!auth.ok) {
     return HttpResponse.json(auth.body, { status: auth.status })
@@ -216,44 +223,44 @@ http.post('/posts/:postId/comments', async ({ request, params }) => {
   const content = await request.json() as string
 
   const post =
-    mockPosts.find((p) => p.Id === postId) ??
-    mockFeedPosts.find((p) => p.Id === postId)
+    mockPosts.find((p) => p.id === postId) ??
+    mockFeedPosts.find((p) => p.id === postId)
 
   if (!post) {
     return HttpResponse.json(
       {
-        IsSuccess: false,
-        Data: null,
-        Errors: ['Post not found.'],
+        isSuccess: false,
+        data: null,
+        errors: ['Post not found.'],
       },
       { status: 404 }
     )
   }
 
   const newComment: (typeof mockComments)[number] = {
-  Id: crypto.randomUUID(),
-  PostId: postId,
-  AuthorId: auth.user.Id,
-  CreatedAtUtc: new Date().toISOString(),
-  Content: content,
-  Username: auth.user.Username,
-  FullName: auth.user.FullName,
-  AuthorProfileImageUrl: auth.user.AvatarUrl ?? '',
+  id: crypto.randomUUID(),
+  postId: postId,
+  authorId: auth.user.id,
+  createdAtUtc: new Date().toISOString(),
+  content: content,
+  username: auth.user.username,
+  fullName: auth.user.fullName,
+  authorProfileImageUrl: auth.user.avatarUrl ?? '',
 }
 
   mockComments.unshift(newComment)
 
   return HttpResponse.json(
     {
-      IsSuccess: true,
-      Data: newComment,
-      Errors: [],
+      isSuccess: true,
+      data: newComment,
+      errors: [],
     },
     { status: 201 }
   )
 }),
 
-  http.patch('/profile/me', async ({ request }) => {
+  http.patch('/api/profile/me', async ({ request }) => {
   const auth = requireAuth(request)
   if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
 
@@ -261,31 +268,31 @@ http.post('/posts/:postId/comments', async ({ request, params }) => {
   db.me = { ...db.me, ...patch }
 
   return HttpResponse.json({
-    IsSuccess: true,
-    Data: db.me,
-    Errors: [],
+    isSuccess: true,
+    data: db.me,
+    errors: [],
   })
 }),
 
-  http.post('/files', ({ request }) => {
+  http.post('/api/files', ({ request }) => {
     const auth = requireAuth(request)
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
 
     return HttpResponse.json({
-      IsSuccess: true,
-      Data: {
-        Url: 'https://placehold.co/128x128?text=Uploaded',
+      isSuccess: true,
+      data: {
+        url: 'https://placehold.co/128x128?text=Uploaded',
       },
-      Errors: [],
+      errors: [],
     })
   }),
 
-  http.post('/profile/me/avatar', ({ request }) => {
+  http.post('/api/profile/me/avatar', ({ request }) => {
     const auth = requireAuth(request)
     if (!auth.ok) return HttpResponse.json(auth.body, { status: auth.status })
 
     // We won’t store binary in-memory; just simulate a new URL
-    db.me = { ...db.me, AvatarUrl: 'https://placehold.co/128x128?text=Avatar' }
+    db.me = { ...db.me, avatarUrl: 'https://placehold.co/128x128?text=Avatar' }
     return HttpResponse.json(db.me)
   }),
 
@@ -293,20 +300,20 @@ http.post('/posts/:postId/comments', async ({ request, params }) => {
 
   
   // Friends
-  http.get('/friends/list', ({ request }) => {
+  http.get('/api/friends/list', ({ request }) => {
   const auth = requireAuth(request)
   if (!auth.ok) {
     return HttpResponse.json(auth.body, { status: auth.status })
   }
 
   return HttpResponse.json({
-    IsSuccess: true,
-    Data: mockFriends,
-    Errors: [],
+    isSuccess: true,
+    data: mockFriends,
+    errors: [],
   })
 }),
 
-http.post('/friends/:targetUserId', ({ params, request }) => {
+http.post('/api/friends/:targetUserId', ({ params, request }) => {
   const auth = requireAuth(request)
   if (!auth.ok) {
     return HttpResponse.json(auth.body, { status: auth.status })
@@ -317,27 +324,27 @@ http.post('/friends/:targetUserId', ({ params, request }) => {
   if (!targetUserId) {
     return HttpResponse.json(
       {
-        IsSuccess: false,
-        Data: null,
-        Errors: ['targetUserId required'],
+        isSuccess: false,
+        data: null,
+        errors: ['targetUserId required'],
       },
       { status: 400 }
     )
   }
 
-  if (!mockFriends.find((f) => f.Id === targetUserId)) {
+  if (!mockFriends.find((f) => f.id === targetUserId)) {
     mockFriends.unshift({
-      Id: targetUserId,
-      Username: `user_${targetUserId.slice(0, 6)}`,
-      FullName: `User ${targetUserId.slice(0, 6)}`,
-      AvatarUrl: null,
+      id: targetUserId,
+      username: `user_${targetUserId.slice(0, 6)}`,
+      fullName: `User ${targetUserId.slice(0, 6)}`,
+      avatarUrl: null,
     })
   }
 
   return new HttpResponse(null, { status: 201 })
 }),
 
-http.delete('/friends/:friendUserId', ({ params, request }) => {
+http.delete('/api/friends/:friendUserId', ({ params, request }) => {
   const auth = requireAuth(request)
   if (!auth.ok) {
     return HttpResponse.json(auth.body, { status: auth.status })
@@ -345,7 +352,7 @@ http.delete('/friends/:friendUserId', ({ params, request }) => {
 
   const friendUserId = params.friendUserId as string
 
-  const index = mockFriends.findIndex((f) => f.Id === friendUserId)
+  const index = mockFriends.findIndex((f) => f.id === friendUserId)
   if (index !== -1) {
     mockFriends.splice(index, 1)
   }
@@ -354,7 +361,7 @@ http.delete('/friends/:friendUserId', ({ params, request }) => {
 }),
 
     //Comments
-  http.get('/posts/:postId/comments', ({ request, params }) => {
+  http.get('/api/posts/:postId/comments', ({ request, params }) => {
   const auth = requireAuth(request)
   if (!auth.ok) {
     return HttpResponse.json(auth.body, { status: auth.status })
@@ -368,13 +375,13 @@ http.delete('/friends/:friendUserId', ({ params, request }) => {
   const take = takeParam ? Number(takeParam) : 20
 
   const filteredComments = [...mockComments, ...mockFeedComments]
-    .filter((comment) => comment.PostId === postId)
-    .sort((a, b) => b.CreatedAtUtc.localeCompare(a.CreatedAtUtc))
+    .filter((comment) => comment.postId === postId)
+    .sort((a, b) => b.createdAtUtc.localeCompare(a.createdAtUtc))
 
   let startIndex = 0
 
   if (cursor) {
-    const index = filteredComments.findIndex((comment) => comment.Id === cursor)
+    const index = filteredComments.findIndex((comment) => comment.id === cursor)
     if (index >= 0) {
       startIndex = index + 1
     }
@@ -383,16 +390,16 @@ http.delete('/friends/:friendUserId', ({ params, request }) => {
   const items = filteredComments.slice(startIndex, startIndex + take)
   const nextCursor =
     startIndex + take < filteredComments.length
-      ? items[items.length - 1]?.Id ?? null
+      ? items[items.length - 1]?.id ?? null
       : null
 
   return HttpResponse.json({
-    IsSuccess: true,
-    Data: {
-      Items: items,
-      NextCursor: nextCursor,
+    isSuccess: true,
+    data: {
+      items: items,
+      nextCursor: nextCursor,
     },
-    Errors: [],
+    errors: [],
   })
 })
 
