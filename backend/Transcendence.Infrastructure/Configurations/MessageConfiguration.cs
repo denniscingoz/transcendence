@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Transcendence.Domain.Chat;
+using Transcendence.Domain.Users;
+
+namespace Transcendence.Infrastructure.Configurations;
 
 public class MessageConfiguration: IEntityTypeConfiguration<Message>
 {
@@ -43,7 +46,9 @@ public class MessageConfiguration: IEntityTypeConfiguration<Message>
                 .WithMany()
                 .HasForeignKey(m => m.ConversationId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-
+        builder.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
     }
 }

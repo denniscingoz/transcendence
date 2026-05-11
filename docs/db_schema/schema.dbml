@@ -76,6 +76,10 @@ Table app.ConversationParticipants {
   UserId uuid [pk]
   JoinedAt timestamptz [not null]
   LastReadAt timestamptz [not null]
+
+  Indexes {
+    UserId
+  }
 }
 
 Table app.Messages {
@@ -93,8 +97,6 @@ Table app.Messages {
     ConversationId
     (SenderId, ClientMessageId) [unique]
   }
-
-  Note: "SenderId exists but no FK to users appears in the snapshot."
 }
 
 Table app.Friendships {
@@ -140,10 +142,17 @@ Table app.Notifications {
   Type int [not null]
   UserId uuid [not null]
 
-  Note: "No FK relations for notification fields appear in the snapshot."
+  Indexes {
+    ActorUserId
+    RelatedConversationId
+    RelatedRequestId
+    UserId
+  }
 }
 
 Ref: app.files.OwnerId > app.users.Id [delete: cascade]
+
+Ref: app.users.AvatarFileId > app.files.Id [delete: set null]
 
 Ref: app.posts.AuthorId > app.users.Id [delete: cascade]
 Ref: app.posts.ImageFileId > app.files.Id [delete: restrict]
@@ -155,8 +164,10 @@ Ref: app.likes.AuthorId > app.users.Id [delete: cascade]
 Ref: app.likes.PostId > app.posts.Id [delete: cascade]
 
 Ref: app.ConversationParticipants.ConversationId > app.Conversations.Id [delete: cascade]
+Ref: app.ConversationParticipants.UserId > app.users.Id [delete: cascade]
 
 Ref: app.Messages.ConversationId > app.Conversations.Id [delete: cascade]
+Ref: app.Messages.SenderId > app.users.Id [delete: restrict]
 
 Ref: app.Friendships.User1Id > app.users.Id [delete: cascade]
 Ref: app.Friendships.User2Id > app.users.Id [delete: cascade]
@@ -164,4 +175,7 @@ Ref: app.Friendships.User2Id > app.users.Id [delete: cascade]
 Ref: app.FriendshipRequests.RequesterId > app.users.Id [delete: cascade]
 Ref: app.FriendshipRequests.TargetUserId > app.users.Id [delete: cascade]
 
-Ref: app.users.AvatarFileId > app.files.Id [delete: set null]
+Ref: app.Notifications.ActorUserId > app.users.Id [delete: set null]
+Ref: app.Notifications.RelatedConversationId > app.Conversations.Id [delete: set null]
+Ref: app.Notifications.RelatedRequestId > app.FriendshipRequests.Id [delete: set null]
+Ref: app.Notifications.UserId > app.users.Id [delete: cascade]
