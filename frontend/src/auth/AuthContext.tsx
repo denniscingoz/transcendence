@@ -145,9 +145,6 @@ const signIn = useCallback(async (req: SignInRequestDto) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-//this gives components access to auth.
-
-
 export function useAuth() { 
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
