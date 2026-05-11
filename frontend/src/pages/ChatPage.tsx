@@ -49,6 +49,7 @@ export function ChatPage() {
   const shouldScrollToBottomRef = useRef(false);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
+  
   const conversationsContainerRef = useRef<HTMLDivElement | null>(null);
   const conversationsOffsetRef = useRef(0);
 
@@ -294,6 +295,7 @@ export function ChatPage() {
     if (!connection) return;
     if (!text.trim()) return;
     if (!currentUserId) return;
+    if (isTargetUserDeleted) return;
 
     let conversationId = activeConversationId;
 
@@ -858,6 +860,7 @@ export function ChatPage() {
   const activeConversation = conversations.find(
     (item) => item.id === activeConversationId,
   );
+  const isTargetUserDeleted = activeConversation?.targetUserIsDeleted === true;
   const activeTitle = shouldShowDraft
     ? draftTargetUserName
     : (activeConversation?.targetUserName ?? t("chat.chats"));
@@ -1243,6 +1246,7 @@ return (
                 value={text}
                 maxLength={150}
                 rows={1}
+                disabled={isTargetUserDeleted}
                 onChange={(e) => setText(e.target.value)}
                 placeholder={t("chat.placeholder")}
                 className="max-h-28 min-h-[44px] flex-1 resize-none rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-black md:w-full md:rounded-xl md:border-panel md:bg-white md:px-4 md:py-5 md:text-xs"
@@ -1262,7 +1266,7 @@ return (
                 <button
                   type="button"
                   onClick={() => void handleSend()}
-                  disabled={sending || !text.trim() || !currentUserId}
+                  disabled={sending || !text.trim() || !currentUserId || isTargetUserDeleted}
                   className="flex h-11 min-w-11 items-center justify-center rounded-full bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:bg-gray-200 disabled:text-gray-400 md:ml-auto md:h-[40px] md:min-w-[140px] md:rounded-xl"
                 >
                   <span className="md:hidden">➤</span>

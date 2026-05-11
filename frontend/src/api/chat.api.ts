@@ -22,6 +22,7 @@ export type ConversationDto = {
   targetUserId: string
   targetUserName: string
   targetUserAvatarUrl?: string | null
+  targetUserIsDeleted: boolean
   lastMessage: string
   lastMessageAt?: string | null
   unreadCount: number

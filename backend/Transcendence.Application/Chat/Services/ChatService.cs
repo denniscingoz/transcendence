@@ -86,6 +86,14 @@ public class ChatService : IChatService
         if (!conversation.HasParticipant(senderId))
             throw new ForbiddenException("User is not a participant");
 
+        foreach (var participant in conversation.Participants)
+        {
+            var user = await _userRepository.GetByIdAsync(participant.UserId, CancellationToken.None);
+
+            if (user is null || user.IsDeleted)
+                throw new ForbiddenException("You cannot send messages in a conversation with a deleted user.");
+        }
+
         var message = new Message(conversationId, senderId, clientMessageId, content);
         
         
@@ -218,6 +226,7 @@ public async Task<IReadOnlyList<ConversationDto>> GetConversations(Guid userId, 
             TargetUserAvatarUrl = targetUser?.AvatarFileId.HasValue == true
                 ? "/files/avatar/" + targetUser.AvatarFileId.Value
                 : null,
+            TargetUserIsDeleted = targetUser?.IsDeleted == true,
             LastMessage = c.LastMessageText ?? "",
             LastMessageAt = c.LastMessageAt,
             UnreadCount = unreadCount
