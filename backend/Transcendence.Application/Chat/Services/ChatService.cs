@@ -288,7 +288,7 @@ public async Task<MessageDeletedDto> DeleteMessageAsync(Guid userId, Guid messag
             MessageId = message.Id
         };
     }
-    public async Task<IReadOnlyList<MessageDeliveredDto>> GetUnreadMessagesAsync(Guid userId)
+    public async Task<IReadOnlyList<MessageDeliveredDto>> DeliverPendingMessagesAsync(Guid userId)
     {
 
 

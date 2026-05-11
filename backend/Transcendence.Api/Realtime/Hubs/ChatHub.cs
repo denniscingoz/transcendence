@@ -77,7 +77,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
                 if (p != userId && _presenceService.IsOnline(p)) 
                     onlineUsers.Add(p);
             }
-        }
+        }   
          
         await Clients.Caller.OnlineUsersSnapshot(
             onlineUsers.Select(id => id.ToString())
@@ -227,7 +227,7 @@ public sealed class ChatHub : Hub<IRealtimeClient>
     public async Task MarkAllIncomingAsDelivered()
     {
         var userId = GetUserId();
-        var messages = await _chatService.GetUnreadMessagesAsync(userId);
+        var messages = await _chatService.DeliverPendingMessagesAsync(userId);
         foreach(var m in messages)
         {
                await Clients

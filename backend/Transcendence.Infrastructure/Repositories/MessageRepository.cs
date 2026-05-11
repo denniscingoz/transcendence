@@ -66,15 +66,17 @@ public sealed class  MessageRepository : IMessageRepository
         await _db.SaveChangesAsync();
     }
     
-    public async Task<IReadOnlyList<Message>> GetUndeliveredIncomingMessagesAsync(Guid userId)
-    {
-            return await _db.ConversationParticipants
-                                    .Where(p => p.UserId == userId )
-                                    .SelectMany(p => _db.Messages
-                                    .Where(m => m.ConversationId == p.ConversationId)
-                                    .Where(m=> !m.IsDeleted))
-                                    .ToListAsync();
-    }
+            public async Task<IReadOnlyList<Message>> GetUndeliveredIncomingMessagesAsync(Guid userId)
+            {
+                return await _db.ConversationParticipants
+                    .Where(p => p.UserId == userId)
+                    .SelectMany(p => _db.Messages
+                        .Where(m => m.ConversationId == p.ConversationId)
+                        .Where(m => m.SenderId != userId)
+                        .Where(m => !m.IsDelivered)
+                        .Where(m => !m.IsDeleted))
+                    .ToListAsync();
+            }
 
 }
 
