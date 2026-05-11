@@ -16,7 +16,7 @@ public sealed class UserRepository : IUserRepository
 	}
 	public Task<User?> GetByIdAsync(Guid id, CancellationToken ct)
 	{
-        return _db.Users.SingleOrDefaultAsync(x => x.Id == id, ct);
+	return _db.Users.SingleOrDefaultAsync(x => x.Id == id, ct);
     }
     public Task<User?> GetByUsernameAsync(string username, CancellationToken ct)
     {

@@ -100,7 +100,8 @@ public sealed class FriendsService : IFriendsService
         var friendship = new Friendship(request.RequesterId, request.TargetUserId, DateTime.UtcNow);
 
         await _friendshipRepository.AddAsync(friendship, ct);
-        await _friendshipRequestRepository.RemoveAsync(request.Id, ct);
+        // Persist the new friendship now so notifications can be created
+        // while the original friendship request still exists.
         await _friendshipRepository.SaveChangesAsync(ct);
 
         var requestDto = new FriendshipRequestDto
@@ -111,9 +112,14 @@ public sealed class FriendsService : IFriendsService
             CreatedAt = request.CreatedAt
         };
 
- 
+        // Notify BEFORE removing the friendship request to avoid orphaning
+        // notifications that reference a deleted FriendshipRequest.
         await _notificationService.NotifyFriendRequestAccepted(request.RequesterId, requestDto);
         await _notificationService.NotifyChange(request.RequesterId);
+
+        // Now remove the request and persist the deletion.
+        await _friendshipRequestRepository.RemoveAsync(request.Id, ct);
+        await _friendshipRequestRepository.SaveChangesAsync(ct);
     }
 
     // POST friends/requests/{targetUserId}/decline
@@ -128,9 +134,6 @@ public sealed class FriendsService : IFriendsService
         var currentUser = await _userRepository.GetByIdAsync(currentUserId, ct)
             ?? throw new NotFoundException("Current user not found.");
 
-        await _friendshipRequestRepository.RemoveAsync(request.Id, ct);
-        await _friendshipRequestRepository.SaveChangesAsync(ct);
-
         var requestDto = new FriendshipRequestDto
         {
             Id = request.Id,
@@ -139,9 +142,12 @@ public sealed class FriendsService : IFriendsService
             CreatedAt = request.CreatedAt
         };
 
- 
+        // Notify before deleting the request to keep RelatedRequestId valid.
         await _notificationService.NotifyFriendRequestDeclined(request.RequesterId, requestDto);
         await _notificationService.NotifyChange(request.RequesterId);
+
+        await _friendshipRequestRepository.RemoveAsync(request.Id, ct);
+        await _friendshipRequestRepository.SaveChangesAsync(ct);
     }
 
     // GET friends/requests
