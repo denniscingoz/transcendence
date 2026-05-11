@@ -1,8 +1,6 @@
 import api from './axios'
 import type { SignInRequestDto, SignUpRequestDto, AuthResponseDto, GoogleSignInRequestDto  } from '../types/api'
 
-
-
 export async function signInApi(payload: SignInRequestDto): Promise<AuthResponseDto> {
   const { data } = await api.post<AuthResponseDto>('/auth/signin', payload)
   return data

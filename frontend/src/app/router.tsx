@@ -6,6 +6,10 @@ import {
   useLocation,
 } from 'react-router-dom'
 
+//Defines all routes - public (signin, terms, privacy policy) and protected (feed, chat, etc.)
+// Public routes are available to everyone.
+// Protected routes are wrapped with RequireAuth and only available after login.
+
 import { RequireAuth } from '../auth/RequireAuth'
 import { useAuth } from '../auth/AuthContext'
 import { Layout } from '../components/Layout'
@@ -64,11 +68,12 @@ function ScrollToTop() {
   So when the route is /feed, Outlet renders FeedPage.
   When the route is /signin, Outlet renders AuthPage.
 */
+//Outlet - Render matching child route
 function RouterRoot() {
   return (
     <>
       <ScrollToTop />
-      <Outlet />
+      <Outlet /> 
     </>
   )
 }

@@ -2,6 +2,9 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 import type { SignInRequestDto, SignUpRequestDto, GoogleSignInRequestDto } from '../types/api'
 import { signInApi, signUpApi, googleSignInApi } from '../api/auth.api'
 
+// Stores and exposes authentication state for the whole app.
+// Components can use useAuth() to access the current user and login/logout actions.
+
 type AuthUser = {
   id: string
   username: string
@@ -142,7 +145,7 @@ const signIn = useCallback(async (req: SignInRequestDto) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export function useAuth() {
+export function useAuth() { //this gives components access to auth.
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx

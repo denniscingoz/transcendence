@@ -10,6 +10,9 @@ import {
   type ChatMessageDto,
 } from '../api/chat.api'
 
+// Provides realtime SignalR connection for logged-in pages.
+// Handles online users, incoming messages, delivery status, and reconnects.
+
 type RealtimeContextValue = {
   connection: HubConnection | null
   isConnected: boolean

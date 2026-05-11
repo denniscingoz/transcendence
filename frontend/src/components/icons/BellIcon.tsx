@@ -4,7 +4,7 @@ type BellIconProps = {
 
 export function BellIcon({ className = 'w-6 h-7' }: BellIconProps) {
   return (
-    <svg
+    <svg //scaling
       className={className}
       viewBox="0 0 24 28"
       fill="none"

@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from './app/App'
 import { AppProviders } from './app/providers'
-import './index.css'
+import './index.css' //global styling
 
 // Stops Chrome from restoring the old scroll position after refresh.
 if ('scrollRestoration' in window.history) {

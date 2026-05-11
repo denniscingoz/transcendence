@@ -46,7 +46,7 @@ export function useDeletePost() {
     mutationFn: deletePost,
     onMutate: async (postId) => {
       await Promise.all([
-        queryClient.cancelQueries({ queryKey: ['post', postId] }),
+        queryClient.cancelQueries({ queryKey: ['post', postId] }),  //prevents old requests from finishing and overwriting state
         queryClient.cancelQueries({ queryKey: ['posts', postId, 'comments'] }),
       ])
     },

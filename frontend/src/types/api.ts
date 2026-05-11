@@ -1,3 +1,7 @@
+// TypeScript DTOs matching backend API responses.
+// These types help the frontend safely use data returned from the API.
+// frontend contract with the backend
+
 export type ApiError = {
   message: string
   details?: Record<string, string[]>

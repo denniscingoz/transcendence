@@ -1,3 +1,6 @@
+//Converts backend errors into readable messages
+// Extracts a user-friendly error message from different backend/API error formats.
+
 export function getApiErrorMessage(error: unknown): string {
   const status =
     typeof error === 'object' && error !== null && 'response' in error

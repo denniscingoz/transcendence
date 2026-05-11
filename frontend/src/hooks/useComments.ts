@@ -9,7 +9,7 @@ export function useComments(
   take = 12,
   enabled = true
 ) {
-  return useInfiniteQuery<CursorPageDto<CommentPreviewDto>, Error>({
+  return useInfiniteQuery<CursorPageDto<CommentPreviewDto>, Error>({ //used for paginated lists
     queryKey: ['posts', postId, 'comments', take],
     queryFn: ({ pageParam }) => {
       if (!postId) {
@@ -33,8 +33,8 @@ export function useComments(
 export function usePostComment(postId: string) {
   const queryClient = useQueryClient()
 
-  return useMutation<CommentPreviewDto, Error, string>({
-    mutationFn: (content: string) => {
+  return useMutation<CommentPreviewDto, Error, string>({ //used for changing data, means POST / PUT / PATCH / DELETE
+    mutationFn: (content: string) => {                   //Mutation changes backend
       if (!postId) {
         throw new Error('Post id is required.')
       }

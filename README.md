@@ -191,7 +191,7 @@ We selected **4 Major** and **6 Minor** modules for a total of **8 module-credit
 | **`@microsoft/signalr` client** | Official client for the chat hub, with auto-reconnect wired through `RealtimeProvider`. |
 | **`@react-oauth/google`** | Drop-in Google sign-in button that returns an ID token for backend verification. |
 | **i18next** | Industry-standard i18n with runtime language switching across three languages — directly satisfies the **multi-language minor module**. |
-| **MSW** | Lets the frontend run end-to-end without the backend, which unblocked parallel work and gave us a reliable demo fallback. |
+| **Mock Service Worker** | Lets the frontend run end-to-end without the backend, which unblocked parallel work and gave us a reliable demo fallback. |
 | **Tailwind CSS** | Utility-first, design-system-friendly. Tailwind tokens back our **custom design system minor module**. |
 
 ### Infrastructure
