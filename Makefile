@@ -18,6 +18,8 @@ clean:
 
 fclean:
 	$(COMPOSE) down -v --remove-orphans --rmi all
+#	docker system prune -a -v -f
+	docker network prune -f
 	rm -f docker/nginx/certs/dev.crt docker/nginx/certs/dev.key
 	rm -rf uploads/*
 	mkdir -p uploads
