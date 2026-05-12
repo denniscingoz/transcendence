@@ -431,13 +431,7 @@ VITE_API_BASE_URL=/api
 │   ├── db_schema/                      # ER diagrams, schema drafts
 │   │   ├── DB_schema.jpg
 │   |   └── schema.dbml
-│   ├── front/                          # Frontend design notes
-│   ├── minor/                          # Notes per minor module
-│   ├── DB entities -> api.md                        
-│   ├── DB Entities.md
-│   ├── en.subject_Transcendence.pdf    # 42 subject reference
-│   ├── SOCIAL MEDIA Features.jpg
-│   └── User scenarios.md
+│   └── front/                          # Frontend design notes
 ├── frontend/
 │   ├── public/                         # Static assets
 │   ├── src/
@@ -468,11 +462,9 @@ VITE_API_BASE_URL=/api
 ├── .dockerignore
 ├── .env.example
 ├── .gitignore
-├── API-First PLAN Backend–Frontend Collaboration (Draft).md
 ├── docker-compose.yml
 ├── Makefile
-├── README.md
-└── The-Social_Flow-Tecnical-Tools.pdf  # Technical tooling reference
+└── README.md
 ```
 
 ---
