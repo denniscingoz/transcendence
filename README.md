@@ -623,7 +623,7 @@ Third-party libraries used in this project remain under their respective license
 
 - [PostgreSQL — Official Documentation](https://www.postgresql.org/docs/)
 - [EF Core — Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/)
-- [ASP.NET Core — Microsoft Learn](https://learn.microsoft.com/en-us/aspnet/core/)
+- [ASP.NET Core — Microsoft Learn](https://learn.microsoft.com/en-us/aspnet/core/?view=aspnetcore-10.0)
 - [SignalR — Real-time web functionality](https://learn.microsoft.com/en-us/aspnet/core/signalr/)
 - [Docker Compose Reference](https://docs.docker.com/compose/)
 - [Nginx Documentation](https://nginx.org/en/docs/)
@@ -638,6 +638,9 @@ Third-party libraries used in this project remain under their respective license
 - [API](https://habr.com/ru/articles/964818/)
 - [Architecture chronicles](https://herbertograca.com/2017/07/03/the-software-architecture-chronicles/)
 - [Websockets](https://habr.com/ru/articles/646401/)
+- [Swagger](https://learn.microsoft.com/en-us/aspnet/core/tutorials/web-api-help-pages-using-swagger?view=aspnetcore-8.0)
+- [Swashbuckle](https://learn.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-8.0&tabs=visual-studio)
+- [Bearer](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-jwt-bearer-authentication?view=aspnetcore-10.0)
 
 ## Specifications
 
