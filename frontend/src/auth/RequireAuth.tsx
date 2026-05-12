@@ -12,5 +12,16 @@ export function RequireAuth() {
     return <Navigate to="/signin" replace state={{ from: location.pathname }} />
   }
 
+  /*
+    <Outlet /> renders the matched child route.
+
+    Example:
+    RequireAuth
+      └── /feed
+
+    If authenticated:
+    Outlet renders FeedPage.
+  */
+
   return <Outlet />
 }
