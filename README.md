@@ -309,15 +309,17 @@ Notifications store a snapshot of the sender’s username and avatar at the time
 
 ## Deniz — Product Owner & Backend Developer
 
-- **Application layer.** Implemented the services that drive the user-facing features: `AuthService`, `ProfileService`, `PostsService`, `PostsFeedService`, `PostsProfileService`, `FriendsService`, and `FilesService`.
-- **Domain rules and invariants.** Encoded the rules that keep the data consistent — no self-friendships, no duplicate friend requests, friends-only file access, idempotent like/unlike, and the soft-delete semantics for posts and comments.
-- **Auth flow (server side).** Email/password sign-up and sign-in (with `Microsoft.AspNetCore.Identity.PasswordHasher`), Google OAuth verification (`Google.Apis.Auth`), and integration with the JWT issuance pipeline so federated and local accounts share a single identity model.
-- **DTO and validation layer.** All request and response DTOs, and the validation rules that sit in front of every endpoint.
-- **API surface.** Controller actions for `auth`, `profile`, `posts`, `friends`, and `files`, including the cursor-based pagination contract used throughout.
-- **Cross-cutting (PO).** Scope arbitration, sprint planning, demo prep, code review, and stakeholder communication.
-- **File uploads.** Client-side validation (type/size), upload progress overlay, image and video preview, and deletion flows for the **file upload and management** Minor module.
-- **API integration layer.** Built the typed API clients under `src/api/`, the Axios instance with token attachment and 401 handling, and the TanStack Query hooks that consume them across the app.
-- **Authentication flows.** Email/password sign-in, Google OAuth 2.0 sign-in, sign-out, JWT handling, and session restoration on reload.
+- **Product ownership and planning.** Defined the product direction for *The SOCIAL* as a social networking platform, shaped the feature scope, selected the module strategy with the team, and translated the subject requirements into concrete product goals, acceptance criteria, timelines, and demo flows.
+- **Project management.** Organised the role division, feature ownership, sprint priorities, review cycles, and coordination between backend, frontend, realtime, infrastructure, and design work. Tracked blockers, clarified responsibilities, and kept the project aligned with evaluation requirements.
+- **Design, concept, and architecture decisions.** Contributed to the product concept, user flows, frontend architecture decisions, and full-stack structure: React, ASP.NET Core, Clean Architecture, EF Core, PostgreSQL, SignalR, Docker, Nginx, Axios, TanStack Query, and JWT authentication.
+- **Application layer.** Implemented the main backend services for user-facing features: `AuthService`, `ProfileService`, `PostsService`, `PostsFeedService`, `PostsProfileService`, `FriendsService`, and `FilesService`.
+- **Controllers and CRUD API surface.** Built controller actions for authentication, profiles, posts, friends, and files, including CRUD-style endpoints, request/response DTOs, validation contracts, protected routes, and consistent API behaviour.
+- **Pagination and feed flow.** Implemented cursor-based pagination contracts and supported infinite-scroll flows for feeds, profile posts, search results, comments, and other paginated data consumed by the frontend.
+- **Domain rules and entities.** Implemented core business rules: no self-friendships, no duplicate friend requests, friends-only access where required, idempotent like/unlike, profile access rules, file privacy rules, and soft-delete behaviour for posts and comments.
+- **Authentication and security.** Implemented server-side email/password authentication with password hashing, Google OAuth verification, JWT integration, protected endpoint handling, and shared identity flow for local and federated accounts.
+- **File upload and management.** Connected file uploads to avatars and posts, added validation and access rules, supported image/video preview, upload progress indicators, deletion flows, and private file access based on friendship and ownership rules.
+- **Frontend-backend integration.** Built typed API clients under `src/api/`, configured Axios token attachment and 401 handling, and connected TanStack Query hooks to backend features such as auth, profile, posts, friends, files, notifications, and chat-related APIs.
+- **Code review and quality control.** Read and reviewed code across project areas, questioned unclear implementations, requested revisions, accepted completed work, and tested feature behaviour against the planned user flows.
 
 ## Daria — Tech Lead & Backend Foundation
 
