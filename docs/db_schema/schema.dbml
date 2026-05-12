@@ -152,7 +152,7 @@ Table app.Notifications {
 
 Ref: app.files.OwnerId > app.users.Id [delete: cascade]
 
-Ref: app.users.AvatarFileId > app.files.Id [delete: set null]
+Ref: app.files.Id - app.users.AvatarFileId [delete: set null]
 
 Ref: app.posts.AuthorId > app.users.Id [delete: cascade]
 Ref: app.posts.ImageFileId > app.files.Id [delete: restrict]
