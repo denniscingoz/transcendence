@@ -289,7 +289,7 @@ async function handleChangePassword(e: React.FormEvent) {
             <div className="flex items-center gap-4">
               
               {
-                profileForm.AvatarUrl ? 
+                avatarPreviewUrl || profileForm.AvatarUrl ? 
                 <img
                 src={avatarPreviewUrl || `${import.meta.env.VITE_API_BASE_URL}${profileForm.AvatarUrl }`}
                   alt="Profile avatar"
