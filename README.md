@@ -84,7 +84,7 @@ Given the small team size and fixed academic deadline, we kept coordination deli
 
 ---
 
-## Selected modules
+## Selected modules and point calculation
 
 ft_transcendence is scored in **module-credits**:
 
